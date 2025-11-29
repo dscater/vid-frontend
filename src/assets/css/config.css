@@ -1,0 +1,508 @@
+@import "./variables.css";
+
+html {
+  overflow-y: scroll;
+  overflow-y: overlay;
+  min-height: 100vh;
+}
+
+body .modal .bg-dark {
+  background-color: white;
+}
+
+body {
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-family: "Mulish", sans-serif; */
+  /* font-family: "Manrope", sans-serif; */
+  /* font-family: "Quicksand", sans-serif; */
+
+  font-size: 0.85rem;
+}
+
+.login-page {
+  min-height: 100vh;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* FORMULARIO */
+.oculto {
+  display: none;
+}
+
+label.required::after {
+  font-family: "Epunda_Slab";
+  font-weight: 400;
+  content: " (*)";
+  color: var(--danger);
+  font-weight: 700;
+}
+/* MIS ESTILOS */
+.bg-oficial {
+  background-color: var(--principal_hover);
+}
+
+body .mi-table tr.bg-oficial td,
+body .mi-table tr.bg-oficial td.fixed-column-right,
+body .mi-table tr.bg-oficial td .mi-celda {
+  background-color: var(--principal_hover);
+  color: white;
+  font-weight: bold;
+}
+
+body .mi-table tr.bg-oficial td .label-responsive {
+  color: black;
+}
+
+.bg-secundario {
+  background-color: var(--secundario);
+  color: white;
+}
+
+.bg-secundario:hover {
+  background-color: var(--secundario_hover);
+  color: white;
+}
+
+.bg1 {
+  background-color: var(--bg1);
+  color: white;
+}
+.bg2 {
+  background-color: var(--bg2);
+  color: white;
+}
+body .sidebar .bg3,
+.bg3 {
+  background-color: var(--bg3);
+  color: white;
+}
+.layout-navbar-fixed
+  .wrapper
+  .sidebar-dark-primary
+  .brand-link:not([class*="navbar"]) {
+  background-color: var(--bg2);
+}
+
+body .sidebar .bgDark1,
+body .bgDark1 {
+  background-color: var(--bgDark1);
+}
+body .sidebar .bgDark2,
+body .bgDark2 {
+  background-color: var(--bgDark2);
+}
+
+body .sidebar .bgGrayDark,
+body .bgGrayDark {
+  background-color: var(--bgGrayDark);
+}
+
+.el-skeleton {
+  --el-skeleton-color: var(--bgDark2) !important;
+  --el-skeleton-to-color: var(--bgGrayDark) !important;
+}
+
+.content-table table .mi-celda.bg-proceso {
+  background-color: var(--bg1);
+  color: white;
+}
+
+body .mi-table .mi-content-header table.tablaFixeada td,
+body .mi-table .content-table table.tablaFixeada td,
+body .mi-table .mi-content-header table.tablaFixeada th {
+  border: none;
+  border-bottom: solid 1px var(--bgWhite2);
+}
+
+.content-table table .mi-celda.bg-enviado {
+  background-color: var(--bg__warning);
+  color: var(--white1);
+}
+.content-table table .mi-celda.bg-concluido {
+  background-color: var(--bg__success);
+  color: var(--white1);
+  font-weight: bold;
+}
+
+.cont_barra_progreso {
+  width: 100%;
+  height: 14px;
+  background-color: var(--bg__danger);
+  position: relative;
+  transition: all 43s ease-in;
+  text-align: center;
+  z-index: 0;
+}
+
+.cont_barra_progreso span {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: rgb(243, 243, 243);
+  position: relative;
+  top: -0.2rem;
+}
+
+.bara_prog {
+  background-color: var(--bg__progreso);
+  height: 100%;
+  position: absolute;
+  width: 0%;
+  left: 0;
+  top: 0;
+  transition: all 43s ease-in;
+  z-index: -1;
+}
+
+.contenedor_opciones {
+  width: 100%;
+  border: solid 1px;
+}
+
+.bg-cancelado {
+  background-color: var(--cancelado);
+}
+tr.bg-cancelado {
+  border-bottom: solid 2px;
+}
+
+body .btn-primary,
+body .btn-primary:active,
+body .btn-primary:focus,
+body .badge-primary,
+body .bg-primary,
+body li a.bg-primary,
+body a.bg-primary,
+body .pagination .page-item.active .page-link,
+body .main-sidebar .sidebar .nav .nav-link.active {
+  background-color: var(--principal) !important;
+  font-weight: 600;
+}
+
+body .btn-primary:disabled {
+  background-color: var(--principal_t);
+}
+
+body .btn {
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+body .main-sidebar .sidebar .nav .nav-link {
+  padding: 10px 0px 10px 10px;
+  position: relative;
+  width: 100%;
+}
+
+body .main-sidebar .sidebar .nav .nav-link.active {
+  color: var(--white1);
+  background-color: var(--principal);
+  border-radius: 0;
+  width: 100%;
+}
+
+body .btn-primary:disabled {
+  background-color: var(--cancelado);
+}
+
+body li a.bg-primary,
+body a.bg-primary,
+body .pagination .page-item.active .page-link,
+body .btn-primary {
+  border-color: var(--principal_hover);
+}
+body .btn-primary:hover {
+  background-color: var(--principal_hover);
+  border-color: var(--principal);
+}
+
+/* Botón si el icono es success */
+.swal2-confirm.btn-sucess {
+  background-color: var(--principal) !important;
+}
+
+/* Botón si el icono es error */
+.swal2-confirm.btn-error {
+  background-color: var(--danger) !important;
+}
+
+/* Botón si el icono es warning */
+.swal2-confirm.btn-warning {
+  background-color: var(--principal) !important;
+  color: #000 !important;
+}
+
+.swal2-confirm.swal2-styled.swal2-default-outline {
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ELEMENT-UI */
+.el-select.el-select--large .el-select__wrapper {
+  height: 38px !important;
+  min-height: 38px !important;
+  line-height: 1.5 !important;
+}
+.el-select-dropdown {
+  max-width: 900px;
+}
+
+.el-select.is-invalid .el-select__wrapper {
+  box-shadow: 0 0 0 1px #dc3545;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* .el-select.el-select--large .el-select__wrapper{
+    padding: 0px 10px;
+    height: 20px;
+} */
+
+/* MODAL */
+
+.modal.show {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* SWAL */
+
+.swal2-confirm.swal2-styled.swal2-default-outline,
+.swal2-cancel.swal2-styled {
+  color: white;
+}
+
+/* TABLES */
+body table.table.mitabla.tablaFixeada thead tr {
+  box-shadow: none;
+}
+
+body table.table tbody tr .accion .btn.accion_icon {
+  width: 40px;
+  margin: 1px;
+}
+
+body table.table tbody tr td {
+  vertical-align: middle;
+}
+
+body .mi-table thead.bg__primary tr th {
+  color: var(--white);
+  background-color: var(--secundario);
+}
+
+body .mi-table table thead tr th .iheader .accion {
+  color: var(--white1);
+}
+
+body .mi-table table thead tr th .iheader .accion.active {
+  color: var(--white);
+}
+
+/* CONTENT WRAPPER */
+.content-wrapper {
+  background-color: var(--bgLight);
+}
+
+/* MODIFICAICÓN ESTILOS ADMINLTE */
+.hold-transition .content-wrapper,
+.hold-transition .control-sidebar,
+.hold-transition .control-sidebar *,
+.hold-transition .main-footer,
+.hold-transition .main-header,
+.hold-transition .main-sidebar,
+.hold-transition .main-sidebar * {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.nav-sidebar .nav-treeview {
+  height: 0;
+  display: block;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+}
+
+/* body .nav-sidebar .nav-item .nav-link.sub-menu.active i.right, */
+body .nav-sidebar .nav-item .nav-link.sub-menu.menu-is-opening i.right {
+  -webkit-transform: rotate(-90deg) !important;
+  transform: rotate(-90deg) !important;
+}
+
+.loading {
+  z-index: -1;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bgDark1);
+  transition: 0.3s;
+  opacity: 0;
+  color: white;
+  height: 100vh;
+  width: 100vw;
+  top: 0;
+}
+
+.loading.show {
+  opacity: 1;
+  z-index: 6050;
+}
+
+.sub-menu.menu-open,
+.sub-menu.menu-open .nav-link.active:hover {
+  color: black;
+}
+
+body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active,
+body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active:focus,
+body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active:hover {
+  background-color: transparent !important;
+  border-top: solid 1px var(--principal);
+  border-bottom: solid 1px var(--principal);
+  color: var(--principal);
+}
+
+.modal-title {
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+body label {
+  margin-bottom: 0px;
+}
+
+.error.invalid-feedback {
+  margin-top: 0px;
+}
+
+body input,
+body select,
+body textarea,
+body input.form-control,
+body select.form-control,
+body select.form-select,
+body textarea.form-control {
+  font-size: 0.8rem;
+}
+
+body table thead tr th,
+body table tbody tr td {
+  font-size: 0.76rem;
+}
+
+body a,
+body a.btn,
+body button,
+body button.btn {
+  font-size: 0.82rem;
+}
+
+body .input-group button.btn {
+  font-size: 1rem;
+}
+
+body a:focus,
+body button:focus,
+body a:active,
+body button:active {
+  box-shadow: none;
+}
+
+body .content ul li a:focus,
+body .content ul li button:focus,
+body .content ul li a:active,
+body .content ul li button:active {
+  box-shadow: none;
+}
+
+/* BREADCRUMB */
+.content-header .breadcrumb {
+  padding: 5px 10px;
+  background: var(--secundario);
+}
+
+.content-header .breadcrumb li a {
+  color: var(--white);
+  font-size: 0.85rem;
+}
+
+.content-header .breadcrumb-item.active {
+  color: var(--principal);
+}
+/* LOGIN */
+body.app-blank.login {
+  background-color: var(--bgDark1);
+}
+/* TEXTOS */
+.title_expressive {
+  font-family: "Epunda_Slab";
+  font-weight: 900;
+}
+
+.title_Chau_Philomene_One {
+  font-family: "Chau_Philomene_One";
+  font-weight: 900;
+}
+
+.text-black {
+  color: var(--bg__dark6);
+}
+.text-white {
+  color: var(--white);
+}
+
+.text-white1 {
+  color: var(--white1);
+}
+
+.text-center {
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .el-input__suffix {
+    width: 0px !important;
+    display: none !important;
+  }
+
+  .modal .modal-dialog,
+  .modal .modal-content {
+    margin: 0;
+    width: 100vw !important;
+  }
+}
+
+/* HABITACIONES */
+.contenedorHabiaciones {
+  border-radius: 6px;
+  padding-top: 5px;
+  margin-left: 0px;
+  max-height: 80vh;
+  overflow: auto;
+  background-color: var(--secundario);
+}
+
+.contenedorHabitacion {
+  position: relative;
+}
+
+.contenedorHabiaciones .habitacion {
+  width: 99%;
+  transition: all 0.1s;
+}
+
+.contenedorHabiaciones .habitacion:hover {
+  transform: scale(1.01);
+}
+
+.contenedorBotones {
+  display: flex;
+  justify-content: end;
+}
+.contenedorBotones .boton {
+  flex: 1;
+}
