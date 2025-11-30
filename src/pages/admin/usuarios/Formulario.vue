@@ -10,6 +10,8 @@
     nextTick,
     reactive,
   } from "vue";
+
+  import MiDropZone from "../../../components/MiDropZone.vue";
   import api, { setAuthToken } from "../../../composables/axios";
   import { useAuthStore } from "../../../stores/authStore";
   const authStore = useAuthStore();
@@ -139,6 +141,22 @@
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
   };
 
+  const detectaCertificados = (files) => {
+    form.certificados = files;
+  };
+
+  const detectaEliminadosCertificados = (eliminados) => {
+    form.certificados_eliminados = eliminados;
+  };
+
+  const detectaDocumentos = (files) => {
+    form.documentos = files;
+  };
+
+  const detectaEliminadosDocumentos = (eliminados) => {
+    form.documentos_eliminados = eliminados;
+  };
+
   const cargarListas = () => {};
 
   const options = ref([]);
@@ -169,7 +187,10 @@
           Todos los campos con
           <span class="text-danger">(*)</span> son obligatorios.
         </p>
-        <div class="row">
+        <div class="row mb-2">
+          <div class="col-12">
+            <h4>Datos Personales</h4>
+          </div>
           <div class="col-md-4 mt-2">
             <label class="required">Nombre(s)</label>
             <input
@@ -258,41 +279,100 @@
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label class="required">Dirección</label>
+            <label class="required">Grupo Sanguíneo</label>
             <input
               type="text"
               class="form-control"
               :class="{
-                'parsley-error': form.errors?.dir,
+                'parsley-error': form.errors?.grupo_san,
               }"
-              v-model="form.dir"
+              v-model="form.grupo_san"
             />
 
-            <ul v-if="form.errors?.dir" class="list-unstyled text-danger">
+            <ul v-if="form.errors?.grupo_san" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.dir }}
+                {{ form.errors?.grupo_san }}
               </li>
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label>Correo electrónico</label>
+            <label class="required">Sexo</label>
             <input
-              type="email"
+              type="text"
               class="form-control"
               :class="{
-                'parsley-error': form.errors?.correo,
+                'parsley-error': form.errors?.sexo,
               }"
-              v-model="form.correo"
+              v-model="form.sexo"
             />
 
-            <ul v-if="form.errors?.correo" class="list-unstyled text-danger">
+            <ul v-if="form.errors?.sexo" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.correo }}
+                {{ form.errors?.sexo }}
               </li>
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label class="required">Teléfono/Celular</label>
+            <label class="required">Nacionalidad</label>
+            <input
+              type="text"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.nacionalidad,
+              }"
+              v-model="form.nacionalidad"
+            />
+
+            <ul
+              v-if="form.errors?.nacionalidad"
+              class="list-unstyled text-danger"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.nacionalidad }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label>Profesión</label>
+            <input
+              type="text"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.profesion,
+              }"
+              v-model="form.profesion"
+            />
+
+            <ul v-if="form.errors?.profesion" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.profesion }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Celular</label>
+            <input
+              type="text"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.cel,
+              }"
+              v-model="form.cel"
+            />
+
+            <ul v-if="form.errors?.cel" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.cel }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-12">
+            <h4>Datos de Contacto</h4>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label>Teléfono de domicilio</label>
             <input
               type="text"
               class="form-control"
@@ -309,27 +389,105 @@
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label class="required">Seleccionar Role</label>
-            <select
+            <label class="required">Celular de Domiclio</label>
+            <input
+              type="text"
               class="form-control"
               :class="{
-                'parsley-error': form.errors?.role_id,
+                'parsley-error': form.errors?.cel_dom,
               }"
-              v-model="form.role_id"
-            >
-              <option value="">- Seleccione -</option>
-              <option v-for="item in listRoles" :value="item.id">
-                {{ item.nombre }}
-              </option>
-            </select>
+              v-model="form.cel_dom"
+            />
 
-            <ul v-if="form.errors?.role_id" class="list-unstyled text-danger">
+            <ul v-if="form.errors?.cel_dom" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.role_id }}
+                {{ form.errors?.cel_dom }}
               </li>
             </ul>
           </div>
           <div class="col-md-4 mt-2">
+            <label class="required">Dirección de domicilio</label>
+            <input
+              type="text"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.dir,
+              }"
+              v-model="form.dir"
+            />
+
+            <ul v-if="form.errors?.dir" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.dir }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6 mt-2">
+            <label class="required">Dirección GPS</label>
+            <div class="row">
+              <div class="col-6">
+                <input
+                  type="text"
+                  class="form-control"
+                  :class="{
+                    'parsley-error': form.errors?.latitud,
+                  }"
+                  v-model="form.latitud"
+                />
+                <small class="text-xs text-muted">Latitud</small>
+                <ul
+                  v-if="form.errors?.latitud"
+                  class="list-unstyled text-danger"
+                >
+                  <li class="parsley-required">
+                    {{ form.errors?.latitud }}
+                  </li>
+                </ul>
+              </div>
+              <div class="col-6">
+                <input
+                  type="text"
+                  class="form-control"
+                  :class="{
+                    'parsley-error': form.errors?.longitud,
+                  }"
+                  v-model="form.longitud"
+                />
+                <small class="text-xs text-muted">Longitud</small>
+                <ul
+                  v-if="form.errors?.longitud"
+                  class="list-unstyled text-danger"
+                >
+                  <li class="parsley-required">
+                    {{ form.errors?.longitud }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mt-2">
+            <label class="required">Correo electrónico</label>
+            <input
+              type="email"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.correo,
+              }"
+              v-model="form.correo"
+            />
+
+            <ul v-if="form.errors?.correo" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.correo }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-12">
+            <h4>Documentos Digitalizados</h4>
+          </div>
+          <div class="col-md-6 mb-2">
             <label>Foto</label>
             <input
               type="file"
@@ -347,27 +505,127 @@
               </li>
             </ul>
           </div>
-          <div class="col-md-4 mt-2">
-            <label class="required">Acceso</label><br />
-            <el-switch
-              size="large"
-              v-model="form.acceso"
-              class="mb-2"
-              style="
-                --el-switch-on-color: #13ce66;
-                --el-switch-off-color: #ff4949;
-              "
-              active-text="Habilitado"
-              inactive-text="Deshabilitado"
-              active-value="1"
-              inactive-value="0"
+          <div class="col-md-6 mb-2">
+            <label>Carnet</label>
+            <input
+              type="file"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.carnet,
+              }"
+              ref="carnet"
+              @change="cargaArchivo($event, 'carnet')"
             />
-            <ul v-if="form.errors?.acceso" class="list-unstyled text-danger">
+
+            <ul v-if="form.errors?.carnet" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.acceso }}
+                {{ form.errors?.carnet }}
               </li>
             </ul>
           </div>
+          <div class="col-md-6 mb-2">
+            <label class=""
+              >Certificados <small class="text-muted">(Opcional)</small></label
+            >
+            <MiDropZone
+              :files="form.certificados"
+              @UpdateFiles="detectaCertificados"
+              @addEliminados="detectaEliminadosCertificados"
+            ></MiDropZone>
+            <ul
+              v-if="form.errors?.certificados"
+              class="parsley-errors-list filled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.certificados }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6 mb-2">
+            <label class=""
+              >Documentos Adicionales
+              <small class="text-muted">(Opcional)</small></label
+            >
+            <MiDropZone
+              :files="form.documentos"
+              @UpdateFiles="detectaDocumentos"
+              @addEliminados="detectaEliminadosDocumentos"
+            ></MiDropZone>
+            <ul
+              v-if="form.errors?.documentos"
+              class="parsley-errors-list filled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.documentos }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mt-2">
+            <label class="required">Seleccionar Tipo de Empleado</label>
+            <select
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.tipo,
+              }"
+              v-model="form.tipo"
+            >
+              <option value="">- Seleccione -</option>
+              <option value="EMPLEADO">EMPLEADO</option>
+              <option value="USUARIO">USUARIO</option>
+            </select>
+
+            <ul v-if="form.errors?.tipo" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.tipo }}
+              </li>
+            </ul>
+          </div>
+          <template v-if="form.tipo == 'USUARIO'">
+            <div class="col-md-4 mt-2">
+              <label class="required">Seleccionar Role</label>
+              <select
+                class="form-control"
+                :class="{
+                  'parsley-error': form.errors?.role_id,
+                }"
+                v-model="form.role_id"
+              >
+                <option value="">- Seleccione -</option>
+                <option v-for="item in listRoles" :value="item.id">
+                  {{ item.nombre }}
+                </option>
+              </select>
+
+              <ul v-if="form.errors?.role_id" class="list-unstyled text-danger">
+                <li class="parsley-required">
+                  {{ form.errors?.role_id }}
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-4 mt-2">
+              <label class="required">Acceso</label><br />
+              <el-switch
+                size="large"
+                v-model="form.acceso"
+                class="mb-2"
+                style="
+                  --el-switch-on-color: #13ce66;
+                  --el-switch-off-color: #ff4949;
+                "
+                active-text="Habilitado"
+                inactive-text="Deshabilitado"
+                active-value="1"
+                inactive-value="0"
+              />
+              <ul v-if="form.errors?.acceso" class="list-unstyled text-danger">
+                <li class="parsley-required">
+                  {{ form.errors?.acceso }}
+                </li>
+              </ul>
+            </div>
+          </template>
         </div>
       </form>
     </template>
