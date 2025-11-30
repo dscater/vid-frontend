@@ -9,11 +9,15 @@
     onMounted,
     nextTick,
     reactive,
+    toRaw,
   } from "vue";
 
   import MiDropZone from "../../../components/MiDropZone.vue";
   import api, { setAuthToken } from "../../../composables/axios";
   import { useAuthStore } from "../../../stores/authStore";
+  import { isArray } from "highcharts";
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const urlServer = import.meta.env.VITE_URL_SERVER + "/";
   const authStore = useAuthStore();
 
   const props = defineProps({
@@ -39,7 +43,7 @@
       if (muestra_form.value) {
         cargarRoles();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
-        form = ref(oUsuario.value);
+        form = oUsuario.value;
         options.value = [
           {
             value: oUsuario.value.persona_id,
@@ -100,21 +104,110 @@
     return `<i class="fa fa-edit"></i> Actualizar`;
   });
 
-  const errors = ref(null);
-  const enviarFormulario = async () => {
+  const enviarFormulario = () => {
     enviando.value = true;
-    let url = form["_method"] == "POST" ? "usuarios" : "usuarios/" + form.id;
-    try {
-      const res = await api.post(url, {
-        usuario: form.usuario,
-        password: form.password,
+    let url =
+      accion_form.value == 0 ? "/admin/usuarios" : "/admin/usuarios/" + form.id;
+
+    const formData = buildFormDataUsuario(form);
+    console.log(formData);
+    api
+      .post(url, formData)
+      .then((response) => {
+        console.log(response);
+
+        const success = response.data.message ?? "Proceso realizado con éxito";
+        Swal.fire({
+          icon: "success",
+          title: "Correcto",
+          html: `<strong>${success}</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-success",
+          },
+        });
+        limpiarUsuario();
+        emits("envio-formulario");
+      })
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          let msgError =
+            "Existen errores en el formulario, por favor verifique";
+
+          if (
+            error.response.data.errors.error &&
+            error.response.data.errors.error[0]
+          ) {
+            msgError = "Ocurrió un error al registrar intente mas tarde";
+          }
+
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          form.errors = error.response.data.errors;
+        } else {
+          const msgError =
+            "Ocurrió un error inesperado contactese con el Administrador";
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          console.error("Error inesperado:", error);
+        }
+      })
+      .finally(() => {
+        enviando.value = false;
       });
-      console.log(res);
-    } catch (err) {
-      errors.value = err.response?.data?.error || "Error en login";
-    } finally {
-      enviando.value = false;
-    }
+  };
+  const buildFormDataUsuario = (form) => {
+    const fd = new FormData();
+
+    Object.entries(toRaw(form)).forEach(([key, value]) => {
+      // Si es array (ej: certificados)
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          // Recorremos cada propiedad del objeto
+          Object.entries(item).forEach(([childKey, childValue]) => {
+            // Si es un archivo nuevo
+            if (childValue instanceof File) {
+              fd.append(`${key}[${index}][${childKey}]`, childValue);
+            }
+
+            // Cualquier otro valor normal
+            else {
+              fd.append(`${key}[${index}][${childKey}]`, childValue ?? "");
+            }
+          });
+        });
+      }
+
+      // Si es File directo
+      else if (value instanceof File) {
+        fd.append(key, value);
+      }
+
+      // Cualquier valor normal
+      else {
+        fd.append(key, value ?? "");
+      }
+    });
+
+    return fd;
   };
 
   const cargarRoles = async () => {
@@ -203,7 +296,7 @@
             />
             <ul v-if="form.errors?.nombre" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.nombre }}
+                {{ form.errors?.nombre[0] }}
               </li>
             </ul>
           </div>
@@ -220,7 +313,7 @@
 
             <ul v-if="form.errors?.paterno" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.paterno }}
+                {{ form.errors?.paterno[0] }}
               </li>
             </ul>
           </div>
@@ -237,7 +330,7 @@
 
             <ul v-if="form.errors?.materno" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.materno }}
+                {{ form.errors?.materno[0] }}
               </li>
             </ul>
           </div>
@@ -254,7 +347,7 @@
 
             <ul v-if="form.errors?.ci" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.ci }}
+                {{ form.errors?.ci[0] }}
               </li>
             </ul>
           </div>
@@ -274,7 +367,7 @@
             </select>
             <ul v-if="form.errors?.ci_exp" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.ci_exp }}
+                {{ form.errors?.ci_exp[0] }}
               </li>
             </ul>
           </div>
@@ -291,7 +384,7 @@
 
             <ul v-if="form.errors?.grupo_san" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.grupo_san }}
+                {{ form.errors?.grupo_san[0] }}
               </li>
             </ul>
           </div>
@@ -308,7 +401,7 @@
 
             <ul v-if="form.errors?.sexo" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.sexo }}
+                {{ form.errors?.sexo[0] }}
               </li>
             </ul>
           </div>
@@ -328,7 +421,7 @@
               class="list-unstyled text-danger"
             >
               <li class="parsley-required">
-                {{ form.errors?.nacionalidad }}
+                {{ form.errors?.nacionalidad[0] }}
               </li>
             </ul>
           </div>
@@ -345,7 +438,7 @@
 
             <ul v-if="form.errors?.profesion" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.profesion }}
+                {{ form.errors?.profesion[0] }}
               </li>
             </ul>
           </div>
@@ -362,7 +455,7 @@
 
             <ul v-if="form.errors?.cel" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.cel }}
+                {{ form.errors?.cel[0] }}
               </li>
             </ul>
           </div>
@@ -384,7 +477,7 @@
 
             <ul v-if="form.errors?.fono" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.fono }}
+                {{ form.errors?.fono[0] }}
               </li>
             </ul>
           </div>
@@ -401,7 +494,7 @@
 
             <ul v-if="form.errors?.cel_dom" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.cel_dom }}
+                {{ form.errors?.cel_dom[0] }}
               </li>
             </ul>
           </div>
@@ -418,7 +511,7 @@
 
             <ul v-if="form.errors?.dir" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.dir }}
+                {{ form.errors?.dir[0] }}
               </li>
             </ul>
           </div>
@@ -440,7 +533,7 @@
                   class="list-unstyled text-danger"
                 >
                   <li class="parsley-required">
-                    {{ form.errors?.latitud }}
+                    {{ form.errors?.latitud[0] }}
                   </li>
                 </ul>
               </div>
@@ -459,7 +552,7 @@
                   class="list-unstyled text-danger"
                 >
                   <li class="parsley-required">
-                    {{ form.errors?.longitud }}
+                    {{ form.errors?.longitud[0] }}
                   </li>
                 </ul>
               </div>
@@ -478,7 +571,7 @@
 
             <ul v-if="form.errors?.correo" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.correo }}
+                {{ form.errors?.correo[0] }}
               </li>
             </ul>
           </div>
@@ -501,7 +594,7 @@
 
             <ul v-if="form.errors?.foto" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.foto }}
+                {{ form.errors?.foto[0] }}
               </li>
             </ul>
           </div>
@@ -519,7 +612,7 @@
 
             <ul v-if="form.errors?.carnet" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.carnet }}
+                {{ form.errors?.carnet[0] }}
               </li>
             </ul>
           </div>
@@ -528,6 +621,7 @@
               >Certificados <small class="text-muted">(Opcional)</small></label
             >
             <MiDropZone
+              :url_assets="urlServer"
               :files="form.certificados"
               @UpdateFiles="detectaCertificados"
               @addEliminados="detectaEliminadosCertificados"
@@ -537,7 +631,7 @@
               class="parsley-errors-list filled"
             >
               <li class="parsley-required">
-                {{ form.errors?.certificados }}
+                {{ form.errors?.certificados[0] }}
               </li>
             </ul>
           </div>
@@ -547,6 +641,7 @@
               <small class="text-muted">(Opcional)</small></label
             >
             <MiDropZone
+              :url_assets="urlServer"
               :files="form.documentos"
               @UpdateFiles="detectaDocumentos"
               @addEliminados="detectaEliminadosDocumentos"
@@ -556,7 +651,7 @@
               class="parsley-errors-list filled"
             >
               <li class="parsley-required">
-                {{ form.errors?.documentos }}
+                {{ form.errors?.documentos[0] }}
               </li>
             </ul>
           </div>
@@ -578,7 +673,7 @@
 
             <ul v-if="form.errors?.tipo" class="list-unstyled text-danger">
               <li class="parsley-required">
-                {{ form.errors?.tipo }}
+                {{ form.errors?.tipo[0] }}
               </li>
             </ul>
           </div>
@@ -600,7 +695,7 @@
 
               <ul v-if="form.errors?.role_id" class="list-unstyled text-danger">
                 <li class="parsley-required">
-                  {{ form.errors?.role_id }}
+                  {{ form.errors?.role_id[0] }}
                 </li>
               </ul>
             </div>
@@ -621,7 +716,7 @@
               />
               <ul v-if="form.errors?.acceso" class="list-unstyled text-danger">
                 <li class="parsley-required">
-                  {{ form.errors?.acceso }}
+                  {{ form.errors?.acceso[0] }}
                 </li>
               </ul>
             </div>

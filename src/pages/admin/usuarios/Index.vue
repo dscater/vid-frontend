@@ -234,8 +234,8 @@
               <template #accion="{ item }">
                 <template
                   v-if="
-                    props_page.auth?.user.role_id == 1 ||
-                    props_page.auth?.user.role_id == 2
+                    authStore?.user?.role_id == 1 ||
+                    authStore?.user?.role_id == 2
                   "
                 >
                   <el-tooltip
@@ -257,8 +257,8 @@
                 </template>
                 <template
                   v-if="
-                    props_page.auth?.user.permisos == '*' ||
-                    props_page.auth?.user.permisos.includes('usuarios.edit')
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('usuarios.edit')
                   "
                 >
                   <el-tooltip
@@ -280,8 +280,8 @@
                 </template>
                 <template
                   v-if="
-                    props_page.auth?.user.permisos == '*' ||
-                    props_page.auth?.user.permisos.includes('usuarios.destroy')
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('usuarios.destroy')
                   "
                 >
                   <el-tooltip

@@ -86,11 +86,12 @@
           error.response.data &&
           error.response.data.errors
         ) {
-          const error = "Existen errores en el formulario, por favor verifique";
+          const msgError =
+            "Existen errores en el formulario, por favor verifique";
           Swal.fire({
             icon: "info",
             title: "Error",
-            html: `<strong>${error}</strong>`,
+            html: `<strong>${msgError}</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
               confirmButton: "btn-error",
@@ -98,12 +99,12 @@
           });
           form.errors = error.response.data.errors;
         } else {
-          const error =
+          const msgError =
             "Ocurrió un error inesperado contactese con el Administrador";
           Swal.fire({
             icon: "info",
             title: "Error",
-            html: `<strong>${error}</strong>`,
+            html: `<strong>${msgError}</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
               confirmButton: "btn-error",

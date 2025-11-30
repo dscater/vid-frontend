@@ -59,7 +59,6 @@
       multiple
       style="display: none"
       ref="fileInput"
-      id="fileInput"
       @change="handleFiles"
     />
   </div>
@@ -195,7 +194,7 @@
           this.archivos_existentes.push({
             id: 0,
             name: file.name,
-            url_file: url_assets + "imgs/attach.png",
+            url_file: this.url_assets + "imgs/attach.png",
             file: file,
           });
           this.$emit(
