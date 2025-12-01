@@ -54,13 +54,13 @@ export const useUsuarios = () => {
       oUsuario.value.latitud = item.latitud;
       oUsuario.value.longitud = item.longitud;
       oUsuario.value.correo = item.correo;
-      oUsuario.value.foto = item.foto;
-      oUsuario.value.carnet = item.carnet;
+      // oUsuario.value.foto = item.foto;
+      // oUsuario.value.carnet = item.carnet;
       oUsuario.value.doc_adicional = item.doc_adicional;
       oUsuario.value.password = item.password;
       oUsuario.value.tipo = item.tipo;
       oUsuario.value.role_id = item.role_id;
-      oUsuario.value.acceso = item.acceso;
+      oUsuario.value.acceso = "" + item.acceso;
       oUsuario.value.certificados = item.certificados;
       oUsuario.value.certificados_eliminados = [];
       oUsuario.value.documentos = item.documentos;

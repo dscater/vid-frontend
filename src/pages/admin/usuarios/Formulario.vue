@@ -107,10 +107,11 @@
   const enviarFormulario = () => {
     enviando.value = true;
     let url =
-      accion_form.value == 0 ? "/admin/usuarios" : "/admin/usuarios/" + form.id;
+      accion_form.value == 0
+        ? "/admin/usuarios"
+        : "/admin/usuarios/update/" + form.id;
 
     const formData = buildFormDataUsuario(form);
-    console.log(formData);
     api
       .post(url, formData)
       .then((response) => {

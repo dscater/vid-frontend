@@ -1,6 +1,7 @@
 <script setup>
   import { useUsuarios } from "../../../composables/usuarios/useUsuarios";
   import { watch, ref, computed, defineEmits } from "vue";
+  import api from "../../../composables/axios";
   const props = defineProps({
     muestra_formulario: {
       type: Boolean,
@@ -17,6 +18,7 @@
   const formulario = ref(props.muestra_formulario);
   let form = ref({
     password: "",
+    _method: "PUT",
   });
   watch(
     () => props.muestra_formulario,
@@ -38,38 +40,67 @@
   });
 
   const enviarFormulario = () => {
-    let url = route("usuarios.password", oUsuario.value.id);
-
-    form.put(url, {
-      preserveScroll: true,
-      onSuccess: () => {
+    let url = "admin/usuarios/password/" + oUsuario.value.id;
+    api
+      .post(url, form.value)
+      .then((response) => {
+        const success = response.data.message ?? "Proceso realizado con éxito";
         Swal.fire({
           icon: "success",
           title: "Correcto",
-          text: `${flash.bien ? flash.bien : "Proceso realizado"}`,
-          confirmButtonColor: "#3085d6",
+          html: `<strong>${success}</strong>`,
           confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-success",
+          },
         });
-        form.password = "";
         limpiarUsuario();
         emits("envio-formulario");
-      },
-      onError: (err) => {
-        Swal.fire({
-          icon: "info",
-          title: "Error",
-          text: `${
-            flash.error
-              ? flash.error
-              : err.error
-              ? err.error
-              : "Hay errores en el formulario"
-          }`,
-          confirmButtonColor: "#3085d6",
-          confirmButtonText: `Aceptar`,
-        });
-      },
-    });
+      })
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          let msgError =
+            "Existen errores en el formulario, por favor verifique";
+
+          if (
+            error.response.data.errors.error &&
+            error.response.data.errors.error[0]
+          ) {
+            msgError = "Ocurrió un error al registrar intente mas tarde";
+          }
+
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          form.errors = error.response.data.errors;
+        } else {
+          const msgError =
+            "Ocurrió un error inesperado contactese con el Administrador";
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          console.error("Error inesperado:", error);
+        }
+      })
+      .finally(() => {
+        enviando.value = false;
+      });
   };
 
   const emits = defineEmits(["cerrar-formulario", "envio-formulario"]);
@@ -98,13 +129,11 @@
   >
     <div class="modal-formulario modal-lg mx-auto">
       <div class="modal-content">
-        <div class="modal-header bg-principal text-white">
+        <div class="modal-header bg-navy text-white">
           <h4 class="modal-title text-white" v-html="tituloFormulario"></h4>
-          <button
-            type="button"
-            class="btn-close"
-            @click="cerrarFormulario()"
-          ></button>
+          <button type="button" class="close" @click="cerrarFormulario()">
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="enviarFormulario()">

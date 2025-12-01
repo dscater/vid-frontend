@@ -5,7 +5,6 @@
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
-  import { useAxios } from "../../../composables/axios/useAxios";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -20,7 +19,6 @@
   });
 
   const { setRole, limpiarRole } = useRoles();
-  const { axiosDelete } = useAxios();
 
   const miTable = ref(null);
   const headers = [
@@ -86,6 +84,17 @@
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
+          const success =
+            respuesta.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
           updateDatatable();
         }
       }

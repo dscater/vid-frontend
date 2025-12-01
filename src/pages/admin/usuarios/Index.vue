@@ -6,12 +6,11 @@
   import Formulario from "./Formulario.vue";
   import FormPassword from "./FormPassword.vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
-  import { useAxios } from "../../../composables/axios/useAxios";
   import { useAuthStore } from "../../../stores/authStore";
+  import api from "../../../composables/axios";
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
-  const { axiosDelete } = useAxios();
 
   onBeforeMount(() => {
     appStore.startLoading();
@@ -32,11 +31,6 @@
       key: "foto",
       sortable: false,
       width: "3%",
-    },
-    {
-      label: "USUARIO",
-      key: "usuario",
-      sortable: true,
     },
     {
       label: "AP. PATERNO",
@@ -115,6 +109,14 @@
     }
   };
 
+  const editar = (id) => {
+    api.get("/admin/usuarios/show/" + id).then((response) => {
+      setUsuario(response.data);
+      accion_formulario.value = 1;
+      muestra_formulario.value = true;
+    });
+  };
+
   const eliminarUsuario = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
@@ -129,10 +131,21 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await axiosDelete(
-          apiUrl + "/usuarios/destroy" + item.id
-        );
-        if (respuesta && respuesta.sw) {
+        let respuesta = await api.post("/admin/usuarios/" + item.id, {
+          _method: "DELETE",
+        });
+        if (respuesta.data && respuesta.data.sw) {
+          const success =
+            respuesta.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
           updateDatatable();
         }
       }
@@ -234,8 +247,8 @@
               <template #accion="{ item }">
                 <template
                   v-if="
-                    authStore?.user?.role_id == 1 ||
-                    authStore?.user?.role_id == 2
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('usuarios.password')
                   "
                 >
                   <el-tooltip
@@ -267,14 +280,7 @@
                     content="Editar"
                     placement="left-start"
                   >
-                    <button
-                      class="btn btn-warning"
-                      @click="
-                        setUsuario(item);
-                        accion_formulario = 1;
-                        muestra_formulario = true;
-                      "
-                    >
+                    <button class="btn btn-warning" @click="editar(item.id)">
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
                 </template>

@@ -109,7 +109,11 @@
           />
         </div>
         <div class="info">
-          <a href="#" class="d-block">{{ authStore.user?.full_name }}</a>
+          <router-link
+            :to="{ name: 'profile.edit', params: { id: authStore.user?.id } }"
+            class="d-block"
+            >{{ authStore.user?.full_name }}</router-link
+          >
         </div>
       </div>
 

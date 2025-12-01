@@ -6,6 +6,14 @@ import Auth from "../layouts/Auth.vue";
 import Admin from "../layouts/Admin.vue";
 
 const routes = [
+  // PROFILE
+  {
+    path: "/admin/profile/:id",
+    name: "profile.edit",
+    props: true,
+    component: () => import("../pages/admin/profile/Edit.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
   // USUARIOS
   {
     path: "/admin/usuarios",
@@ -64,21 +72,25 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+import { validateToken } from "../composables/auth";
 // Guard global
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  // Rutas protegidas
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    console.log("LOGIN");
-    return next({ name: "Login" });
+  const token = localStorage.getItem("token");
+  // Si la ruta requiere auth
+  if (to.meta.requiresAuth) {
+    authStore.verificaSesion();
+    if (!token) {
+      return next({ name: "Login" });
+    }
+    return next();
   }
 
-  // Logeado y quiere ir al login
+  // Si la ruta es guest y ya está logeado → bloquear
   if (to.meta.guest && authStore.isAuthenticated) {
-    console.log("INICIO");
     return next({ name: "Inicio" });
   }
-
   next();
 });
 

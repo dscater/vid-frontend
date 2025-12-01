@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "../stores/authStore";
 
 // Base URL de la API desde variable de entorno
 const API_URL = import.meta.env.VITE_API_URL;
@@ -37,5 +38,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const authStore = useAuthStore();
+      authStore.logout();
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

@@ -12,6 +12,20 @@ export const useAuthStore = defineStore("auth", {
     isAuthenticated: (state) => !!state.token,
   },
   actions: {
+    setUser(item) {
+      this.user = item;
+      localStorage.setItem("user", JSON.stringify(item));
+    },
+    async verificaSesion() {
+      try {
+        const res = await api.get("/authCheck");
+      } catch (err) {
+        console.log(err);
+        if (err.status === 401) {
+          this.logout();
+        }
+      }
+    },
     async login(form) {
       this.loading = true;
       this.errors = null;
@@ -32,12 +46,24 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       }
     },
-    logout() {
-      this.user = null;
-      this.token = null;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setAuthToken(null);
+    async logout() {
+      this.loading = true;
+      try {
+        const res = await api.post("/logout");
+        if (res) {
+          this.user = null;
+          this.token = null;
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuthToken(null);
+          // window.location.href = "/";
+        }
+      } catch (err) {
+        this.errors = err.response?.data?.error || "Error en logout";
+        // window.location.href = "/";
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });
