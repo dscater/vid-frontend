@@ -85,100 +85,114 @@
         </el-skeleton>
       </div>
     </div>
-    <div class="col-md-6 bg1 p-5 contendor_formulario">
-      <el-skeleton
-        class="w-100 h-100 d-block d-md-none"
-        animated
-        :loading="loadingLogo"
-      >
-        <template #template>
-          <el-skeleton-item variant="image" class="w-100 h-100" />
-        </template>
-        <template #default>
-          <img
-            :src="configuracionStore.oConfiguracion.url_logo"
-            alt="Logo"
-            class="d-block d-md-none mx-auto mb-2 rounded"
-            style="max-height: 120px"
-            loading="lazy"
-          />
-        </template>
-      </el-skeleton>
-      <a
-        href="/"
-        class="h1 w-100 text-center d-block nombre_sistema title_Chau_Philomene_One text-white"
-        >{{ configuracionStore.oConfiguracion.nombre_sistema }}</a
-      >
-      <form @submit.prevent="submit">
-        <p class="login-box-msg">Ingresa tú usuario y contraseña</p>
-        <div class="row">
-          <div class="col-12 mb-3">
-            <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Usuario"
-                v-model="form.usuario"
-                autofocus
-              />
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-user"></span>
+    <div class="col-md-6 bg2 p-5">
+      <div class="contenedor-formulario">
+        <el-skeleton
+          class="w-100 h-100 d-block d-md-none"
+          animated
+          :loading="loadingLogo"
+        >
+          <template #template>
+            <el-skeleton-item variant="image" class="w-100 h-100" />
+          </template>
+          <template #default>
+            <img
+              :src="configuracionStore.oConfiguracion.url_logo"
+              alt="Logo"
+              class="d-block d-md-none mx-auto mb-2 rounded"
+              style="max-height: 120px"
+              loading="lazy"
+            />
+          </template>
+        </el-skeleton>
+        <a
+          href="/"
+          class="h1 w-100 text-center d-block nombre_sistema title_Chau_Philomene_One text-white"
+          >{{ configuracionStore.oConfiguracion.nombre_sistema }}</a
+        >
+        <form @submit.prevent="submit">
+          <p class="login-box-msg">Ingresa tú usuario y contraseña</p>
+          <div class="row">
+            <div class="col-12 mb-3">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Usuario"
+                  v-model="form.usuario"
+                  autofocus
+                />
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                  </div>
                 </div>
               </div>
+              <span
+                class="text-danger"
+                v-if="form.errors && form.errors.usuario"
+              >
+                {{ form.errors.usuario }}
+              </span>
             </div>
-            <span class="text-danger" v-if="form.errors && form.errors.usuario">
-              {{ form.errors.usuario }}
-            </span>
-          </div>
-          <div class="col-12 mb-3">
-            <div class="input-group">
-              <input
-                :type="muestra_password ? 'text' : 'password'"
-                class="form-control"
-                placeholder="Contraseña"
-                v-model="form.password"
-                autocomplete="false"
-              />
-              <div class="input-group-append">
-                <button
-                  class="btn btn-default"
-                  type="button"
-                  @click="muestra_password = !muestra_password"
-                >
-                  <i
-                    class="fa"
-                    :class="[muestra_password ? 'fa-eye' : 'fa-eye-slash']"
-                  ></i>
-                </button>
-              </div>
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
+            <div class="col-12 mb-3">
+              <div class="input-group">
+                <input
+                  :type="muestra_password ? 'text' : 'password'"
+                  class="form-control"
+                  placeholder="Contraseña"
+                  v-model="form.password"
+                  autocomplete="false"
+                />
+                <div class="input-group-append">
+                  <button
+                    class="btn btn-default"
+                    type="button"
+                    @click="muestra_password = !muestra_password"
+                  >
+                    <i
+                      class="fa"
+                      :class="[muestra_password ? 'fa-eye' : 'fa-eye-slash']"
+                    ></i>
+                  </button>
+                </div>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                  </div>
                 </div>
               </div>
+              <span
+                class="text-danger"
+                v-if="form.errors && form.errors.password"
+              >
+                {{ form.errors.password }}
+              </span>
             </div>
-            <span
-              class="text-danger"
-              v-if="form.errors && form.errors.password"
-            >
-              {{ form.errors.password }}
-            </span>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <button
-              type="submit"
-              class="btn btn-primary btn-block"
-              :disabled="form.processing"
-            >
-              Acceder
-            </button>
+          <div class="row">
+            <div class="col-12">
+              <button
+                type="submit"
+                class="btn btn-primary btn-block"
+                :disabled="form.processing"
+              >
+                Acceder
+              </button>
+            </div>
+            <!-- /.col -->
           </div>
-          <!-- /.col -->
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 </template>
+<style>
+  .contenedor-formulario {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

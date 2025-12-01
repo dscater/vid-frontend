@@ -56,6 +56,11 @@ body .mi-table tr.bg-oficial td .label-responsive {
   color: black;
 }
 
+.bg-principal {
+  background-color: var(--principal);
+  color: white;
+}
+
 .bg-secundario {
   background-color: var(--secundario);
   color: white;
@@ -168,19 +173,6 @@ tr.bg-cancelado {
   border-bottom: solid 2px;
 }
 
-body .btn-primary,
-body .btn-primary:active,
-body .btn-primary:focus,
-body .badge-primary,
-body .bg-primary,
-body li a.bg-primary,
-body a.bg-primary,
-body .pagination .page-item.active .page-link,
-body .main-sidebar .sidebar .nav .nav-link.active {
-  background-color: var(--principal) !important;
-  font-weight: 600;
-}
-
 body .btn-primary:disabled {
   background-color: var(--principal_t);
 }
@@ -203,19 +195,12 @@ body .main-sidebar .sidebar .nav .nav-link.active {
   width: 100%;
 }
 
-body .btn-primary:disabled {
-  background-color: var(--cancelado);
+.btn-primary {
+  background-color: var(--secundario);
+  border-color: var(--secundario);
 }
-
-body li a.bg-primary,
-body a.bg-primary,
-body .pagination .page-item.active .page-link,
-body .btn-primary {
-  border-color: var(--principal_hover);
-}
-body .btn-primary:hover {
-  background-color: var(--principal_hover);
-  border-color: var(--principal);
+.btn-primary:hover {
+  background-color: var(--secundario_hover);
 }
 
 /* Botón si el icono es success */
@@ -431,7 +416,8 @@ body .content ul li button:active {
 }
 
 .content-header .breadcrumb-item.active {
-  color: var(--principal);
+  font-weight: bold;
+  color: var(--white);
 }
 /* LOGIN */
 body.app-blank.login {

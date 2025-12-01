@@ -5,6 +5,10 @@
 
   const props = defineProps({
     ruta: String,
+    params: {
+      type: Object,
+      default: {},
+    },
     label: String,
     icon: String,
     method: {
@@ -39,7 +43,7 @@
     <!-- Router Link -->
     <router-link
       v-if="ruta !== routeCurrent"
-      :to="{ name: ruta ? ruta : 'home' }"
+      :to="{ name: ruta ? ruta : 'Inicio', params: params }"
       class="nav-link"
       :class="[classActive ?? '']"
       @click="appStore.startLoading()"

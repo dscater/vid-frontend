@@ -15,7 +15,7 @@
 
   const logout = () => {
     authStore.logout();
-    router.push({ name: "Login" });
+    // router.push({ name: "Login" });
   };
 
   onMounted(() => {});
@@ -24,7 +24,9 @@
 </script>
 <template>
   <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light bg1">
+  <nav
+    class="main-header navbar navbar-expand navbar-white navbar-light bg-secundario"
+  >
     <!-- Left navbar links -->
     <ul class="navbar-nav">
       <li class="nav-item">

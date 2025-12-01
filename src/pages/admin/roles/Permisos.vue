@@ -5,41 +5,41 @@
   // TOAST
   import { toast } from "vue3-toastify";
   import "vue3-toastify/dist/index.css";
+  import api from "../../../composables/axios";
   const appStore = useAppStore();
   onBeforeMount(() => {
     appStore.startLoading();
   });
   const props = defineProps({
-    role: {
-      type: Object,
-      default: {
-        nombre: "",
-        permisos: 0,
-        usuarios: 0,
-      },
-    },
-    modulos_group: {
-      type: Array,
-      default: [],
-    },
-    array_modulos: {
-      type: Object,
-      default: null,
-    },
-    array_permisos: {
-      type: Object,
-      default: null,
+    id: {
+      type: String,
+      default: "",
     },
   });
 
-  const listPermisos = ref(props.array_permisos);
+  const role = ref(null);
+  const modulos_group = ref([]);
+  const array_modulos = ref(null);
+  const array_permisos = ref(null);
+
+  const listPermisos = ref([]);
+
+  const cargarRole = () => {
+    api.get("/admin/roles/" + props.id).then((response) => {
+      role.value = response.data.role;
+      modulos_group.value = response.data.modulos_group;
+      array_modulos.value = response.data.array_modulos;
+      array_permisos.value = response.data.array_permisos;
+      listPermisos.value = array_permisos.value;
+    });
+  };
 
   const verificaDisabled = (modulo, accion) => {
     let disabled = false;
-    if (props.role.id == 1) {
+    if (role.value.id == 1) {
       disabled = true;
     }
-    if (props.role.id != 2) {
+    if (role.value.id != 2) {
       if (modulo == "Solicitud de productos") {
         if (accion == "CREAR") {
           disabled = true;
@@ -70,31 +70,54 @@
   const actualizaPermiso = (e, modulo, accion) => {
     const checked = e.target.checked ? 1 : 0;
     let listPermisosBK = listPermisos.value;
-    axios
-      .post(route("roles.actualizaPermiso", props.role.id), {
+    api
+      .post("/admin/roles/actualizaPermiso/" + role.value.id, {
         sw_cambio: checked,
         modulo: modulo,
         accion: accion,
       })
       .then((response) => {
+        // console.log(response);
         toast.success("Operación completada correctamente!");
         listPermisos.value[modulo] = response.data.array_permisos;
       })
       .catch((error) => {
         listPermisos.value[modulo] = listPermisosBK;
-        toast.error(
-          "No se pudo actualizar la información debido a un error, intenté mas tarde"
-        );
-        console.log(error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          const msgError =
+            "Existen errores en el formulario, por favor verifique";
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          form.errors = error.response.data.errors;
+        } else {
+          toast.error(
+            "No se pudo actualizar la información debido a un error, intenté mas tarde"
+          );
+          console.error("Error inesperado:", error);
+        }
+      })
+      .finally(() => {
+        // enviando.value = false;
       });
   };
 
   onMounted(() => {
+    cargarRole();
     appStore.stopLoading();
   });
 </script>
 <template>
-  <Head title="Roles-Permisos"></Head>
   <Content>
     <template #header>
       <div class="row mb-2">
@@ -105,10 +128,10 @@
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item">
-              <Link :href="route('inicio')">Inicio</Link>
+              <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
             <li class="breadcrumb-item">
-              <Link :href="route('roles.index')">Roles</Link>
+              <router-link :to="{ name: 'roles.index' }">Roles</router-link>
             </li>
             <li class="breadcrumb-item active">Permisos</li>
           </ol>
@@ -119,50 +142,33 @@
     </template>
     <div class="row">
       <div class="col-md-3 mb-2">
-        <Link
-          :href="route('roles.index')"
+        <router-link
+          :to="{ name: 'roles.index' }"
           class="btn btn-default d-inline-block w-100"
         >
           <i class="fa fa-arrow-left"></i> Volver
-        </Link>
+        </router-link>
       </div>
       <div class="col-md-12">
         <!-- BEGIN card -->
         <div class="card">
           <!-- BEGIN card-body -->
-          <div class="card-body p-2 overflow-auto">
-            <div class="row">
+          <div class="card-body p-2 overflow-auto p-0">
+            <div class="row w-100 m-0">
               <div class="col-12">
-                <h3>{{ props.role.nombre }}</h3>
+                <h3>{{ role?.nombre }}</h3>
               </div>
               <div
                 class="col-12 fila_seccion p-0"
                 v-for="item in modulos_group"
               >
-                <p
-                  class="font-weight-bold mb-2 nomModulo"
-                  :class="[
-                    {
-                      'bg-primary': [
-                        'Lengua',
-                        'Matemáticas',
-                        'Ciencias',
-                        'Instrucción Policial',
-                        'Historia Policial',
-                        'Acondicionamiento Físico',
-                      ].some((palabra) => item?.includes(palabra)),
-                    },
-                    {
-                      'bg-principal': item.includes('Evaluación'),
-                    },
-                  ]"
-                >
+                <p class="font-weight-bold mb-2 nomModulo">
                   {{ item }}
                 </p>
                 <div class="row mb-3 px-3">
                   <div
                     class="col-md-3"
-                    v-for="item_permiso in props.array_modulos[item]"
+                    v-for="item_permiso in array_modulos[item]"
                   >
                     <label class="check_permiso">
                       {{ item_permiso.accion }}
@@ -192,7 +198,6 @@
   .nomModulo {
     font-size: 1.1em;
     background-color: var(--bg6);
-    color: white !important;
     padding-left: 10px;
   }
   .nomModulo.bg-principal {

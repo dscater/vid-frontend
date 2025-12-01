@@ -34,7 +34,7 @@
 
   const logout = () => {
     authStore.logout();
-    router.push({ name: "Login" });
+    // router.push({ name: "Login" });
   };
 
   const route = useRoute();
@@ -102,7 +102,7 @@
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
           <img
-            :src="authStore.user?.url_foto"
+            :src="authStore?.user?.url_foto"
             class="img-circle elevation-2"
             alt="User Image"
             v-if="!loadingLogo"
@@ -110,9 +110,12 @@
         </div>
         <div class="info">
           <router-link
-            :to="{ name: 'profile.edit', params: { id: authStore.user?.id } }"
+            :to="{
+              name: 'profile.edit',
+              params: { id: authStore?.user?.id ?? 0 },
+            }"
             class="d-block"
-            >{{ authStore.user?.full_name }}</router-link
+            >{{ authStore?.user?.full_name }}</router-link
           >
         </div>
       </div>
@@ -132,8 +135,102 @@
             :class="[routeCurrent == 'Inicio' ? 'active' : '']"
           ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">OPERACIONES</li>
-
+          <ItemMenu
+            :label="'Orden de Ventas'"
+            :ruta="'orden_ventas.index'"
+            :icon="'fa fa-clipboard-check'"
+          ></ItemMenu>
+          <ItemMenu
+            :label="'Proformas'"
+            :ruta="'proformas.index'"
+            :icon="'fa fa-list'"
+          ></ItemMenu>
+          <ItemMenu
+            :label="'Cuentas por Cobrar'"
+            :ruta="'cuenta_cobrars.index'"
+            :icon="'fa fa-list-alt'"
+          ></ItemMenu>
+          <li class="nav-item">
+            <a
+              href="#"
+              class="nav-link sub-menu"
+              :class="[
+                routeCurrent == 'devolucion_stocks.index'
+                  ? 'active menu-is-opening menu-open'
+                  : '',
+              ]"
+              @click.stop="toggleSubMenu($event)"
+            >
+              <i class="nav-icon fa fa-sign-out-alt"></i>
+              <p>
+                Devoluciones
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <ItemMenu
+                :label="'Devolución de Stock'"
+                :ruta="'solicitud_ingresos.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Devolución de Clientes'"
+                :ruta="'solicitud_ingresos.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a
+              href="#"
+              class="nav-link sub-menu"
+              :class="[
+                routeCurrent == 'devolucion_stocks.index'
+                  ? 'active menu-is-opening menu-open'
+                  : '',
+              ]"
+              @click.stop="toggleSubMenu($event)"
+            >
+              <i class="nav-icon fa fa-sync"></i>
+              <p>
+                Movimientos
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <ItemMenu
+                :label="'Solicitud de Ingreso'"
+                :ruta="'solicitud_ingresos.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Orden de Salida'"
+                :ruta="'orden_salidas.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Transferencias de Stock'"
+                :ruta="'transferencias.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+            </ul>
+          </li>
+          <ItemMenu
+            :label="'Registro de Gastos'"
+            :ruta="'gastos.index'"
+            :icon="'fa fa-clipboard-list'"
+          ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">ADMINISTRACIÓN</li>
+          <ItemMenu
+            :label="'Clientes'"
+            :ruta="'clientes.index'"
+            :icon="'fa fa-user-friends'"
+          ></ItemMenu>
+          <ItemMenu
+            :label="'Proveedores'"
+            :ruta="'proveedors.index'"
+            :icon="'fa fa-clipboard-list'"
+          ></ItemMenu>
           <li class="nav-item">
             <a
               href="#"
@@ -158,6 +255,26 @@
                 :ruta="'productos.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
+              <ItemMenu
+                :label="'Unidades de Medida'"
+                :ruta="'unidad_medidas.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Marcas'"
+                :ruta="'marcas.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Subcategorías'"
+                :ruta="'sub_categorias.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Categorías'"
+                :ruta="'categorias.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
             </ul>
           </li>
           <li class="nav-item">
@@ -165,51 +282,29 @@
               href="#"
               class="nav-link sub-menu"
               :class="[
-                routeCurrent == 'habitacions.index' ||
-                routeCurrent == 'tipo_habitacions.index'
+                routeCurrent == 'sucursals.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
               @click.stop="toggleSubMenu($event)"
             >
-              <i class="nav-icon fas fa-list"></i>
+              <i class="nav-icon fas fa-building"></i>
               <p>
-                Habitaciones
+                Sucursales
                 <i class="fas fa-angle-left right"></i>
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <!-- <ItemMenu
-                :label="'Habitaciones'"
-                :ruta="'habitacions.index'"
+              <ItemMenu
+                :label="'Sucursales'"
+                :ruta="'sucursals.index'"
                 :icon="'fa fa-angle-right'"
-              ></ItemMenu> -->
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a
-              href="#"
-              class="nav-link sub-menu"
-              :class="[
-                routeCurrent == 'monedas.index' ||
-                routeCurrent == 'tipo_cambios.index'
-                  ? 'active menu-is-opening menu-open'
-                  : '',
-              ]"
-              @click.stop="toggleSubMenu($event)"
-            >
-              <i class="nav-icon fa fa-dollar-sign"></i>
-              <p>
-                Monedas
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- <ItemMenu
-                :label="'Monedas'"
-                :ruta="'monedas.index'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Productos Sucursal'"
+                :ruta="'sucursals.index'"
                 :icon="'fa fa-angle-right'"
-              ></ItemMenu> -->
+              ></ItemMenu>
             </ul>
           </li>
           <li class="nav-item">
@@ -263,11 +358,31 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <!-- <ItemMenu
+              <ItemMenu
                 :label="'Usuarios'"
-                :ruta="'reportes.usuarios'"
+                :ruta="''"
                 :icon="'fa fa-angle-right'"
-              ></ItemMenu> -->
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Productos'"
+                :ruta="''"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Lista de Sucursales'"
+                :ruta="''"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Lista de Clientes'"
+                :ruta="''"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                :label="'Lista de Proveedores'"
+                :ruta="''"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
             </ul>
           </li>
           <li class="nav-header font-weight-bold bg3">OTROS</li>
@@ -276,7 +391,12 @@
             :ruta="'configuracions.index'"
             :icon="'fa fa-cog'"
           ></ItemMenu>
-
+          <ItemMenu
+            :label="'Perfil'"
+            :ruta="'profile.edit'"
+            :params="{ id: authStore?.user?.id ?? 0 }"
+            :icon="'fa fa-user'"
+          ></ItemMenu>
           <li class="nav-item">
             <a href="#" class="nav-link" @click.prevent="logout()">
               <i class="nav-icon fa fa-power-off"></i>

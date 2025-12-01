@@ -7,6 +7,7 @@
   import Formulario from "./Formulario.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
+  import { useRouter } from "vue-router";
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -55,8 +56,9 @@
     muestra_formulario.value = true;
   };
 
+  const router = useRouter();
   const editarPermisos = (item) => {
-    // router.get(route("roles.edit", item.id));
+    router.push({ name: "roles.edit", params: { id: item.id } });
   };
 
   const updateDatatable = async () => {

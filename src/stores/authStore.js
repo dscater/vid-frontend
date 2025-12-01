@@ -23,6 +23,7 @@ export const useAuthStore = defineStore("auth", {
         console.log(err);
         if (err.status === 401) {
           this.logout();
+          // window.location.reload();
         }
       }
     },
@@ -56,7 +57,7 @@ export const useAuthStore = defineStore("auth", {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setAuthToken(null);
-          // window.location.href = "/";
+          window.location.href = "/";
         }
       } catch (err) {
         this.errors = err.response?.data?.error || "Error en logout";

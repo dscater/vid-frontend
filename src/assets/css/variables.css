@@ -1,16 +1,16 @@
 :root {
-    --principal: #5cc72f;
-    --principal_hover: #48b619;
-    --principal_t: #5dc72fd5;
-    --secundario: #0d2649;
-    --secundario_hover: #013b92;
-    --bg1: #205080;
-    --bg2: rgb(10, 30, 50);
-    --bg3: rgb(3, 10, 20);
-    --danger: rgb(236, 122, 122);
-    --bgDark: rgb(18, 20, 20);
-    --bgDark1: rgb(32.4, 32.7, 33.3);
-    --bgDark2: rgba(0, 0, 0, 0.842);
-    --bgLight: rgb(223, 223, 223);
-    --bgGrayDark: rgb(39, 39, 39);
+  --principal: #e30512;
+  --principal_hover: #f83542;
+  --principal_t: #e30514d7;
+  --secundario: #004a93;
+  --secundario_hover: rgb(3, 72, 175);
+  --bg1: #205080;
+  --bg2: rgb(10, 30, 50);
+  --bg3: rgb(3, 10, 20);
+  --danger: rgb(236, 122, 122);
+  --bgDark: rgb(18, 20, 20);
+  --bgDark1: rgb(32.4, 32.7, 33.3);
+  --bgDark2: rgba(0, 0, 0, 0.842);
+  --bgLight: rgb(223, 223, 223);
+  --bgGrayDark: rgb(39, 39, 39);
 }

@@ -143,7 +143,7 @@
             html: `<strong>${success}</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
-              confirmButton: "btn-success",
+              confirmButton: "btn-primary",
             },
           });
           updateDatatable();
@@ -187,7 +187,7 @@
                 authStore?.user?.permisos.includes('usuarios.create')
               "
               type="button"
-              class="btn btn-success"
+              class="btn btn-primary"
               @click="agregarRegistro"
             >
               <i class="fa fa-plus"></i> Nuevo Usuario
