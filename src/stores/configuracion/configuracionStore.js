@@ -4,8 +4,8 @@ import api, { setAuthToken } from "../../composables/axios.js";
 export const useConfiguracionStore = defineStore("configuracion", {
   state: () => ({
     oConfiguracion: {
-      sistema: "SISTEMA HOTEL",
-      alias: "SH",
+      nombre_sistema: "SISTEMA VID",
+      alias: "VD",
       url_logo: "",
     },
   }),

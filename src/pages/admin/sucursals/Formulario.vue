@@ -1,6 +1,6 @@
 <script setup>
   import MiModal from "../../../Components/MiModal.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useSucursals } from "../../../composables/sucursals/useSucursals";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
   const props = defineProps({
@@ -14,18 +14,19 @@
     },
   });
 
-  const { oRole, limpiarRole } = useRoles();
+  const { oSucursal, limpiarSucursal } = useSucursals();
   const accion_form = ref(props.accion_formulario);
   const muestra_form = ref(props.muestra_formulario);
   const enviando = ref(false);
-  let form = reactive(oRole.value);
+  let form = reactive(oSucursal.value);
   watch(
     () => props.muestra_formulario,
     (newValue) => {
       muestra_form.value = newValue;
       if (muestra_form.value) {
+        cargarUsers();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
-        form = oRole.value;
+        form = oSucursal.value;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
@@ -43,8 +44,8 @@
 
   const tituloDialog = computed(() => {
     return accion_form.value == 0
-      ? `<i class="fa fa-plus"></i> Nuevo Role`
-      : `<i class="fa fa-edit"></i> Editar Role`;
+      ? `<i class="fa fa-plus"></i> Nueva Sucursal`
+      : `<i class="fa fa-edit"></i> Editar Sucursal`;
   });
 
   const textBtn = computed(() => {
@@ -60,7 +61,9 @@
   const enviarFormulario = () => {
     enviando.value = true;
     let url =
-      accion_form.value == 0 ? "/admin/roles" : "/admin/roles/" + form.id;
+      accion_form.value == 0
+        ? "/admin/sucursals"
+        : "/admin/sucursals/" + form.id;
 
     api
       .post(url, form)
@@ -77,7 +80,7 @@
             confirmButton: "btn-success",
           },
         });
-        limpiarRole();
+        limpiarSucursal();
         emits("envio-formulario");
       })
       .catch((error) => {
@@ -130,6 +133,18 @@
     muestra_form.value = false;
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
   };
+  const listUsers = ref([]);
+  const cargarUsers = () => {
+    api
+      .get("/admin/usuarios/listado", {
+        params: {
+          usuarios: true,
+        },
+      })
+      .then((response) => {
+        listUsers.value = response.data.usuarios;
+      });
+  };
 
   onMounted(() => {});
 </script>
@@ -156,8 +171,8 @@
           <span class="text-danger">(*)</span> son obligatorios.
         </p>
         <div class="row">
-          <div class="col-md-12 mt-2">
-            <label class="required">Nombre de Role</label>
+          <div class="col-md-4 mt-2">
+            <label class="required">Nombre de Sucursal</label>
             <el-input
               type="text"
               :class="{
@@ -172,6 +187,112 @@
             >
               <li class="parsley-required">
                 {{ form.errors?.nombre[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Dirección Completa</label>
+            <el-input
+              type="text"
+              :class="{
+                'parsley-error': form.errors?.direccion,
+              }"
+              v-model="form.direccion"
+              autosize
+            ></el-input>
+            <ul
+              v-if="form.errors?.direccion"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.direccion[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Teléfono</label>
+            <el-input
+              type="text"
+              :class="{
+                'parsley-error': form.errors?.fono,
+              }"
+              v-model="form.fono"
+              autosize
+            ></el-input>
+            <ul
+              v-if="form.errors?.fono"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.fono[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label>Correo electrónico</label>
+            <el-input
+              type="text"
+              :class="{
+                'parsley-error': form.errors?.correo,
+              }"
+              v-model="form.correo"
+              autosize
+            ></el-input>
+            <ul
+              v-if="form.errors?.correo"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.correo[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Encargado de Sucursal</label>
+            <el-select
+              :class="{
+                'parsley-error': form.errors?.user_id,
+              }"
+              v-model="form.user_id"
+              placeholder="Seleccionar"
+              filterable
+              autosize
+            >
+              <el-option
+                v-for="item in listUsers"
+                :key="item.id"
+                :value="item.id"
+                :label="item.full_name"
+              >
+              </el-option>
+            </el-select>
+            <ul
+              v-if="form.errors?.user_id"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.user_id[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Estado</label><br />
+            <el-switch
+              size="large"
+              v-model="form.estado"
+              class="mb-2"
+              style="
+                --el-switch-on-color: #13ce66;
+                --el-switch-off-color: #ff4949;
+              "
+              active-text="Habilitado"
+              inactive-text="Deshabilitado"
+              :active-value="1"
+              :inactive-value="0"
+            />
+            <ul v-if="form.errors?.estado" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.estado[0] }}
               </li>
             </ul>
           </div>

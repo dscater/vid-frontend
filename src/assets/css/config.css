@@ -173,10 +173,6 @@ tr.bg-cancelado {
   border-bottom: solid 2px;
 }
 
-body .btn-primary:disabled {
-  background-color: var(--principal_t);
-}
-
 body .btn {
   text-transform: uppercase;
   font-weight: 700;
@@ -346,9 +342,10 @@ body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active,
 body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active:focus,
 body .main-sidebar .sidebar .nav.nav-treeview .nav-link.active:hover {
   background-color: transparent !important;
-  border-top: solid 1px var(--principal);
-  border-bottom: solid 1px var(--principal);
-  color: var(--principal);
+  border-top: solid 1px var(--principal_hover);
+  border-bottom: solid 1px var(--principal_hover);
+  color: var(--principal_hover);
+  font-weight: bold;
 }
 
 .modal-title {
