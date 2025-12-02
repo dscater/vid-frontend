@@ -24,6 +24,7 @@
     () => props.muestra_formulario,
     (newValue) => {
       formulario.value = newValue;
+      form.errors = null;
 
       document.getElementsByTagName("body")[0].classList.add("modal-open");
     }

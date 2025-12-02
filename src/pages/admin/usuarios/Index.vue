@@ -187,7 +187,7 @@
                 authStore?.user?.permisos.includes('usuarios.create')
               "
               type="button"
-              class="btn btn-primary"
+              class="btn btn-success"
               @click="agregarRegistro"
             >
               <i class="fa fa-plus"></i> Nuevo Usuario

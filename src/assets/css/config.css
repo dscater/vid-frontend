@@ -106,8 +106,8 @@ body .bgGrayDark {
 }
 
 .el-skeleton {
-  --el-skeleton-color: var(--bgDark2) !important;
-  --el-skeleton-to-color: var(--bgGrayDark) !important;
+  --el-skeleton-color: var(--secundario) !important;
+  --el-skeleton-to-color: var(--secundario_hover) !important;
 }
 
 .content-table table .mi-celda.bg-proceso {

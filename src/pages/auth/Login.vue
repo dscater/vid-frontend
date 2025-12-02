@@ -115,6 +115,11 @@
           <div class="row">
             <div class="col-12 mb-3">
               <div class="input-group">
+                <div class="input-group-append">
+                  <div class="input-group-text bg-secundario border-0">
+                    <span class="fas fa-user"></span>
+                  </div>
+                </div>
                 <input
                   type="text"
                   class="form-control"
@@ -122,11 +127,6 @@
                   v-model="form.usuario"
                   autofocus
                 />
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-user"></span>
-                  </div>
-                </div>
               </div>
               <span
                 class="text-danger"
@@ -137,6 +137,11 @@
             </div>
             <div class="col-12 mb-3">
               <div class="input-group">
+                <div class="input-group-append">
+                  <div class="input-group-text bg-secundario border-0">
+                    <span class="fas fa-lock"></span>
+                  </div>
+                </div>
                 <input
                   :type="muestra_password ? 'text' : 'password'"
                   class="form-control"
@@ -155,11 +160,6 @@
                       :class="[muestra_password ? 'fa-eye' : 'fa-eye-slash']"
                     ></i>
                   </button>
-                </div>
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-lock"></span>
-                  </div>
                 </div>
               </div>
               <span

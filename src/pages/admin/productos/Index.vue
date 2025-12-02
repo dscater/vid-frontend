@@ -1,7 +1,7 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useProductos } from "../../../composables/productos/useProductos";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
@@ -19,19 +19,62 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setProducto, limpiarProducto } = useProductos();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "",
-      key: "id",
+      label: "CÓDIGO",
+      key: "codigo",
       sortable: true,
-      width: "4%",
+      width: "1%",
+      fixed: true,
     },
     {
-      label: "NOMBRE DE ROLES",
+      label: "NOMBRE",
       key: "nombre",
+      sortable: true,
+      fixed: true,
+      width: "13%",
+    },
+    {
+      label: "UNIDADES/CAJA",
+      key: "unidades_caja",
+      sortable: true,
+    },
+    {
+      label: "DESCRIPCIÓN",
+      key: "descripcion",
+      sortable: true,
+    },
+    {
+      label: "CATEGORÍA",
+      key: "categoria.nombre",
+      sortable: true,
+    },
+    {
+      label: "MARCA",
+      key: "marca.nombre",
+      sortable: true,
+    },
+    {
+      label: "PRECIO VENTA",
+      key: "precio",
+      sortable: true,
+    },
+    {
+      label: "UNIDAD DE MEDIDA",
+      key: "unidad_medida.nombre",
+      sortable: true,
+    },
+    {
+      label: "IMAGEN",
+      key: "imagen",
+      sortable: true,
+    },
+    {
+      label: "ESTADO",
+      key: "estado",
       sortable: true,
     },
     {
@@ -51,7 +94,7 @@
   const muestra_formulario = ref(false);
 
   const agregarRegistro = () => {
-    limpiarRole();
+    limpiarProducto();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
   };
@@ -63,7 +106,7 @@
     }
   };
 
-  const eliminarRole = (item) => {
+  const eliminarProducto = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
       html: `<strong>${item.nombre}</strong>`,
@@ -77,7 +120,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/productos/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +146,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Listado de Productos</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +154,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Listado de Productos</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -125,13 +168,13 @@
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('productos.create')
               "
               type="button"
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
+              <i class="fa fa-plus"></i> Nuevo Producto
             </button>
           </div>
           <div class="col-md-8 my-1">
@@ -163,7 +206,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/productos/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -173,11 +216,22 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #imagen="{ item }">
+                <img class="" height="40" :src="item.url_imagen" alt="Foto" />
+              </template>
+              <template #estado="{ item }">
+                <div
+                  class="badge text-sm"
+                  :class="[item.estado == 1 ? 'bg-success' : 'bg-danger']"
+                >
+                  {{ item.estado == 1 ? "HABILITADO" : "DESHABILITADO" }}
+                </div>
+              </template>
               <template #accion="{ item }">
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    authStore?.user?.permisos.includes('productos.edit')
                   "
                 >
                   <el-tooltip
@@ -189,7 +243,7 @@
                     <button
                       class="btn btn-warning"
                       @click="
-                        setRole(item);
+                        setProducto(item);
                         accion_formulario = 1;
                         muestra_formulario = true;
                       "
@@ -200,9 +254,8 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('productos.destroy')
                   "
                 >
                   <el-tooltip
@@ -211,7 +264,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarProducto(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>

@@ -27,6 +27,7 @@
         cargarUsers();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
         form = oSucursal.value;
+        form.errors = null;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }

@@ -1,6 +1,6 @@
 <script setup>
   import MiModal from "../../../Components/MiModal.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useSubCategorias } from "../../../composables/sub_categorias/useSubCategorias";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
   const props = defineProps({
@@ -14,18 +14,20 @@
     },
   });
 
-  const { oRole, limpiarRole } = useRoles();
+  const { oSubCategoria, limpiarSubCategoria } = useSubCategorias();
   const accion_form = ref(props.accion_formulario);
   const muestra_form = ref(props.muestra_formulario);
   const enviando = ref(false);
-  let form = reactive(oRole.value);
+  let form = reactive(oSubCategoria.value);
   watch(
     () => props.muestra_formulario,
     (newValue) => {
+      cargarCategorias();
       muestra_form.value = newValue;
       if (muestra_form.value) {
         document.getElementsByTagName("body")[0].classList.add("modal-open");
-        form = oRole.value;
+        form = oSubCategoria.value;
+        form.errors = null;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
@@ -43,8 +45,8 @@
 
   const tituloDialog = computed(() => {
     return accion_form.value == 0
-      ? `<i class="fa fa-plus"></i> Nuevo Role`
-      : `<i class="fa fa-edit"></i> Editar Role`;
+      ? `<i class="fa fa-plus"></i> Nueva Subcategoría`
+      : `<i class="fa fa-edit"></i> Editar Subcategoría`;
   });
 
   const textBtn = computed(() => {
@@ -60,7 +62,9 @@
   const enviarFormulario = () => {
     enviando.value = true;
     let url =
-      accion_form.value == 0 ? "/admin/roles" : "/admin/roles/" + form.id;
+      accion_form.value == 0
+        ? "/admin/sub_categorias"
+        : "/admin/sub_categorias/" + form.id;
 
     api
       .post(url, form)
@@ -77,7 +81,7 @@
             confirmButton: "btn-success",
           },
         });
-        limpiarRole();
+        limpiarSubCategoria();
         emits("envio-formulario");
       })
       .catch((error) => {
@@ -130,7 +134,12 @@
     muestra_form.value = false;
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
   };
-
+  const listCategorias = ref([]);
+  const cargarCategorias = () => {
+    api.get("/admin/categorias/listado").then((response) => {
+      listCategorias.value = response.data.categorias;
+    });
+  };
   onMounted(() => {});
 </script>
 
@@ -157,7 +166,7 @@
         </p>
         <div class="row">
           <div class="col-md-12 mt-2">
-            <label class="required">Nombre de Role</label>
+            <label class="required">Nombre de Subcategoría</label>
             <el-input
               type="text"
               :class="{
@@ -172,6 +181,32 @@
             >
               <li class="parsley-required">
                 {{ form.errors?.nombre[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-12 mt-2">
+            <label class="required">Seleccionar Categoría</label>
+            <el-select
+              :class="{
+                'parsley-error': form.errors?.categoria_id,
+              }"
+              v-model="form.categoria_id"
+              placeholder="Seleccione"
+              filterable
+            >
+              <el-option
+                v-for="item in listCategorias"
+                :key="item.id"
+                :value="item.id"
+                :label="item.nombre"
+              ></el-option
+            ></el-select>
+            <ul
+              v-if="form.errors?.categoria_id"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.categoria_id[0] }}
               </li>
             </ul>
           </div>

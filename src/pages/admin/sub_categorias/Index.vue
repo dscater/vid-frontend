@@ -1,7 +1,7 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useSubCategorias } from "../../../composables/sub_categorias/useSubCategorias";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
@@ -19,7 +19,7 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setSubCategoria, limpiarSubCategoria } = useSubCategorias();
 
   const miTable = ref(null);
   const headers = [
@@ -30,8 +30,13 @@
       width: "4%",
     },
     {
-      label: "NOMBRE DE ROLES",
+      label: "NOMBRE",
       key: "nombre",
+      sortable: true,
+    },
+    {
+      label: "CATEGORÍA",
+      key: "categoria.nombre",
       sortable: true,
     },
     {
@@ -51,7 +56,7 @@
   const muestra_formulario = ref(false);
 
   const agregarRegistro = () => {
-    limpiarRole();
+    limpiarSubCategoria();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
   };
@@ -63,7 +68,7 @@
     }
   };
 
-  const eliminarRole = (item) => {
+  const eliminarSubCategoria = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
       html: `<strong>${item.nombre}</strong>`,
@@ -77,7 +82,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/sub_categorias/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +108,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Subcategorías</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +116,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Subcategorías</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -125,13 +130,13 @@
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('sub_categorias.create')
               "
               type="button"
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
+              <i class="fa fa-plus"></i> Nueva SubCategoría
             </button>
           </div>
           <div class="col-md-8 my-1">
@@ -163,7 +168,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/sub_categorias/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -177,7 +182,7 @@
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    authStore?.user?.permisos.includes('sub_categorias.edit')
                   "
                 >
                   <el-tooltip
@@ -189,7 +194,7 @@
                     <button
                       class="btn btn-warning"
                       @click="
-                        setRole(item);
+                        setSubCategoria(item);
                         accion_formulario = 1;
                         muestra_formulario = true;
                       "
@@ -200,9 +205,8 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('sub_categorias.destroy')
                   "
                 >
                   <el-tooltip
@@ -211,7 +215,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarSubCategoria(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>

@@ -26,6 +26,7 @@
       if (muestra_form.value) {
         document.getElementsByTagName("body")[0].classList.add("modal-open");
         form = oRole.value;
+        form.errors = null;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }

@@ -10,7 +10,8 @@
   --danger: rgb(236, 122, 122);
   --bgDark: rgb(18, 20, 20);
   --bgDark1: rgb(32.4, 32.7, 33.3);
-  --bgDark2: rgba(0, 0, 0, 0.842);
+  --bgDark2: rgb(41, 41, 41);
+  --bgDark3: rgb(59, 59, 59);
   --bgLight: rgb(223, 223, 223);
   --bgGrayDark: rgb(39, 39, 39);
 }

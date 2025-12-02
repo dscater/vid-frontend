@@ -44,6 +44,7 @@
         cargarRoles();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
         form = oUsuario.value;
+        form.errors = null;
         options.value = [
           {
             value: oUsuario.value.persona_id,

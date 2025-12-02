@@ -237,7 +237,10 @@
               class="nav-link sub-menu"
               :class="[
                 routeCurrent == 'productos.index' ||
-                routeCurrent == 'ingresos.index'
+                routeCurrent == 'unidad_medidas.index' ||
+                routeCurrent == 'marcas.index' ||
+                routeCurrent == 'sub_categorias.index' ||
+                routeCurrent == 'categorias.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"

@@ -1,6 +1,6 @@
 <script setup>
   import MiModal from "../../../Components/MiModal.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useMarcas } from "../../../composables/marcas/useMarcas";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
   const props = defineProps({
@@ -14,18 +14,19 @@
     },
   });
 
-  const { oRole, limpiarRole } = useRoles();
+  const { oMarca, limpiarMarca } = useMarcas();
   const accion_form = ref(props.accion_formulario);
   const muestra_form = ref(props.muestra_formulario);
   const enviando = ref(false);
-  let form = reactive(oRole.value);
+  let form = reactive(oMarca.value);
   watch(
     () => props.muestra_formulario,
     (newValue) => {
       muestra_form.value = newValue;
       if (muestra_form.value) {
         document.getElementsByTagName("body")[0].classList.add("modal-open");
-        form = oRole.value;
+        form = oMarca.value;
+        form.errors = null;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
@@ -43,8 +44,8 @@
 
   const tituloDialog = computed(() => {
     return accion_form.value == 0
-      ? `<i class="fa fa-plus"></i> Nuevo Role`
-      : `<i class="fa fa-edit"></i> Editar Role`;
+      ? `<i class="fa fa-plus"></i> Nueva Marca`
+      : `<i class="fa fa-edit"></i> Editar Marca`;
   });
 
   const textBtn = computed(() => {
@@ -60,7 +61,7 @@
   const enviarFormulario = () => {
     enviando.value = true;
     let url =
-      accion_form.value == 0 ? "/admin/roles" : "/admin/roles/" + form.id;
+      accion_form.value == 0 ? "/admin/marcas" : "/admin/marcas/" + form.id;
 
     api
       .post(url, form)
@@ -77,7 +78,7 @@
             confirmButton: "btn-success",
           },
         });
-        limpiarRole();
+        limpiarMarca();
         emits("envio-formulario");
       })
       .catch((error) => {
@@ -157,7 +158,7 @@
         </p>
         <div class="row">
           <div class="col-md-12 mt-2">
-            <label class="required">Nombre de Role</label>
+            <label class="required">Nombre de Marca</label>
             <el-input
               type="text"
               :class="{
