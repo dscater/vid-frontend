@@ -1,7 +1,7 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useClientes } from "../../../composables/clientes/useClientes";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
@@ -19,19 +19,65 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setCliente, limpiarCliente } = useClientes();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "",
-      key: "id",
+      label: "RAZÓN SOCIAL",
+      key: "razon_social",
       sortable: true,
-      width: "4%",
+      fixed: true,
     },
     {
-      label: "NOMBRE DE ROLES",
-      key: "nombre",
+      label: "NOMBRE PROPIETARIO",
+      key: "nombre_prop",
+      sortable: true,
+      fixed: true,
+    },
+    {
+      label: "TIPO CLIENTE",
+      key: "tipo",
+      sortable: true,
+    },
+    {
+      label: "NIT",
+      key: "nit",
+      sortable: true,
+    },
+    {
+      label: "NOMBRE PUNTO VENTA",
+      key: "nombre_punto",
+      sortable: true,
+    },
+    {
+      label: "C.I. PROPIETARIO",
+      key: "ci_prop",
+      sortable: true,
+    },
+    {
+      label: "CORREO",
+      key: "correo",
+      sortable: true,
+    },
+    {
+      label: "CELULAR",
+      key: "cel",
+      sortable: true,
+    },
+    {
+      label: "TELÉFONO",
+      key: "fono",
+      sortable: true,
+    },
+    {
+      label: "DIRECCIÓN",
+      key: "dir",
+      sortable: true,
+    },
+    {
+      label: "ESTADO",
+      key: "estado",
       sortable: true,
     },
     {
@@ -51,7 +97,7 @@
   const muestra_formulario = ref(false);
 
   const agregarRegistro = () => {
-    limpiarRole();
+    limpiarCliente();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
   };
@@ -63,10 +109,10 @@
     }
   };
 
-  const eliminarRole = (item) => {
+  const eliminarCliente = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
-      html: `<strong>${item.nombre}</strong>`,
+      html: `<strong>${item.razon_social}</strong>`,
       showCancelButton: true,
       confirmButtonText: "Si, eliminar",
       cancelButtonText: "No, cancelar",
@@ -77,7 +123,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/clientes/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +149,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Clientes</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +157,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Clientes</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -125,13 +171,13 @@
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('clientes.create')
               "
               type="button"
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
+              <i class="fa fa-plus"></i> Nuevo Cliente
             </button>
           </div>
           <div class="col-md-8 my-1">
@@ -163,7 +209,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/clientes/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -173,11 +219,24 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #estado="{ item }">
+                <span
+                  class="badge text-sm"
+                  :class="[
+                    {
+                      'bg-success': item.estado == 1,
+                      'bg-danger': item.estado == 0,
+                    },
+                  ]"
+                >
+                  {{ item.estado_t }}</span
+                >
+              </template>
               <template #accion="{ item }">
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    authStore?.user?.permisos.includes('clientes.edit')
                   "
                 >
                   <el-tooltip
@@ -189,7 +248,7 @@
                     <button
                       class="btn btn-warning"
                       @click="
-                        setRole(item);
+                        setCliente(item);
                         accion_formulario = 1;
                         muestra_formulario = true;
                       "
@@ -200,9 +259,8 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('clientes.destroy')
                   "
                 >
                   <el-tooltip
@@ -211,7 +269,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarCliente(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>
