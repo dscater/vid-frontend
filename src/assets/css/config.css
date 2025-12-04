@@ -250,6 +250,15 @@ body .main-sidebar .sidebar .nav .nav-link.active {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.modal-full {
+  margin: 0 auto;
+  min-width: 100vw;
+}
+.modal-full .modal-body {
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+}
+
 /* SWAL */
 
 .swal2-confirm.swal2-styled.swal2-default-outline,

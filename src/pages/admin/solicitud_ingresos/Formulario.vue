@@ -1,8 +1,11 @@
 <script setup>
   import MiModal from "../../../Components/MiModal.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useSolicitudIngresos } from "../../../composables/solicitud_ingresos/useSolicitudIngresos";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
+  // TOAST
+  import { toast } from "vue3-toastify";
+  import "vue3-toastify/dist/index.css";
   const props = defineProps({
     muestra_formulario: {
       type: Boolean,
@@ -14,18 +17,24 @@
     },
   });
 
-  const { oRole, limpiarRole } = useRoles();
+  const { oSolicitudIngreso, limpiarSolicitudIngreso } = useSolicitudIngresos();
   const accion_form = ref(props.accion_formulario);
   const muestra_form = ref(props.muestra_formulario);
   const enviando = ref(false);
-  let form = reactive(oRole.value);
+  let form = reactive(oSolicitudIngreso.value);
+  const codigoProducto = ref("");
   watch(
     () => props.muestra_formulario,
     (newValue) => {
       muestra_form.value = newValue;
       if (muestra_form.value) {
+        cargarListas();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
-        form = oRole.value;
+        form = oSolicitudIngreso.value;
+        if (accion_form.value == 0 || form.id == 0) {
+          form.fecha_ingreso = getFechaAtual();
+          form.hora_ingreso = getHoraActual();
+        }
         form.errors = null;
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
@@ -44,8 +53,8 @@
 
   const tituloDialog = computed(() => {
     return accion_form.value == 0
-      ? `<i class="fa fa-plus"></i> Nuevo Role`
-      : `<i class="fa fa-edit"></i> Editar Role`;
+      ? `<i class="fa fa-plus"></i> Nueva Solicitud de Ingreso`
+      : `<i class="fa fa-edit"></i> Editar Solicitud de Ingreso`;
   });
 
   const textBtn = computed(() => {
@@ -61,7 +70,9 @@
   const enviarFormulario = () => {
     enviando.value = true;
     let url =
-      accion_form.value == 0 ? "/admin/roles" : "/admin/roles/" + form.id;
+      accion_form.value == 0
+        ? "/admin/solicitud_ingresos"
+        : "/admin/solicitud_ingresos/" + form.id;
 
     api
       .post(url, form)
@@ -78,7 +89,7 @@
             confirmButton: "btn-success",
           },
         });
-        limpiarRole();
+        limpiarSolicitudIngreso();
         emits("envio-formulario");
       })
       .catch((error) => {
@@ -132,6 +143,136 @@
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
   };
 
+  const listProveedors = ref([]);
+  const cargarProveedors = () => {
+    api.get("/admin/proveedors/listado").then((response) => {
+      listProveedors.value = response.data.proveedors;
+    });
+  };
+  const cargarListas = () => {
+    cargarProveedors();
+  };
+
+  const getFechaAtual = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getHoraActual = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  const agregarProducto = () => {
+    if (codigoProducto.value.trim() == "") {
+      Swal.fire({
+        icon: "info",
+        title: "Atención",
+        html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+        confirmButtonText: `Aceptar`,
+        customClass: {
+          confirmButton: "btn-success",
+        },
+      });
+      return;
+    }
+
+    api
+      .get("/admin/productos/byCodigo", {
+        params: {
+          codigo: codigoProducto.value,
+        },
+      })
+      .then((response) => {
+        if (!response.data) {
+          Swal.fire({
+            icon: "info",
+            title: "Atención",
+            html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          return;
+        }
+        const prod = response.data;
+        const existe = form.solicitud_ingreso_detalles.filter(
+          (elem) => elem.producto_id === prod.id
+        );
+        if (existe.length > 0) {
+          toast.info("Ese producto ya fue agregado");
+          return;
+        }
+
+        form.solicitud_ingreso_detalles.push({
+          id: 0,
+          solicitud_ingreso_id: 0,
+          producto_id: prod.id,
+          producto: prod,
+          cantidad: 1,
+          costo: prod.precio,
+          subtotal: prod.precio,
+        });
+        codigoProducto.value = "";
+        calcularTotal();
+      })
+      .catch((err) => {
+        console.log(err);
+        Swal.fire({
+          icon: "info",
+          title: "Atención",
+          html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-success",
+          },
+        });
+      });
+  };
+
+  const calcularSubtotal = (e, index) => {
+    const elem = e.target;
+    const value = elem.value;
+    if (!value || value.trim() == "") {
+      form.solicitud_ingreso_detalles[index].subtotal =
+        form.solicitud_ingreso_detalles[index].costo;
+    }
+    form.solicitud_ingreso_detalles[index].subtotal =
+      parseFloat(value) *
+      parseFloat(form.solicitud_ingreso_detalles[index].costo);
+    calcularTotal();
+  };
+
+  const calcularTotal = () => {
+    if (form.solicitud_ingreso_detalles.length == 0) {
+      form.total = 0;
+      form.cantidad_total = 0;
+      return;
+    }
+    let total = 0;
+    total = form.solicitud_ingreso_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.subtotal);
+    }, 0);
+    form.total = total;
+    total = form.solicitud_ingreso_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.cantidad);
+    }, 0);
+    form.cantidad_total = total;
+  };
+
+  const eliminarDetalle = (index, id) => {
+    if (id != 0) {
+      form.eliminados_detalles.push(id);
+    }
+    form.solicitud_ingreso_detalles.splice(index, 1);
+  };
+
   onMounted(() => {});
 </script>
 
@@ -139,7 +280,7 @@
   <MiModal
     :open_modal="muestra_form"
     @close="cerrarFormulario"
-    :size="'modal-xl'"
+    :size="'modal-full'"
     :header-class="'bg-navy'"
     :footer-class="'justify-content-end'"
   >
@@ -157,22 +298,263 @@
           <span class="text-danger">(*)</span> son obligatorios.
         </p>
         <div class="row">
-          <div class="col-md-12 mt-2">
-            <label class="required">Nombre de Role</label>
-            <el-input
-              type="text"
+          <div class="col-md-4 mb-2">
+            <label class="required">Seleccionar Proveedor</label>
+            <el-select
+              class="w-100"
               :class="{
-                'parsley-error': form.errors?.nombre,
+                'parsley-error': form.errors?.proveedor_id,
               }"
-              v-model="form.nombre"
-              autosize
-            ></el-input>
+              v-model="form.proveedor_id"
+              filterable
+              placeholder="Seleccione"
+              no-data-text="Sin datos"
+              no-match-text="No se encontró"
+            >
+              <el-option
+                v-for="item in listProveedors"
+                :key="item.id"
+                :value="item.id"
+                :label="item.razon_social"
+              ></el-option>
+            </el-select>
             <ul
-              v-if="form.errors?.nombre"
+              v-if="form.errors?.proveedor_id"
               class="d-block text-danger list-unstyled"
             >
               <li class="parsley-required">
-                {{ form.errors?.nombre[0] }}
+                {{ form.errors?.proveedor_id[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label class="required">Fecha de Ingreso</label>
+            <input
+              type="date"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.fecha_ingreso,
+              }"
+              v-model="form.fecha_ingreso"
+              autosize
+            />
+            <ul
+              v-if="form.errors?.fecha_ingreso"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.fecha_ingreso[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label class="required">Hora de Ingreso</label>
+            <input
+              type="time"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.hora_ingreso,
+              }"
+              v-model="form.hora_ingreso"
+              autosize
+            />
+            <ul
+              v-if="form.errors?.hora_ingreso"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.hora_ingreso[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label class="required">Con factura/Sin factura*</label>
+            <select
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.cs_f,
+              }"
+              v-model="form.cs_f"
+            >
+              <option value="CON FATURA">CON FACTURA</option>
+              <option value="SIN FATURA">SIN FACTURA</option>
+            </select>
+            <ul
+              v-if="form.errors?.cs_f"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.cs_f[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label class="required">Tipo de Cambio</label>
+            <input
+              type="number"
+              class="form-control"
+              step="0.01"
+              :class="{
+                'parsley-error': form.errors?.tipo_cambio,
+              }"
+              v-model="form.tipo_cambio"
+              autosize
+            />
+            <ul
+              v-if="form.errors?.tipo_cambio"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.tipo_cambio[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label class="required">Gastos adicionales</label>
+            <input
+              type="number"
+              class="form-control"
+              step="0.01"
+              :class="{
+                'parsley-error': form.errors?.gastos,
+              }"
+              v-model="form.gastos"
+              autosize
+            />
+            <ul
+              v-if="form.errors?.gastos"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.gastos[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label>Observaciones</label>
+            <el-input
+              type="textarea"
+              :class="{
+                'parsley-error': form.errors?.observaciones,
+              }"
+              v-model="form.observaciones"
+              autosize
+            ></el-input>
+            <ul
+              v-if="form.errors?.observaciones"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.observaciones[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label>Descripción</label>
+            <el-input
+              type="textarea"
+              :class="{
+                'parsley-error': form.errors?.descripcion,
+              }"
+              v-model="form.descripcion"
+              autosize
+            ></el-input>
+            <ul
+              v-if="form.errors?.descripcion"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.descripcion[0] }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <h4>Seleccionar Productos</h4>
+          </div>
+          <div class="col-md-6 mb-2">
+            <small class="text-muted font-weight-bold"
+              >Código de Producto</small
+            >
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                v-model="codigoProducto"
+                @keypres.enter="agregarProducto"
+              />
+              <div class="input-group-append">
+                <button
+                  class="btn btn-primary d-flex align-items-center justify-content-center"
+                  @click.prevent="agregarProducto"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 overflow-auto">
+            <table class="table table-bordered mb-0">
+              <thead class="bg-secundario">
+                <tr>
+                  <th>PRODUCTO</th>
+                  <th width="100px">C/U</th>
+                  <th width="60px">CANTIDAD</th>
+                  <th width="100px">SUBTOTAL</th>
+                  <th width="1%"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-if="form.solicitud_ingreso_detalles.length > 0">
+                  <tr v-for="(item, index) in form.solicitud_ingreso_detalles">
+                    <td>{{ item.producto.nombre }}</td>
+                    <td>{{ item.costo }}</td>
+                    <td>
+                      <input
+                        type="number"
+                        step="1"
+                        min="1"
+                        class="form-control"
+                        v-model="item.cantidad"
+                        @change="calcularSubtotal($event, index)"
+                        @keyup="calcularSubtotal($event, index)"
+                      />
+                    </td>
+                    <td>{{ item.subtotal }}</td>
+                    <td>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        @click.prevent="eliminarDetalle(index, item.id)"
+                      >
+                        X
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+                <template v-else>
+                  <tr>
+                    <td colspan="4" class="text-muted text-sm text-center">
+                      NO SE AGREGARÓN PRODUCTOS
+                    </td>
+                  </tr>
+                </template>
+                <tr>
+                  <td class="font-weight-bold text-right" colspan="2">
+                    TOTALES
+                  </td>
+                  <td>{{ form.cantidad_total }}</td>
+                  <td>{{ form.total }}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul
+              v-if="form.errors?.solicitud_ingreso_detalles"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.solicitud_ingreso_detalles[0] }}
               </li>
             </ul>
           </div>

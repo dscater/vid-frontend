@@ -185,7 +185,9 @@
               href="#"
               class="nav-link sub-menu"
               :class="[
-                routeCurrent == 'devolucion_stocks.index'
+                routeCurrent == 'solicitud_ingresos.index' ||
+                routeCurrent == 'orden_salidas.index' ||
+                routeCurrent == 'transferencias.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"

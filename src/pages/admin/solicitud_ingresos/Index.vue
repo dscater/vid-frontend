@@ -1,7 +1,7 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useSolicitudIngresos } from "../../../composables/solicitud_ingresos/useSolicitudIngresos";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
@@ -19,19 +19,50 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setSolicitudIngreso, limpiarSolicitudIngreso } =
+    useSolicitudIngresos();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "",
-      key: "id",
+      label: "CÓDIGO",
+      key: "codigo",
       sortable: true,
       width: "4%",
     },
     {
-      label: "NOMBRE DE ROLES",
-      key: "nombre",
+      label: "PROVEEDOR",
+      key: "proveedor.razon_social",
+      sortable: true,
+    },
+    {
+      label: "CANTIDAD TOTAL",
+      key: "cantidad_total",
+      sortable: true,
+    },
+    {
+      label: "MONTO TOTAL",
+      key: "total",
+      sortable: true,
+    },
+    {
+      label: "FECHA",
+      key: "fecha_c",
+      sortable: true,
+    },
+    {
+      label: "FACTURA",
+      key: "cs_f",
+      sortable: true,
+    },
+    {
+      label: "USUARIO",
+      key: "user",
+      sortable: true,
+    },
+    {
+      label: "ESTADO",
+      key: "estado",
       sortable: true,
     },
     {
@@ -51,7 +82,7 @@
   const muestra_formulario = ref(false);
 
   const agregarRegistro = () => {
-    limpiarRole();
+    limpiarSolicitudIngreso();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
   };
@@ -63,10 +94,18 @@
     }
   };
 
-  const eliminarRole = (item) => {
+  const editarSolicitudIngreso = (item) => {
+    api.get("/admin/solicitud_ingresos/" + item.id).then((response) => {
+      setSolicitudIngreso(response.data.solicitud_ingreso);
+      accion_formulario.value = 1;
+      muestra_formulario.value = true;
+    });
+  };
+
+  const eliminarSolicitudIngreso = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
-      html: `<strong>${item.nombre}</strong>`,
+      html: `<strong>${item.codigo}</strong>`,
       showCancelButton: true,
       confirmButtonText: "Si, eliminar",
       cancelButtonText: "No, cancelar",
@@ -77,7 +116,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/solicitud_ingresos/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +142,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Solicitud de Ingreso</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +150,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Solicitud de Ingreso</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -125,13 +164,13 @@
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('solicitud_ingresos.create')
               "
               type="button"
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
+              <i class="fa fa-plus"></i> Nueva Solicitud de Ingreso
             </button>
           </div>
           <div class="col-md-8 my-1">
@@ -163,7 +202,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/solicitud_ingresos/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -173,11 +212,18 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #user="{ item }">
+                {{ item.user.nombre }} {{ item.user.paterno }}
+                {{ item.user.materno }}
+              </template>
+
               <template #accion="{ item }">
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    authStore?.user?.permisos.includes(
+                      'solicitud_ingresos.edit'
+                    )
                   "
                 >
                   <el-tooltip
@@ -188,11 +234,7 @@
                   >
                     <button
                       class="btn btn-warning"
-                      @click="
-                        setRole(item);
-                        accion_formulario = 1;
-                        muestra_formulario = true;
-                      "
+                      @click="editarSolicitudIngreso(item)"
                     >
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
@@ -202,7 +244,9 @@
                   v-if="
                     item.id != 2 &&
                     (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                      authStore?.user?.permisos.includes(
+                        'solicitud_ingresos.destroy'
+                      ))
                   "
                 >
                   <el-tooltip
@@ -211,7 +255,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarSolicitudIngreso(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>
