@@ -27,56 +27,49 @@
   });
 </script>
 <template>
-  <Admin>
-    <Content>
-      <template #header>
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0">Inicio</h1>
-          </div>
-          <!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item active">Inicio</li>
-            </ol>
-          </div>
-          <!-- /.col -->
+  <Content>
+    <template #header>
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Inicio</h1>
         </div>
-        <!-- /.row -->
+        <!-- /.col -->
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item active">Inicio</li>
+          </ol>
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </template>
+
+    <el-skeleton :loading="loadingInfos" animated class="w-100 row" :count="4">
+      <template #template>
+        <div class="col-lg-3 col-6">
+          <el-skeleton-item style="height: 120px"></el-skeleton-item>
+        </div>
       </template>
+      <template #default>
+        <div class="row">
+          <div class="col-lg-3 col-6" v-for="item in array_infos">
+            <!-- small box -->
+            <div class="small-box" :class="[item.color]">
+              <div class="inner">
+                <h3 class="text-white">{{ item.cantidad }}</h3>
 
-      <el-skeleton
-        :loading="loadingInfos"
-        animated
-        class="w-100 row"
-        :count="4"
-      >
-        <template #template>
-          <div class="col-lg-3 col-6">
-            <el-skeleton-item style="height: 120px"></el-skeleton-item>
-          </div>
-        </template>
-        <template #default>
-          <div class="row">
-            <div class="col-lg-3 col-6" v-for="item in array_infos">
-              <!-- small box -->
-              <div class="small-box" :class="[item.color]">
-                <div class="inner">
-                  <h3 class="text-white">{{ item.cantidad }}</h3>
-
-                  <p>{{ item.label }}</p>
-                </div>
-                <div class="icon">
-                  <i class="fa" :class="[item.icon]"></i>
-                </div>
-                <router-link :to="{ name: item.url }" class="small-box-footer"
-                  >Ver más <i class="fa fa-arrow-alt-circle-right"></i
-                ></router-link>
+                <p>{{ item.label }}</p>
               </div>
+              <div class="icon">
+                <i class="fa" :class="[item.icon]"></i>
+              </div>
+              <router-link :to="{ name: item.url }" class="small-box-footer"
+                >Ver más <i class="fa fa-arrow-alt-circle-right"></i
+              ></router-link>
             </div>
           </div>
-        </template>
-      </el-skeleton>
-    </Content>
-  </Admin>
+        </div>
+      </template>
+    </el-skeleton>
+  </Content>
 </template>

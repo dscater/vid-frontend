@@ -287,7 +287,8 @@
               href="#"
               class="nav-link sub-menu"
               :class="[
-                routeCurrent == 'sucursals.index'
+                routeCurrent == 'sucursals.index' ||
+                routeCurrent == 'sucursal_productos.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
@@ -307,7 +308,7 @@
               ></ItemMenu>
               <ItemMenu
                 :label="'Productos Sucursal'"
-                :ruta="'sucursals.index'"
+                :ruta="'sucursal_productos.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>

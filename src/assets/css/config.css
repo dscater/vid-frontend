@@ -52,6 +52,11 @@ body .mi-table tr.bg-oficial td .mi-celda {
   font-weight: bold;
 }
 
+.mi-celda,
+.mi-celda .badge {
+  white-space: normal !important;
+}
+
 body .mi-table tr.bg-oficial td .label-responsive {
   color: black;
 }
@@ -497,4 +502,9 @@ body.app-blank.login {
 }
 .contenedorBotones .boton {
   flex: 1;
+}
+
+.verificaCheckbox .el-checkbox__inner {
+  height: 18px !important;
+  width: 18px !important;
 }

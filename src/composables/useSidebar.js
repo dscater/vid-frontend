@@ -15,7 +15,7 @@ export const useSideBar = () => {
       body.classList.remove("sidebar-open");
       body.classList.add("sidebar-collapse");
     } else if (ancho_pantalla.value > 990 && ancho_pantalla.value < 1010) {
-      body.classList.add("sidebar-collapse");
+      // body.classList.add("sidebar-collapse");
     }
   };
 

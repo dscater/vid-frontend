@@ -5,6 +5,7 @@
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
+  import Detalles from "./Detalles.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -91,6 +92,7 @@
     if (miTable.value) {
       await miTable.value.cargarDatos();
       muestra_formulario.value = false;
+      muestra_formulario_detalle.value = false;
     }
   };
 
@@ -99,6 +101,16 @@
       setSolicitudIngreso(response.data.solicitud_ingreso);
       accion_formulario.value = 1;
       muestra_formulario.value = true;
+    });
+  };
+
+  const accion_formulario_detalle = ref(0);
+  const muestra_formulario_detalle = ref(false);
+  const aprobarSolicitudIngreso = (item) => {
+    api.get("/admin/solicitud_ingresos/" + item.id).then((response) => {
+      setSolicitudIngreso(response.data.solicitud_ingreso);
+      accion_formulario_detalle.value = 1;
+      muestra_formulario_detalle.value = true;
     });
   };
 
@@ -218,12 +230,25 @@
               </template>
 
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="aprobarSolicitudIngreso(item)"
+                  >
+                    <i class="fa fa-list"></i></button
+                ></el-tooltip>
                 <template
                   v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes(
-                      'solicitud_ingresos.edit'
-                    )
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'solicitud_ingresos.edit'
+                      ))
                   "
                 >
                   <el-tooltip
@@ -242,7 +267,7 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
+                    item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(
                         'solicitud_ingresos.destroy'
@@ -274,5 +299,11 @@
       @envio-formulario="updateDatatable"
       @cerrar-formulario="muestra_formulario = false"
     ></Formulario>
+    <Detalles
+      :muestra_formulario="muestra_formulario_detalle"
+      :accion_formulario="accion_formulario_detalle"
+      @envio-formulario="updateDatatable"
+      @cerrar-formulario="muestra_formulario_detalle = false"
+    ></Detalles>
   </Content>
 </template>

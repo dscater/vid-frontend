@@ -71,6 +71,14 @@ const routes = [
     meta: { layout: Admin, requiresAuth: true },
   },
 
+  // SUCURSAL PRODUCTOS
+  {
+    path: "/admin/sucursal_productos",
+    name: "sucursal_productos.index",
+    component: () => import("../pages/admin/sucursal_productos/Index.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
+
   // CATEGORIAS
   {
     path: "/admin/categorias",

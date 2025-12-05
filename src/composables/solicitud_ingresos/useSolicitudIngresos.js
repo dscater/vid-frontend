@@ -20,6 +20,7 @@ const oSolicitudIngreso = ref({
   user_id: "",
   solicitud_ingreso_detalles: [],
   eliminados_detalles: [],
+  verificado: 0,
   _method: "POST",
 });
 
@@ -43,6 +44,7 @@ export const useSolicitudIngresos = () => {
       oSolicitudIngreso.value.total = item.total;
       oSolicitudIngreso.value.estado = item.estado;
       oSolicitudIngreso.value.user_id = item.user_id;
+      oSolicitudIngreso.value.verificado = item.verificado;
       oSolicitudIngreso.value.solicitud_ingreso_detalles =
         item.solicitud_ingreso_detalles;
       oSolicitudIngreso.value.eliminados_detalles = [];
@@ -70,6 +72,7 @@ export const useSolicitudIngresos = () => {
     oSolicitudIngreso.value.total = 0;
     oSolicitudIngreso.value.estado = "";
     oSolicitudIngreso.value.user_id = "";
+    oSolicitudIngreso.value.verificado = 0;
     oSolicitudIngreso.value.solicitud_ingreso_detalles = [];
     oSolicitudIngreso.value.eliminados_detalles = [];
     oSolicitudIngreso.value._method = "POST";

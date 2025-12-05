@@ -207,9 +207,11 @@
               fixed-header
             >
               <template #user="{ item }">
-                {{ item.user.nombre }}
-                {{ item.user.paterno }}
-                {{ item.user.materno }}
+                <div v-if="item.user">
+                  {{ item.user.nombre }}
+                  {{ item.user.paterno }}
+                  {{ item.user.materno }}
+                </div>
               </template>
               <template #estado="{ item }">
                 <span
@@ -228,8 +230,9 @@
               <template #accion="{ item }">
                 <template
                   v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('sucursals.edit')
+                    item.almacen != 1 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('sucursals.edit'))
                   "
                 >
                   <el-tooltip
@@ -245,8 +248,9 @@
 
                 <template
                   v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('sucursals.destroy')
+                    item.almacen != 1 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('sucursals.destroy'))
                   "
                 >
                   <el-tooltip

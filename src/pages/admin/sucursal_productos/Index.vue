@@ -1,13 +1,14 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useProveedors } from "../../../composables/proveedors/useProveedors";
+  import { useSucursalProductos } from "../../../composables/sucursal_productos/useSucursalProductos";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import axios from "axios";
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -17,63 +18,37 @@
 
   onMounted(() => {
     appStore.stopLoading();
+    cargarSucursals();
   });
 
-  const { setProveedor, limpiarProveedor } = useProveedors();
+  const { setSucursalProducto, limpiarSucursalProducto } =
+    useSucursalProductos();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "RAZÓN SOCIAL",
-      key: "razon_social",
-      width: "90px",
-      sortable: true,
-      fixed: true,
-    },
-    {
-      label: "NIT",
-      key: "nit",
-      sortable: true,
-      fixed: true,
-    },
-    {
-      label: "MONEDA TRANSACCIÓN",
-      key: "moneda",
+      label: "CÓDIGO PRODUCTO",
+      key: "codigo",
       sortable: true,
     },
     {
-      label: "TELÉFONO",
-      key: "fono_emp",
+      label: "PRODUCTO",
+      key: "nombre",
       sortable: true,
     },
     {
-      label: "CORREO",
-      key: "correo",
+      label: "CANTIDAD IDEAL STOCK",
+      key: "cantidad_ideal",
       sortable: true,
     },
     {
-      label: "DIRECCIÓN",
-      key: "dir",
+      label: "CANTIDAD MÍNIMA DE STOCK",
+      key: "cantidad_minima",
       sortable: true,
     },
     {
-      label: "TIPO DE PROVEEDOR",
-      key: "tipo",
-      sortable: true,
-    },
-    {
-      label: "ESTADO",
-      key: "estado",
-      sortable: true,
-    },
-    {
-      label: "NOMBRE COMERCIAL",
-      key: "nombre_com",
-      sortable: true,
-    },
-    {
-      label: "OBSERVACIONES",
-      key: "observaciones",
+      label: "STOCK ACTUAL",
+      key: "stock_actual",
       sortable: true,
     },
     {
@@ -86,17 +61,26 @@
 
   const multiSearch = ref({
     search: "",
+    sucursal_id: "",
     filtro: [],
   });
 
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
-
-  const agregarRegistro = () => {
-    limpiarProveedor();
-    accion_formulario.value = 0;
-    muestra_formulario.value = true;
+  const listSucursals = ref([]);
+  const cargarSucursals = () => {
+    api
+      .get("/admin/sucursals/listadoSP", {
+        parmams: {
+          estado: 1,
+        },
+      })
+      .then((response) => {
+        listSucursals.value = response.data.sucursals;
+      });
   };
+
+  const router = useRouter();
 
   const updateDatatable = async () => {
     if (miTable.value) {
@@ -105,39 +89,19 @@
     }
   };
 
-  const eliminarProveedor = (item) => {
-    Swal.fire({
-      title: "¿Quierés eliminar este registro?",
-      html: `<strong>${item.nombre}</strong>`,
-      showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
-      cancelButtonText: "No, cancelar",
-      denyButtonText: `No, cancelar`,
-      customClass: {
-        confirmButton: "btn-danger",
-      },
-    }).then(async (result) => {
-      /* Read more about isConfirmed, isDenied below */
-      if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/proveedors/" + item.id, {
-          _method: "DELETE",
-        });
-        if (respuesta.data && respuesta.data.sw) {
-          const success =
-            respuesta.data.message ?? "Proceso realizado con éxito";
-          Swal.fire({
-            icon: "success",
-            title: "Correcto",
-            html: `<strong>${success}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-success",
-            },
-          });
-          updateDatatable();
-        }
-      }
-    });
+  const editarSucursalProducto = (item) => {
+    api
+      .get("/admin/sucursal_productos/getSucursalProducto", {
+        params: {
+          sucursal_id: multiSearch.value.sucursal_id,
+          producto_id: item.id,
+        },
+      })
+      .then((response) => {
+        setSucursalProducto(response.data.sucursal_producto);
+        accion_formulario.value = 1;
+        muestra_formulario.value = true;
+      });
   };
 </script>
 <template>
@@ -145,7 +109,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Proveedores</h1>
+          <h1 class="m-0">Productos Sucursal</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -153,7 +117,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Proveedores</li>
+            <li class="breadcrumb-item active">Productos Sucursal</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -164,17 +128,21 @@
       <div class="col-md-12">
         <div class="row">
           <div class="col-md-4">
-            <button
-              v-if="
-                authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('proveedors.create')
-              "
-              type="button"
-              class="btn btn-success"
-              @click="agregarRegistro"
+            <el-select
+              class="w-100"
+              size="large"
+              v-model="multiSearch.sucursal_id"
+              placeholder="Seleccionar Sucursal"
+              filterable
+              clearable
             >
-              <i class="fa fa-plus"></i> Nuevo Proveedor
-            </button>
+              <el-option
+                v-for="item in listSucursals"
+                :key="item.id"
+                :value="item.id"
+                :label="item.nombre"
+              ></el-option>
+            </el-select>
           </div>
           <div class="col-md-8 my-1">
             <div class="row justify-content-end">
@@ -205,7 +173,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/proveedors/paginado'"
+              :url="apiUrl + '/admin/sucursal_productos/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -215,24 +183,16 @@
               :header-class="'bg__primary'"
               fixed-header
             >
-              <template #estado="{ item }">
-                <span
-                  class="badge text-sm"
-                  :class="[
-                    {
-                      'bg-success': item.estado == 1,
-                      'bg-danger': item.estado == 0,
-                    },
-                  ]"
-                >
-                  {{ item.estado_t }}</span
-                >
+              <template #imagen="{ item }">
+                <img :src="item.url_imagen" height="90px" />
               </template>
               <template #accion="{ item }">
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('proveedors.edit')
+                    authStore?.user?.permisos.includes(
+                      'sucursal_productos.edit'
+                    )
                   "
                 >
                   <el-tooltip
@@ -243,33 +203,9 @@
                   >
                     <button
                       class="btn btn-warning"
-                      @click="
-                        setProveedor(item);
-                        accion_formulario = 1;
-                        muestra_formulario = true;
-                      "
+                      @click="editarSucursalProducto(item)"
                     >
                       <i class="fa fa-pen"></i></button
-                  ></el-tooltip>
-                </template>
-
-                <template
-                  v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('proveedors.destroy')
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Eliminar"
-                    placement="left-start"
-                  >
-                    <button
-                      class="btn btn-danger"
-                      @click="eliminarProveedor(item)"
-                    >
-                      <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>
               </template>
