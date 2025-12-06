@@ -70,7 +70,7 @@
   const listSucursals = ref([]);
   const cargarSucursals = () => {
     api
-      .get("/admin/sucursals/listadoSP", {
+      .get("/admin/sucursals/listado", {
         parmams: {
           estado: 1,
         },

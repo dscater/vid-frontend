@@ -170,12 +170,12 @@
             <ul class="nav nav-treeview">
               <ItemMenu
                 :label="'Devolución de Stock'"
-                :ruta="'solicitud_ingresos.index'"
+                :ruta="'devolucion_stocks.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
                 :label="'Devolución de Clientes'"
-                :ruta="'solicitud_ingresos.index'"
+                :ruta="'devolucion_clientes.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
@@ -319,7 +319,8 @@
               class="nav-link sub-menu"
               :class="[
                 routeCurrent == 'usuarios.index' ||
-                routeCurrent == 'roles.index'
+                routeCurrent == 'roles.index' ||
+                routeCurrent == 'roles.edit'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
