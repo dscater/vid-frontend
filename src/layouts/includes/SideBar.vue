@@ -136,6 +136,7 @@
           ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">OPERACIONES</li>
           <ItemMenu
+            :class="[routeCurrent == 'orden_ventas.create' ? 'active' : '']"
             :label="'Orden de Ventas'"
             :ruta="'orden_ventas.index'"
             :icon="'fa fa-clipboard-check'"
@@ -339,6 +340,7 @@
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                :class="[routeCurrent == 'roles.edit' ? 'active' : '']"
                 :label="'Roles'"
                 :ruta="'roles.index'"
                 :icon="'fa fa-angle-right'"

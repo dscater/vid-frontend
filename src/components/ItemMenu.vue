@@ -45,7 +45,7 @@
       v-if="ruta !== routeCurrent"
       :to="{ name: ruta ? ruta : 'Inicio', params: params }"
       class="nav-link"
-      :class="[classActive ?? '']"
+      :class="[classActive ?? '', $attrs.class]"
       @click="appStore.startLoading()"
     >
       <i class="nav-icon" :class="icon ?? 'fa-th'"></i>

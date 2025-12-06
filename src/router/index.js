@@ -165,6 +165,19 @@ const routes = [
     component: () => import("../pages/admin/orden_ventas/Index.vue"),
     meta: { layout: Admin, requiresAuth: true },
   },
+  {
+    path: "/admin/orden_ventas/create",
+    name: "orden_ventas.create",
+    component: () => import("../pages/admin/orden_ventas/Create.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
+  {
+    path: "/admin/orden_ventas/:id",
+    name: "orden_ventas.edit",
+    props: true,
+    component: () => import("../pages/admin/orden_ventas/Edit.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
 
   // TRANSFERENCIAS
   {
