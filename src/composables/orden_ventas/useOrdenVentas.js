@@ -11,6 +11,7 @@ const oOrdenVenta = ref({
   total_st: "",
   solicitud_descuento: 0,
   solicitud_sw: 0,
+  user_ap: "",
   monto_solicitud: 0,
   descuento: 0,
   total_f: "",
@@ -28,7 +29,7 @@ const oOrdenVenta = ref({
 });
 
 export const useOrdenVentas = () => {
-  const setOrdenVenta = (item = null) => {
+  const setOrdenVenta = (item = null, withUser = false) => {
     if (item) {
       oOrdenVenta.value.id = item.id;
       oOrdenVenta.value.sucursal_id = item.sucursal_id;
@@ -40,6 +41,7 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.total_st = item.total_st;
       oOrdenVenta.value.solicitud_descuento = item.solicitud_descuento;
       oOrdenVenta.value.solicitud_sw = item.solicitud_sw;
+      oOrdenVenta.value.user_ap = item.user_ap;
       oOrdenVenta.value.monto_solicitud = item.monto_solicitud;
       oOrdenVenta.value.descuento = item.descuento;
       oOrdenVenta.value.total_f = item.total_f;
@@ -51,6 +53,9 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.estado = item.estado;
       oOrdenVenta.value.verificado = item.verificado;
       oOrdenVenta.value.cliente = item.cliente;
+      if (withUser) {
+        oOrdenVenta.value.user = item.user;
+      }
       oOrdenVenta.value.orden_venta_detalles = item.orden_venta_detalles;
       oOrdenVenta.value.eliminados_detalles = [];
       oOrdenVenta.value._method = "PUT";
@@ -85,6 +90,7 @@ export const useOrdenVentas = () => {
     oOrdenVenta.value.total_st = "";
     oOrdenVenta.value.solicitud_descuento = 0;
     oOrdenVenta.value.solicitud_sw = 0;
+    oOrdenVenta.value.user_ap = "";
     oOrdenVenta.value.monto_solicitud = 0;
     oOrdenVenta.value.descuento = 0;
     oOrdenVenta.value.total_f = "";

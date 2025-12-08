@@ -204,6 +204,10 @@ body .main-sidebar .sidebar .nav .nav-link.active {
   background-color: var(--secundario_hover);
 }
 
+.text-danger {
+  color: var(--danger);
+}
+
 /* Botón si el icono es success */
 .swal2-confirm.btn-sucess {
   background-color: var(--principal) !important;
@@ -507,4 +511,14 @@ body.app-blank.login {
 .verificaCheckbox .el-checkbox__inner {
   height: 18px !important;
   width: 18px !important;
+}
+
+.el-collapse-item {
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  padding: 0px 10px;
+}
+
+.el-collapse-item__content {
+  padding-bottom: 5px !important;
 }

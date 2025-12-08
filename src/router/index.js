@@ -178,6 +178,13 @@ const routes = [
     component: () => import("../pages/admin/orden_ventas/Edit.vue"),
     meta: { layout: Admin, requiresAuth: true },
   },
+  {
+    path: "/admin/orden_ventas/imprimir/:id",
+    name: "orden_ventas.imprimir",
+    props: true,
+    component: () => import("../pages/admin/orden_ventas/Imprimir.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
 
   // TRANSFERENCIAS
   {

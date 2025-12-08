@@ -1,7 +1,7 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useCuentaCobrars } from "../../../composables/cuenta_cobrars/useCuentaCobrars";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
@@ -19,19 +19,38 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setCuentaCobrar, limpiarCuentaCobrar } = useCuentaCobrars();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "",
-      key: "id",
+      label: "CÓDIGO ORDEN VENTA",
+      key: "orden_venta.codigo",
       sortable: true,
-      width: "4%",
     },
     {
-      label: "NOMBRE DE ROLES",
-      key: "nombre",
+      label: "CLIENTE",
+      key: "cliente.razon_social",
+      sortable: true,
+    },
+    {
+      label: "TOTAL",
+      key: "total",
+      sortable: true,
+    },
+    {
+      label: "CANCELADO",
+      key: "cancelado",
+      sortable: true,
+    },
+    {
+      label: "SALDO",
+      key: "saldo",
+      sortable: true,
+    },
+    {
+      label: "FECHA",
+      key: "fecha_c",
       sortable: true,
     },
     {
@@ -51,9 +70,16 @@
   const muestra_formulario = ref(false);
 
   const agregarRegistro = () => {
-    limpiarRole();
+    limpiarCuentaCobrar();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
+  };
+  const registrarPago = (item) => {
+    api.get("/admin/cuenta_cobrars/" + item.id).then((response) => {
+      setCuentaCobrar(response.data);
+      accion_formulario.value = 1;
+      muestra_formulario.value = true;
+    });
   };
 
   const updateDatatable = async () => {
@@ -63,10 +89,10 @@
     }
   };
 
-  const eliminarRole = (item) => {
+  const eliminarCuentaCobrar = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
-      html: `<strong>${item.nombre}</strong>`,
+      html: `<strong>${item.orden_venta.codigo}</strong>`,
       showCancelButton: true,
       confirmButtonText: "Si, eliminar",
       cancelButtonText: "No, cancelar",
@@ -77,7 +103,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/cuenta_cobrars/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +129,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Cuentas por Cobrar</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +137,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Cuentas por Cobrar</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -121,20 +147,20 @@
     <div class="row">
       <div class="col-md-12">
         <div class="row">
-          <div class="col-md-4">
+          <!-- <div class="col-md-4">
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('cuenta_cobrars.create')
               "
               type="button"
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
+              <i class="fa fa-plus"></i> Agregar Nuevo Pago
             </button>
-          </div>
-          <div class="col-md-8 my-1">
+          </div> -->
+          <div class="col-md-8 my-1 offset-md-4">
             <div class="row justify-content-end">
               <div class="col-md-5">
                 <div class="input-group" style="align-items: end">
@@ -163,7 +189,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/cuenta_cobrars/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -177,24 +203,20 @@
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    authStore?.user?.permisos.includes('cuenta_cobrars.create')
                   "
                 >
                   <el-tooltip
                     class="box-item"
                     effect="dark"
-                    content="Editar"
+                    content="Pagos"
                     placement="left-start"
                   >
                     <button
-                      class="btn btn-warning"
-                      @click="
-                        setRole(item);
-                        accion_formulario = 1;
-                        muestra_formulario = true;
-                      "
+                      class="btn btn-success"
+                      @click="registrarPago(item)"
                     >
-                      <i class="fa fa-pen"></i></button
+                      <i class="fa fa-hand-holding-usd"></i></button
                   ></el-tooltip>
                 </template>
 
@@ -202,7 +224,9 @@
                   v-if="
                     item.id != 2 &&
                     (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                      authStore?.user?.permisos.includes(
+                        'cuenta_cobrars.destroy'
+                      ))
                   "
                 >
                   <el-tooltip
@@ -211,7 +235,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarCuentaCobrar(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>

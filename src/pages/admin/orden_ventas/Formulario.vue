@@ -10,6 +10,8 @@
   } from "vue";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useAuthStore } from "../../../stores/authStore";
+  const authStore = useAuthStore();
   const router = useRouter();
   // TOAST
   import { toast } from "vue3-toastify";
@@ -43,7 +45,11 @@
     if (form.id == 0) {
       return `<i class="fa fa-save"></i> Guardar y Solicitar Descuento`;
     }
-    return `<i class="fa fa-edit"></i> Actualizar`;
+
+    if (form.solicitud_sw == 1) {
+      return `<i class="fa fa-check"></i> Finalizar Orden de Venta`;
+    }
+    return `<i class="fa fa-edit"></i> Actualizar Orden de Venta`;
   });
 
   const textBtn = computed(() => {
@@ -60,13 +66,18 @@
     let tituloConfirmar = "¿Completar Orden de Venta?";
     let mensajeConfirmar = `<strong>Una vez confirmada no se podrá modificar</strong>`;
 
-    if (form.id == 0) {
+    if (form.id != 0) {
+      tituloConfirmar = "¿Modificar Orden de Venta?";
+      mensajeConfirmar = `<strong>Se guardarán las modificaciones de la Orden de Venta</strong>`;
+      if (form.solicitud_sw == 1) {
+        tituloConfirmar = "¿Finalizar Orden de Venta?";
+        mensajeConfirmar = `<strong>Se finalizará la Orden de Venta</strong>`;
+      }
+    } else {
       if (form.solicitud_descuento == 1) {
         tituloConfirmar = "¿Guardar Orden de Venta y Solicitar Descuento?";
         mensajeConfirmar = `<strong>Se guardará la Orden de Venta y se solicitará el descuento</strong>`;
       }
-    } else {
-      //
     }
 
     Swal.fire({
@@ -105,6 +116,84 @@
               },
             });
             router.push({ name: "orden_ventas.index" });
+          })
+          .catch((error) => {
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.errors
+            ) {
+              const msgError = error.response.data.errors.error
+                ? error.response.data.errors.error[0]
+                : "Existen errores en el formulario, por favor verifique";
+              Swal.fire({
+                icon: "info",
+                title: "Error",
+                html: `<strong>${msgError}</strong>`,
+                confirmButtonText: `Aceptar`,
+                customClass: {
+                  confirmButton: "btn-error",
+                },
+              });
+              form.errors = error.response.data.errors;
+            } else {
+              const msgError =
+                "Ocurrió un error inesperado contactese con el Administrador";
+              Swal.fire({
+                icon: "info",
+                title: "Error",
+                html: `<strong>${msgError}</strong>`,
+                confirmButtonText: `Aceptar`,
+                customClass: {
+                  confirmButton: "btn-error",
+                },
+              });
+              console.error("Error inesperado:", error);
+            }
+          })
+          .finally(() => {
+            enviando.value = false;
+          });
+      }
+    });
+  };
+
+  const aprobarDescuento = () => {
+    let tituloConfirmar = "¿Aprobar Descuento?";
+    let mensajeConfirmar = `Se aprobará el descuento con un monto de ${form.descuento}<br/><strong>Una vez aprobada no se podrá deshacer</strong>`;
+    Swal.fire({
+      icon: "question",
+      title: tituloConfirmar,
+      html: mensajeConfirmar,
+      showCancelButton: true,
+      confirmButtonText: "Si, confirmar",
+      cancelButtonText: "No, cancelar",
+      denyButtonText: `No, cancelar`,
+      customClass: {
+        confirmButton: "btn-primary",
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        api
+          .post("/admin/orden_ventas/aprobar/" + form.id, {
+            descuento: form.descuento,
+            _method: "PUT",
+          })
+          .then((response) => {
+            form.verificado = response.data.orden_venta.verificado;
+            form.descuento = response.data.orden_venta.descuento;
+            form.estado = response.data.orden_venta.estado;
+            form.user_ap = response.data.orden_venta.user_ap;
+            form.errors = null;
+            Swal.fire({
+              icon: "success",
+              title: "Correcto",
+              html: `<strong>${response.data.message}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-success",
+              },
+            });
           })
           .catch((error) => {
             if (
@@ -282,6 +371,8 @@
       parseFloat(form.orden_venta_detalles[index].descuento);
 
     calcularTotal();
+    calcularTotalConDescuento();
+    calcularCambio();
   };
   const calcularSubtotalPorDescuento = (e, index) => {
     const elem = e.target;
@@ -652,10 +743,22 @@
                 <div class="row">
                   <div class="col-md-6">
                     <small class="font-weight-bold">Forma de pago</small><br />
-                    <el-radio-group v-model="form.forma_pago">
+                    <el-radio-group
+                      v-model="form.forma_pago"
+                      :disabled="form.id != 0 && form.forma_pago == 'CRÉDITO'"
+                    >
                       <el-radio value="EFECTIVO">EFECTIVO</el-radio>
                       <el-radio value="QR">QR</el-radio>
-                      <el-radio value="CRÉDITO">CRÉDITO</el-radio>
+                      <el-radio
+                        value="CRÉDITO"
+                        v-if="
+                          authStore?.user?.permisos == '*' ||
+                          authStore?.user?.permisos.includes(
+                            'cuenta_cobrars.create'
+                          )
+                        "
+                        >CRÉDITO</el-radio
+                      >
                     </el-radio-group>
                   </div>
                   <div class="col-md-6">
@@ -674,12 +777,48 @@
                         v-if="form.solicitud_descuento == 1"
                       >
                         <small class="font-weight-bold">Descuento</small>
+                        <small
+                          v-if="form.id != 0 && form.verificado == 0"
+                          class="font-weight-bold"
+                          :class="{
+                            'text-success': form.solicitud_sw == 1,
+                            'text-danger': form.solicitud_sw == 0,
+                          }"
+                        >
+                          ({{
+                            form.solicitud_sw == 0 ? "Sin aprobar" : "Aprobado"
+                          }})</small
+                        >
                         <input
                           type="number"
                           v-model="form.descuento"
                           class="form-control"
                           @keyup="calcularTotalConDescuento"
+                          :disabled="form.verificado == 1"
                         />
+                        <ul
+                          v-if="form.errors?.descuento"
+                          class="d-block text-danger mb-0 list-unstyled"
+                        >
+                          <li class="parsley-required">
+                            {{ form.errors?.descuento[0] }}
+                          </li>
+                        </ul>
+                        <button
+                          v-if="
+                            form.id != 0 &&
+                            form.verificado == 0 &&
+                            (authStore?.user?.permisos == '*' ||
+                              authStore?.user?.permisos.includes(
+                                'orden_ventas.aprobar_descuentos'
+                              ))
+                          "
+                          class="btn btn-success btn-sm w-100 mt-1 text-xs"
+                          @click.prevent="aprobarDescuento"
+                        >
+                          <i class="fa fa-check"></i>
+                          Aprobar Descuento
+                        </button>
                       </div>
                       <div class="col-md-6">
                         <small class="font-weight-bold"
@@ -727,6 +866,9 @@
                       type="number"
                       v-model="form.cambio"
                       class="form-control"
+                      :class="{
+                        'bg-danger': form.cambio < 0,
+                      }"
                     />
                   </div>
                   <ul

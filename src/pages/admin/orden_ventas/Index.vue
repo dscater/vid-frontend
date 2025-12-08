@@ -51,6 +51,11 @@
       sortable: true,
     },
     {
+      label: "FORMA DE PAGO",
+      key: "forma_pago",
+      sortable: true,
+    },
+    {
       label: "FECHA",
       key: "fecha_c",
       sortable: true,
@@ -91,6 +96,10 @@
 
   const editarOrdenVenta = (item) => {
     router.push({ name: "orden_ventas.edit", params: { id: item.id } });
+  };
+
+  const imprimirOrdenVenta = (item) => {
+    router.push({ name: "orden_ventas.imprimir", params: { id: item.id } });
   };
 
   const accion_formulario_detalle = ref(0);
@@ -218,6 +227,18 @@
               </template>
 
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Imprimir"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="imprimirOrdenVenta(item)"
+                  >
+                    <i class="fa fa-print"></i></button
+                ></el-tooltip>
                 <template
                   v-if="
                     item.verificado == 0 &&
