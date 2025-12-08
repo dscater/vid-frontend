@@ -454,6 +454,9 @@
       form.eliminados_detalles.push(id);
     }
     form.orden_venta_detalles.splice(index, 1);
+    calcularTotal();
+    calcularTotalConDescuento();
+    calcularCambio();
   };
 
   const calcularCambio = () => {
