@@ -45,13 +45,21 @@
     appStore.stopLoading();
   });
 
-  function imrpimirContenedor() {
-    var divContents = document.getElementById("principal").innerHTML;
-    var a = window.open("", "");
-    a.document.write("<html>");
-    a.document.write("<head>");
-    a.document.write(
-      `
+  function imprimirContenedor() {
+    const contenido = document.getElementById("principal").innerHTML;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "absolute";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+    <html>
+      <head>
                 <style>
                     @page { margin: 0; }
 
@@ -188,14 +196,16 @@
                         font-size: 9pt !important;
                     }
                 </style>
-                `
-    );
-    a.document.write("</head>");
-    a.document.write("<body >");
-    a.document.write(divContents);
-    a.document.write("</body></html>");
-    a.document.close();
-    a.print();
+      </head>
+      <body>${contenido}</body>
+    </html>
+  `);
+    doc.close();
+
+    iframe.onload = function () {
+      iframe.contentWindow.print();
+      document.body.removeChild(iframe);
+    };
   }
 </script>
 <template>
@@ -337,7 +347,7 @@
                           <button
                             class="btn btn-primary btn-block btn-flat mb-2"
                             id="btnImprimir"
-                            @click.prevent="imrpimirContenedor"
+                            @click.prevent="imprimirContenedor"
                           >
                             <i class="fa fa-print"></i> Imprimir
                           </button>
