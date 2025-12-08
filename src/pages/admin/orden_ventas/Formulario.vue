@@ -338,6 +338,8 @@
         });
         nuevoProducto.value.codigoProducto = "";
         calcularTotal();
+        calcularTotalConDescuento();
+        calcularCambio();
       })
       .catch((err) => {
         console.log(err);
