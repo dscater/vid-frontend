@@ -136,7 +136,12 @@
           ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">OPERACIONES</li>
           <ItemMenu
-            :class="[routeCurrent == 'orden_ventas.create' ? 'active' : '']"
+            :class="[
+              routeCurrent == 'orden_ventas.create' ||
+              routeCurrent == 'orden_ventas.edit'
+                ? 'active'
+                : '',
+            ]"
             :label="'Orden de Ventas'"
             :ruta="'orden_ventas.index'"
             :icon="'fa fa-clipboard-check'"

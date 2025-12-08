@@ -8,16 +8,19 @@ const oOrdenVenta = ref({
   hora: "",
   cantidad_total: "",
   total: "",
-  solicitud_descuento: "",
-  solicitud_sw: "",
-  monto_solicitud: "",
-  descuento: "",
+  total_st: "",
+  solicitud_descuento: 0,
+  solicitud_sw: 0,
+  monto_solicitud: 0,
+  descuento: 0,
   total_f: "",
   forma_pago: "",
   cancelado: "",
   cambio: "",
   cs_f: "",
   observaciones: "",
+  estado: "",
+  verificado: 0,
   orden_venta_detalles: [],
   eliminados_detalles: [],
   verificado: 0,
@@ -34,12 +37,20 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.hora = item.hora;
       oOrdenVenta.value.cantidad_total = item.cantidad_total;
       oOrdenVenta.value.total = item.total;
+      oOrdenVenta.value.total_st = item.total_st;
+      oOrdenVenta.value.solicitud_descuento = item.solicitud_descuento;
+      oOrdenVenta.value.solicitud_sw = item.solicitud_sw;
+      oOrdenVenta.value.monto_solicitud = item.monto_solicitud;
+      oOrdenVenta.value.descuento = item.descuento;
       oOrdenVenta.value.total_f = item.total_f;
       oOrdenVenta.value.forma_pago = item.forma_pago;
       oOrdenVenta.value.cancelado = item.cancelado;
       oOrdenVenta.value.cambio = item.cambio;
       oOrdenVenta.value.cs_f = item.cs_f;
       oOrdenVenta.value.observaciones = item.observaciones;
+      oOrdenVenta.value.estado = item.estado;
+      oOrdenVenta.value.verificado = item.verificado;
+      oOrdenVenta.value.cliente = item.cliente;
       oOrdenVenta.value.orden_venta_detalles = item.orden_venta_detalles;
       oOrdenVenta.value.eliminados_detalles = [];
       oOrdenVenta.value._method = "PUT";
@@ -71,12 +82,19 @@ export const useOrdenVentas = () => {
     oOrdenVenta.value.hora = getHoraActual();
     oOrdenVenta.value.cantidad_total = "";
     oOrdenVenta.value.total = "";
+    oOrdenVenta.value.total_st = "";
+    oOrdenVenta.value.solicitud_descuento = 0;
+    oOrdenVenta.value.solicitud_sw = 0;
+    oOrdenVenta.value.monto_solicitud = 0;
+    oOrdenVenta.value.descuento = 0;
     oOrdenVenta.value.total_f = "";
     oOrdenVenta.value.forma_pago = "EFECTIVO";
     oOrdenVenta.value.cancelado = "";
     oOrdenVenta.value.cambio = "";
     oOrdenVenta.value.cs_f = "CON FACTURA";
     oOrdenVenta.value.observaciones = "";
+    oOrdenVenta.value.estado = "";
+    oOrdenVenta.value.verificado = "";
     oOrdenVenta.value.orden_venta_detalles = [];
     oOrdenVenta.value.eliminados_detalles = [];
     oOrdenVenta.value._method = "POST";

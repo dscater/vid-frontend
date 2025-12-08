@@ -7,6 +7,7 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  const router = useRouter();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -60,6 +61,11 @@
       sortable: true,
     },
     {
+      label: "ESTADO",
+      key: "estado",
+      sortable: true,
+    },
+    {
       label: "ACCIÓN",
       key: "accion",
       fixed: "right",
@@ -84,11 +90,7 @@
   };
 
   const editarOrdenVenta = (item) => {
-    api.get("/admin/orden_ventas/" + item.id).then((response) => {
-      setOrdenVenta(response.data.orden_venta);
-      accion_formulario.value = 1;
-      muestra_formulario.value = true;
-    });
+    router.push({ name: "orden_ventas.edit", params: { id: item.id } });
   };
 
   const accion_formulario_detalle = ref(0);
@@ -168,7 +170,7 @@
               class="btn btn-success"
               :to="{ name: 'orden_ventas.create' }"
             >
-              <i class="fa fa-plus"></i> Nueva Solicitud de Ingreso
+              <i class="fa fa-plus"></i> Nueva Orden de Venta
             </router-link>
           </div>
           <div class="col-md-8 my-1">

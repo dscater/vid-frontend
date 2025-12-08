@@ -1,5 +1,13 @@
 <script setup>
-  import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
+  import {
+    watch,
+    ref,
+    computed,
+    onMounted,
+    nextTick,
+    reactive,
+    onBeforeMount,
+  } from "vue";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
   const router = useRouter();
@@ -24,24 +32,47 @@
     () => props.orden_venta,
     (newValue) => {
       form = newValue;
+      verificarOrdenVenta();
     }
   );
+
+  const textBtnDescuento = computed(() => {
+    if (enviando.value) {
+      return `<i class="fa fa-spin fa-spinner"></i> Enviando...`;
+    }
+    if (form.id == 0) {
+      return `<i class="fa fa-save"></i> Guardar y Solicitar Descuento`;
+    }
+    return `<i class="fa fa-edit"></i> Actualizar`;
+  });
 
   const textBtn = computed(() => {
     if (enviando.value) {
       return `<i class="fa fa-spin fa-spinner"></i> Enviando...`;
     }
     if (form.id == 0) {
-      return `<i class="fa fa-save"></i> Guardar`;
+      return `<i class="fa fa-save"></i> Finalizar Orden de Venta`;
     }
-    return `<i class="fa fa-edit"></i> Actualizar`;
+    return `<i class="fa fa-edit"></i> Actualizar Orden de Venta`;
   });
 
   const enviarFormulario = () => {
+    let tituloConfirmar = "¿Completar Orden de Venta?";
+    let mensajeConfirmar = `<strong>Una vez confirmada no se podrá modificar</strong>`;
+
+    if (form.id == 0) {
+      if (form.solicitud_descuento == 1) {
+        tituloConfirmar = "¿Guardar Orden de Venta y Solicitar Descuento?";
+        mensajeConfirmar = `<strong>Se guardará la Orden de Venta y se solicitará el descuento</strong>`;
+      }
+    } else {
+      //
+    }
+
     Swal.fire({
       icon: "question",
-      title: "¿Completar Orden de Venta?",
-      html: `<strong>Una vez confirmada no se podrá modificar</strong>`,
+      title: tituloConfirmar,
+      html: mensajeConfirmar,
       showCancelButton: true,
       confirmButtonText: "Si, confirmar",
       cancelButtonText: "No, cancelar",
@@ -163,21 +194,6 @@
     cargarUnidadMedidas();
   };
 
-  const getFechaAtual = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  const getHoraActual = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  };
-
   const agregarProducto = () => {
     if (
       nuevoProducto.value.codigoProducto.trim() == "" ||
@@ -226,7 +242,7 @@
           unidad_medida_id: prod.unidad_medida_id,
           producto: prod,
           cantidad: nuevoProducto.value.cantidad,
-          costo: prod.precio,
+          precio: prod.precio,
           descuento: 0,
           subtotal: subtotal,
           subtotal_f: subtotal,
@@ -253,13 +269,13 @@
     const value = elem.value;
     if (!value || value.trim() == "") {
       form.orden_venta_detalles[index].subtotal =
-        form.orden_venta_detalles[index].costo;
+        form.orden_venta_detalles[index].precio;
       form.orden_venta_detalles[index].subtotal_f =
         parseFloat(form.orden_venta_detalles[index].subtotal) -
         parseFloat(form.orden_venta_detalles[index].descuento);
     }
     form.orden_venta_detalles[index].subtotal =
-      parseFloat(value) * parseFloat(form.orden_venta_detalles[index].costo);
+      parseFloat(value) * parseFloat(form.orden_venta_detalles[index].precio);
 
     form.orden_venta_detalles[index].subtotal_f =
       parseFloat(form.orden_venta_detalles[index].subtotal) -
@@ -282,10 +298,10 @@
     const value = form.orden_venta_detalles[index].cantidad;
     if (!value) {
       form.orden_venta_detalles[index].subtotal =
-        form.orden_venta_detalles[index].costo;
+        form.orden_venta_detalles[index].precio;
     }
     form.orden_venta_detalles[index].subtotal =
-      parseFloat(value) * parseFloat(form.orden_venta_detalles[index].costo);
+      parseFloat(value) * parseFloat(form.orden_venta_detalles[index].precio);
     calcularTotal();
   };
 
@@ -310,6 +326,36 @@
     form.cantidad_total = total;
   };
 
+  const calcularTotalConDescuento = () => {
+    if (form.orden_venta_detalles.length == 0) {
+      form.total = 0;
+      form.cantidad_total = 0;
+      return;
+    }
+    let total = 0;
+    total = form.orden_venta_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.subtotal);
+    }, 0);
+    form.total_f = total - form.descuento;
+  };
+
+  const detectarDescuento = () => {
+    if (form.solicitud_descuento == 1) {
+      form.total_f = form.total - form.descuento;
+    } else {
+      form.total_f = form.total;
+    }
+    calcularCambio();
+  };
+
+  const subTotalFinal = computed(() => {
+    const subtotal = form.orden_venta_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.subtotal_f);
+    }, 0);
+    form.total_st = subtotal;
+    return subtotal;
+  });
+
   const eliminarDetalle = (index, id) => {
     if (id != 0) {
       form.eliminados_detalles.push(id);
@@ -325,15 +371,24 @@
     }
   };
 
+  const verificarOrdenVenta = async () => {
+    await nextTick(() => {
+      if (form.id != 0) {
+        listClientes.value.push({
+          value: form.cliente_id,
+          label: `${form.cliente.razon_social}`,
+        });
+
+        // form.fecha = getFechaAtual();
+        // form.hora = getHoraActual();
+      }
+      form.errors = null;
+    });
+  };
+
   onMounted(() => {
     cargarListas();
-    console.log(form.id);
-    // if (form.id == 0) {
-
-    //   form.fecha = getFechaAtual();
-    //   form.hora = getHoraActual();
-    // }
-    form.errors = null;
+    verificarOrdenVenta();
   });
 </script>
 
@@ -518,7 +573,7 @@
                                 </option>
                               </select>
                             </td>
-                            <td>{{ item.costo }}</td>
+                            <td>{{ item.precio }}</td>
                             <td>
                               <input
                                 type="number"
@@ -575,11 +630,11 @@
                           <td class="font-weight-bold text-right" colspan="2">
                             TOTALES
                           </td>
+                          <td></td>
                           <td>{{ form.cantidad_total }}</td>
                           <td>{{ form.total }}</td>
                           <td></td>
-                          <td></td>
-                          <td>{{ form.total_f }}</td>
+                          <td>{{ subTotalFinal }}</td>
                           <td></td>
                         </tr>
                       </tbody>
@@ -595,22 +650,50 @@
                   </li>
                 </ul>
                 <div class="row">
-                  <div class="col-12">
-                    <small class="font-weight-bold">Forma de pago</small>
-                    <select v-model="form.forma_pago" class="form-control">
-                      <option value="EFECTIVO">EFECTIVO</option>
-                      <option value="QR">QR</option>
-                      <option value="CRÉDITO">CRÉDITO</option>
-                    </select>
+                  <div class="col-md-6">
+                    <small class="font-weight-bold">Forma de pago</small><br />
+                    <el-radio-group v-model="form.forma_pago">
+                      <el-radio value="EFECTIVO">EFECTIVO</el-radio>
+                      <el-radio value="QR">QR</el-radio>
+                      <el-radio value="CRÉDITO">CRÉDITO</el-radio>
+                    </el-radio-group>
                   </div>
-                  <div class="col-12">
+                  <div class="col-md-6">
                     <small class="font-weight-bold"
                       >Con Factura/Sin Factura</small
-                    >
-                    <select v-model="form.cs_f" class="form-control">
-                      <option value="CON FACTURA">CON FACTURA</option>
-                      <option value="SIN FACTURA">SIN FACTURA</option>
-                    </select>
+                    ><br />
+                    <el-radio-group v-model="form.cs_f">
+                      <el-radio value="CON FACTURA">CON FACTURA</el-radio>
+                      <el-radio value="SIN FACTURA">SIN FACTURA</el-radio>
+                    </el-radio-group>
+                  </div>
+                  <div class="col-12">
+                    <div class="row">
+                      <div
+                        class="col-md-6"
+                        v-if="form.solicitud_descuento == 1"
+                      >
+                        <small class="font-weight-bold">Descuento</small>
+                        <input
+                          type="number"
+                          v-model="form.descuento"
+                          class="form-control"
+                          @keyup="calcularTotalConDescuento"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <small class="font-weight-bold"
+                          >Descuento adicional</small
+                        ><br />
+                        <el-radio-group
+                          v-model="form.solicitud_descuento"
+                          @change="detectarDescuento"
+                        >
+                          <el-radio :value="0">SIN DESCUENTO</el-radio>
+                          <el-radio :value="1">CON DESCUENTO</el-radio>
+                        </el-radio-group>
+                      </div>
+                    </div>
                   </div>
                   <div class="col-12">
                     <small class="font-weight-bold">Total Pagar</small>
@@ -646,7 +729,6 @@
                       class="form-control"
                     />
                   </div>
-
                   <ul
                     v-if="form.errors?.total"
                     class="d-block text-danger mb-0 list-unstyled"
@@ -655,7 +737,6 @@
                       {{ form.errors?.total[0] }}
                     </li>
                   </ul>
-
                   <ul
                     v-if="form.errors?.total_f"
                     class="d-block text-danger mb-0 list-unstyled"
@@ -666,6 +747,14 @@
                   </ul>
                   <div class="col-12 my-1">
                     <button
+                      v-if="form.solicitud_descuento == 1"
+                      class="btn btn-primary w-100"
+                      v-html="textBtnDescuento"
+                      :disabled="enviando"
+                      @click.prevent="enviarFormulario"
+                    ></button>
+                    <button
+                      v-if="form.solicitud_descuento == 0"
                       class="btn btn-primary w-100"
                       v-html="textBtn"
                       :disabled="enviando"
