@@ -461,7 +461,7 @@
 
   const calcularCambio = () => {
     form.cambio = 0;
-    if (form.total_f && form.cancelado) {
+    if (form.total_f && form.cancelado && form.cancelado != 0) {
       form.cambio = parseFloat(form.total_f) - parseFloat(form.cancelado);
       form.cambio *= -1;
     }

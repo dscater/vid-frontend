@@ -26,6 +26,7 @@
     loadingOrdenVenta.value = true;
     api.get("/admin/orden_ventas/" + props.id).then((response) => {
       setOrdenVenta(response.data.orden_venta);
+      console.log(response.data.orden_venta);
       loadingOrdenVenta.value = false;
     });
   };
