@@ -7,6 +7,7 @@
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
   import { useConfiguracionStore } from "../../../stores/configuracion/configuracionStore";
+  import html2pdf from "html2pdf.js";
   const configuracionStore = useConfiguracionStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
@@ -45,167 +46,185 @@
     appStore.stopLoading();
   });
 
-  function imprimirContenedor() {
-    const contenido = document.getElementById("principal").innerHTML;
+  // function imprimirContenedor() {
+  //   // Obtener el contenido del contenedor
+  //   const divContents = document.getElementById("principal").innerHTML;
 
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "absolute";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    document.body.appendChild(iframe);
+  //   // Crear un iframe oculto
+  //   const iframe = document.createElement("iframe");
+  //   iframe.style.position = "absolute";
+  //   iframe.style.width = "0";
+  //   iframe.style.height = "0";
+  //   iframe.style.border = "0";
+  //   document.body.appendChild(iframe);
 
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-    <html>
-      <head>
-                <style>
-                    @page { margin: 0; }
+  //   const doc = iframe.contentWindow.document;
+  //   doc.open();
+  //   doc.write(`
+  //   <html>
+  //     <head>
+  //       <style>
+  //         @page { margin: 0; }
 
-                    #principal{
-                        width: 6.4cm !important;
-                    }
+  //         #principal {
+  //           width: 6.4cm !important;
+  //         }
 
-                    #contenedor_imprimir {
-                        font-size: 9pt;
-                        width: 6.4cm !important;
-                        padding-top: 15px;
-                        padding-bottom: 15px;
-                        font-family: 'Times New Roman', Times, serif;
-                    }
+  //         #contenedor_imprimir {
+  //           font-size: 9pt;
+  //           width: 6.4cm !important;
+  //           padding-top: 15px;
+  //           padding-bottom: 15px;
+  //           font-family: 'Times New Roman', Times, serif;
+  //         }
 
-                    .elemento {
-                        text-align: center;
-                        font-size: 0.9em;
-                    }
+  //         .elemento {
+  //           text-align: center;
+  //           font-size: 0.9em;
+  //         }
 
-                    .elemento.logo img {
-                        width: 60%;
-                    }
+  //         .elemento.logo img {
+  //           width: 60%;
+  //         }
 
-                    .separador {
-                        padding: 0px;
-                        margin: 0px;
-                    }
+  //         .separador {
+  //           padding: 0px;
+  //           margin: 0px;
+  //         }
 
-                    .fono,
-                    .lp {
-                        font-size: 0.8em;
-                    }
+  //         .fono,
+  //         .lp {
+  //           font-size: 0.8em;
+  //         }
 
-                    .txt_fo {
-                        margin-top: 3px;
-                        border-top: dashed 1px black;
-                    }
+  //         .txt_fo {
+  //           margin-top: 3px;
+  //           border-top: dashed 1px black;
+  //         }
 
-                    .detalle {
-                        border-top: dashed 1px black;
-                        border-bottom: dashed 1px black;
-                    }
+  //         .detalle {
+  //           border-top: dashed 1px black;
+  //           border-bottom: dashed 1px black;
+  //         }
 
-                    .act_eco {
-                        font-size: 0.7em;
-                    }
+  //         .act_eco {
+  //           font-size: 0.7em;
+  //         }
 
-                    .info1 {
-                        text-align: center;
-                        font-weight: bold;
-                        font-size: 0.7em;
-                    }
+  //         .info1, .info2 {
+  //           text-align: center;
+  //           font-weight: bold;
+  //           font-size: 0.7em;
+  //         }
 
-                    .info2 {
-                        text-align: center;
-                        font-weight: bold;
-                        font-size: 0.7em;
-                    }
+  //         .izquierda {
+  //           text-align: left;
+  //           padding-left: 5px;
+  //         }
 
-                    .izquierda {
-                        text-align: left;
-                        padding-left: 5px;
-                    }
+  //         .derecha {
+  //           text-align: right;
+  //           padding-right: 5px;
+  //         }
 
-                    .derecha {
-                        text-align: right;
-                        padding-right: 5px;
-                    }
+  //         .informacion {
+  //           padding: 5px;
+  //           width: 100%;
+  //         }
 
-                    .informacion {
-                        padding: 5px;
-                        width: 100%;
-                    }
+  //         .bold {
+  //           font-weight: bold;
+  //         }
 
-                    .bold {
-                        font-weight: bold;
-                    }
+  //         .cobro {
+  //           width: 100%;
+  //           padding: 5px;
+  //         }
 
-                    .cobro {
-                        width: 100%;
-                        padding: 5px;
-                    }
+  //         .cobro table {
+  //           width: 97%;
+  //           border-collapse: collapse;
+  //         }
 
-                    .cobro table {
-                        width: 97%;
-                    }
+  //         .cobro table tr td {
+  //           font-size: 0.7em;
+  //           word-break: break-all;
+  //         }
 
-                    .centreado {
-                        text-align: center;
-                    }
+  //         .cobro table tr td:nth-child(3) {
+  //           word-break: normal;
+  //         }
 
-                    .cobro table tr td {
-                        font-size: 0.7em;
-                        word-break: break-all;
-                    }
-                    .cobro table tr td:nth-child(3) {
-                        word-break: normal;
-                    }
+  //         .cobro table tr.punteado td {
+  //           border-top: dashed 1px black;
+  //           border-bottom: dashed 1px black;
+  //         }
 
-                    .literal {
-                        font-size: 0.85em;
-                    }
+  //         .cobro table tr.punteado_top td {
+  //           border-top: dashed 1px black;
+  //         }
 
-                    .cod_control,
-                    .fecha_emision {
-                        font-size: 0.9em;
-                    }
+  //         .literal {
+  //           font-size: 0.85em;
+  //         }
 
-                    .cobro table {
-                        border-collapse: collapse;
-                    }
+  //         .cod_control,
+  //         .fecha_emision {
+  //           font-size: 0.9em;
+  //         }
 
-                    .cobro table tr.punteado td {
-                        border-top: dashed 1px black;
-                        border-bottom: dashed 1px black;
-                    }
+  //         .qr img {
+  //           width: 160px;
+  //           height: 160px;
+  //         }
 
-                    .cobro table tr.punteado_top td {
-                        border-top: dashed 1px black;
-                    }
+  //         .total {
+  //           font-size: 0.9em !important;
+  //         }
 
-                    .qr img {
-                        width: 160px;
-                        height: 160px;
-                    }
+  //         .pr-10 {
+  //           padding-right: 10px;
+  //           font-size: 9pt !important;
+  //         }
 
-                    .total {
-                        font-size: 0.9em !important;
-                    }
+  //         .centreado {
+  //           text-align: center;
+  //         }
+  //       </style>
+  //     </head>
+  //     <body>
+  //       ${divContents}
+  //     </body>
+  //   </html>
+  // `);
+  //   doc.close();
 
-                    .pr-10 {
-                        padding-right: 10px;
-                        font-size: 9pt !important;
-                    }
-                </style>
-      </head>
-      <body>${contenido}</body>
-    </html>
-  `);
-    doc.close();
+  //   // Esperar a que el iframe cargue
+  //   iframe.onload = function () {
+  //     iframe.contentWindow.focus();
+  //     iframe.contentWindow.print();
+  //     document.body.removeChild(iframe); // limpiar
+  //   };
+  // }
 
-    iframe.onload = function () {
-      iframe.contentWindow.print();
-      document.body.removeChild(iframe);
+  async function imprimirContenedor() {
+    const elemento = document.getElementById("principal");
+
+    const opt = {
+      margin: 0,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "cm", format: [6.4, 20], orientation: "portrait" },
     };
+
+    // Generar el PDF como blob
+    const pdfBlob = await html2pdf().set(opt).from(elemento).outputPdf("blob");
+
+    // Crear una URL temporal
+    const url = URL.createObjectURL(pdfBlob);
+
+    // Abrir en nueva ventana / pestaña
+    window.open(url, "_blank");
   }
 </script>
 <template>
@@ -237,12 +256,7 @@
       <div class="col-md-12">
         <div class="row">
           <div class="col-12">
-            <el-skeleton
-              :loading="loadingOrdenVenta"
-              animated
-              :count="2"
-              class="row"
-            >
+            <el-skeleton :loading="loadingOrdenVenta" animated class="row">
               <template #template>
                 <div class="col-md-6 offset-md-3">
                   <el-skeleton-item style="height: 500px"></el-skeleton-item>
@@ -259,7 +273,7 @@
                         >
                           <div class="elemento logo">
                             <img
-                              :src="configuracionStore.oConfiguracion.url_logo"
+                              :src="configuracionStore.oConfiguracion.logo_b64"
                               alt="Logo"
                             />
                           </div>
