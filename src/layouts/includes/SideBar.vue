@@ -138,7 +138,8 @@
           <ItemMenu
             :class="[
               routeCurrent == 'orden_ventas.create' ||
-              routeCurrent == 'orden_ventas.edit'
+              routeCurrent == 'orden_ventas.edit' ||
+              routeCurrent == 'orden_ventas.imprimir'
                 ? 'active'
                 : '',
             ]"
@@ -147,6 +148,13 @@
             :icon="'fa fa-clipboard-check'"
           ></ItemMenu>
           <ItemMenu
+            :class="[
+              routeCurrent == 'proformas.create' ||
+              routeCurrent == 'proformas.edit' ||
+              routeCurrent == 'proformas.imprimir'
+                ? 'active'
+                : '',
+            ]"
             :label="'Proformas'"
             :ruta="'proformas.index'"
             :icon="'fa fa-list'"

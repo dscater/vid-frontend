@@ -32,10 +32,14 @@ export const useOrdenVentas = () => {
   const setOrdenVenta = (item = null, withUser = false) => {
     if (item) {
       oOrdenVenta.value.id = item.id;
+      oOrdenVenta.value.nro = item.nro;
+      oOrdenVenta.value.codigo = item.codigo;
       oOrdenVenta.value.sucursal_id = item.sucursal_id;
       oOrdenVenta.value.cliente_id = item.cliente_id;
       oOrdenVenta.value.fecha = item.fecha;
       oOrdenVenta.value.hora = item.hora;
+      oOrdenVenta.value.fecha_ct = item.fecha_ct;
+      oOrdenVenta.value.fecha_t = item.fecha_t;
       oOrdenVenta.value.cantidad_total = item.cantidad_total;
       oOrdenVenta.value.total = item.total;
       oOrdenVenta.value.total_st = item.total_st;

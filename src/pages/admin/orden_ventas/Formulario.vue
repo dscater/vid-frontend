@@ -878,7 +878,7 @@
                   </div>
                   <ul
                     v-if="form.errors?.total"
-                    class="d-block text-danger mb-0 list-unstyled"
+                    class="d-block text-danger mb-0 list-unstyled w-100"
                   >
                     <li class="parsley-required">
                       {{ form.errors?.total[0] }}
@@ -886,7 +886,7 @@
                   </ul>
                   <ul
                     v-if="form.errors?.total_f"
-                    class="d-block text-danger mb-0 list-unstyled"
+                    class="d-block text-danger mb-0 list-unstyled w-100"
                   >
                     <li class="parsley-required">
                       {{ form.errors?.total_f[0] }}

@@ -225,6 +225,26 @@ const routes = [
     component: () => import("../pages/admin/proformas/Index.vue"),
     meta: { layout: Admin, requiresAuth: true },
   },
+  {
+    path: "/admin/proformas/create",
+    name: "proformas.create",
+    component: () => import("../pages/admin/proformas/Create.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
+  {
+    path: "/admin/proformas/:id",
+    name: "proformas.edit",
+    props: true,
+    component: () => import("../pages/admin/proformas/Edit.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
+  {
+    path: "/admin/proformas/imprimir/:id",
+    name: "proformas.imprimir",
+    props: true,
+    component: () => import("../pages/admin/proformas/Imprimir.vue"),
+    meta: { layout: Admin, requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

@@ -1,13 +1,13 @@
 <script setup>
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
-  import { useRoles } from "../../../composables/roles/useRoles";
+  import { useProformas } from "../../../composables/proformas/useProformas";
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
-  import Formulario from "./Formulario.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  const router = useRouter();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -19,19 +19,50 @@
     appStore.stopLoading();
   });
 
-  const { setRole, limpiarRole } = useRoles();
+  const { setProforma, limpiarProforma } = useProformas();
 
   const miTable = ref(null);
   const headers = [
     {
-      label: "",
-      key: "id",
+      label: "CÓDIGO",
+      key: "codigo",
       sortable: true,
       width: "4%",
     },
     {
-      label: "NOMBRE DE ROLES",
-      key: "nombre",
+      label: "SUCURSAL",
+      key: "sucursal.nombre",
+      sortable: true,
+    },
+    {
+      label: "CLIENTE",
+      key: "cliente.razon_social",
+      sortable: true,
+    },
+
+    {
+      label: "CANTIDAD TOTAL",
+      key: "cantidad_total",
+      sortable: true,
+    },
+    {
+      label: "MONTO TOTAL",
+      key: "total",
+      sortable: true,
+    },
+    {
+      label: "FORMA DE PAGO",
+      key: "forma_pago",
+      sortable: true,
+    },
+    {
+      label: "FECHA",
+      key: "fecha_c",
+      sortable: true,
+    },
+    {
+      label: "USUARIO",
+      key: "user",
       sortable: true,
     },
     {
@@ -50,23 +81,28 @@
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
 
-  const agregarRegistro = () => {
-    limpiarRole();
-    accion_formulario.value = 0;
-    muestra_formulario.value = true;
-  };
-
   const updateDatatable = async () => {
     if (miTable.value) {
       await miTable.value.cargarDatos();
       muestra_formulario.value = false;
+      muestra_formulario_detalle.value = false;
     }
   };
 
-  const eliminarRole = (item) => {
+  const editarProforma = (item) => {
+    router.push({ name: "proformas.edit", params: { id: item.id } });
+  };
+
+  const imprimirProforma = (item) => {
+    router.push({ name: "proformas.imprimir", params: { id: item.id } });
+  };
+
+  const accion_formulario_detalle = ref(0);
+  const muestra_formulario_detalle = ref(false);
+  const eliminarProforma = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
-      html: `<strong>${item.nombre}</strong>`,
+      html: `<strong>${item.codigo}</strong>`,
       showCancelButton: true,
       confirmButtonText: "Si, eliminar",
       cancelButtonText: "No, cancelar",
@@ -77,7 +113,7 @@
     }).then(async (result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        let respuesta = await api.post("/admin/roles/" + item.id, {
+        let respuesta = await api.post("/admin/proformas/" + item.id, {
           _method: "DELETE",
         });
         if (respuesta.data && respuesta.data.sw) {
@@ -103,7 +139,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Roles</h1>
+          <h1 class="m-0">Proformas</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -111,7 +147,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Roles</li>
+            <li class="breadcrumb-item active">Proformas</li>
           </ol>
         </div>
         <!-- /.col -->
@@ -122,17 +158,16 @@
       <div class="col-md-12">
         <div class="row">
           <div class="col-md-4">
-            <button
+            <router-link
               v-if="
                 authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('roles.create')
+                authStore?.user?.permisos.includes('proformas.create')
               "
-              type="button"
               class="btn btn-success"
-              @click="agregarRegistro"
+              :to="{ name: 'proformas.create' }"
             >
-              <i class="fa fa-plus"></i> Nuevo Role
-            </button>
+              <i class="fa fa-plus"></i> Nueva Proforma
+            </router-link>
           </div>
           <div class="col-md-8 my-1">
             <div class="row justify-content-end">
@@ -163,7 +198,7 @@
               ref="miTable"
               :cols="headers"
               :api="true"
-              :url="apiUrl + '/admin/roles/paginado'"
+              :url="apiUrl + '/admin/proformas/paginado'"
               :numPages="5"
               :multiSearch="multiSearch"
               :token="authStore.token"
@@ -173,11 +208,29 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #user="{ item }">
+                {{ item.user.nombre }} {{ item.user.paterno }}
+                {{ item.user.materno }}
+              </template>
+
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Imprimir"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="imprimirProforma(item)"
+                  >
+                    <i class="fa fa-print"></i></button
+                ></el-tooltip>
                 <template
                   v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('roles.edit')
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('proformas.edit'))
                   "
                 >
                   <el-tooltip
@@ -188,11 +241,7 @@
                   >
                     <button
                       class="btn btn-warning"
-                      @click="
-                        setRole(item);
-                        accion_formulario = 1;
-                        muestra_formulario = true;
-                      "
+                      @click="editarProforma(item)"
                     >
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
@@ -200,9 +249,9 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
+                    item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('roles.destroy'))
+                      authStore?.user?.permisos.includes('proformas.destroy'))
                   "
                 >
                   <el-tooltip
@@ -211,7 +260,10 @@
                     content="Eliminar"
                     placement="left-start"
                   >
-                    <button class="btn btn-danger" @click="eliminarRole(item)">
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarProforma(item)"
+                    >
                       <i class="fa fa-trash-alt"></i></button
                   ></el-tooltip>
                 </template>
@@ -221,11 +273,5 @@
         </div>
       </div>
     </div>
-    <Formulario
-      :muestra_formulario="muestra_formulario"
-      :accion_formulario="accion_formulario"
-      @envio-formulario="updateDatatable"
-      @cerrar-formulario="muestra_formulario = false"
-    ></Formulario>
   </Content>
 </template>
