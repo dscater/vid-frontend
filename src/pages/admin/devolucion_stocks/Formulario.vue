@@ -307,6 +307,7 @@
       form.eliminados_detalles.push(id);
     }
     form.devolucion_stock_detalles.splice(index, 1);
+    calcularTotal();
   };
 
   onMounted(() => {});

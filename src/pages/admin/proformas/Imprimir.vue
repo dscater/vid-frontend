@@ -258,6 +258,8 @@
   .contenedor_impresion {
     width: 100%;
     overflow: auto;
+    max-width: 21.59cm;
+    margin: auto;
   }
 
   .contenedor_factura {

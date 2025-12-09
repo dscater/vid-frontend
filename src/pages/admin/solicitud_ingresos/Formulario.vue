@@ -271,6 +271,7 @@
       form.eliminados_detalles.push(id);
     }
     form.solicitud_ingreso_detalles.splice(index, 1);
+    calcularTotal();
   };
 
   onMounted(() => {});

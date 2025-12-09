@@ -306,6 +306,7 @@
       form.eliminados_detalles.push(id);
     }
     form.orden_salida_detalles.splice(index, 1);
+    calcularTotal();
   };
 
   const indexDetalle = ref(-1);

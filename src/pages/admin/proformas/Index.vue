@@ -228,9 +228,8 @@
                 ></el-tooltip>
                 <template
                   v-if="
-                    item.verificado == 0 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('proformas.edit'))
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('proformas.edit')
                   "
                 >
                   <el-tooltip
@@ -249,9 +248,8 @@
 
                 <template
                   v-if="
-                    item.verificado == 0 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes('proformas.destroy'))
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('proformas.destroy')
                   "
                 >
                   <el-tooltip

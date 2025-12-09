@@ -152,7 +152,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Orden de Salida</h1>
+          <h1 class="m-0">Orden de Ventas</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -160,7 +160,7 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Orden de Salida</li>
+            <li class="breadcrumb-item active">Orden de Ventas</li>
           </ol>
         </div>
         <!-- /.col -->
