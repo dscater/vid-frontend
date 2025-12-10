@@ -2,7 +2,6 @@
   import { onMounted, ref } from "vue";
   import { useAppStore } from "../../stores/aplicacion/appStore";
   import { useAuthStore } from "../../stores/authStore";
-  import Admin from "../../layouts/Admin.vue";
   import api from "../../composables/axios";
   const appStore = useAppStore();
   const authStore = useAuthStore();

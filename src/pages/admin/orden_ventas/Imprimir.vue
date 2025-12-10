@@ -8,6 +8,10 @@
   import { useRouter } from "vue-router";
   import { useConfiguracionStore } from "../../../stores/configuracion/configuracionStore";
   import html2pdf from "html2pdf.js";
+  import { useOrdenVentaStore } from "../../../stores/offlineStores/ordenVentaStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const ordenVentaStore = useOrdenVentaStore();
   const configuracionStore = useConfiguracionStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
@@ -25,13 +29,20 @@
   const { setOrdenVenta, limpiarOrdenVenta, oOrdenVenta } = useOrdenVentas();
   const loadingOrdenVenta = ref(true);
   const literal = ref("");
-  const cargarOrdenVenta = () => {
+  const cargarOrdenVenta = async () => {
     loadingOrdenVenta.value = true;
-    api.get("/admin/orden_ventas/" + props.id).then((response) => {
-      setOrdenVenta(response.data.orden_venta, true);
-      literal.value = response.data.literal;
+    if (!connectivityStore.isOnline) {
+      const data = await ordenVentaStore.getOrderById(parseInt(props.id));
+      setOrdenVenta(data, true);
+      literal.value = data.literal_txt;
       loadingOrdenVenta.value = false;
-    });
+    } else {
+      api.get("/admin/orden_ventas/" + props.id).then((response) => {
+        setOrdenVenta(response.data.orden_venta, true);
+        literal.value = response.data.literal;
+        loadingOrdenVenta.value = false;
+      });
+    }
   };
 
   function formatDMY(fecha) {

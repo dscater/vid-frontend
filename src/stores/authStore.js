@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import api, { setAuthToken } from "../composables/axios";
+import { useConnectivityStore } from "./offlineStores/useConnectivityStore";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -7,6 +8,7 @@ export const useAuthStore = defineStore("auth", {
     token: localStorage.getItem("token") || null,
     loading: false,
     errors: null,
+    connectivityStore: useConnectivityStore(),
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
@@ -18,6 +20,9 @@ export const useAuthStore = defineStore("auth", {
     },
     async verificaSesion() {
       try {
+        if (!this.connectivityStore.isOnline) {
+          return true;
+        }
         const res = await api.get("/authCheck");
       } catch (err) {
         console.log(err);
@@ -31,6 +36,9 @@ export const useAuthStore = defineStore("auth", {
       this.loading = true;
       this.errors = null;
       try {
+        if (!this.connectivityStore.isOnline) {
+          return true;
+        }
         const res = await api.post("/login", {
           usuario: form.usuario,
           password: form.password,

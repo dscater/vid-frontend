@@ -4,6 +4,13 @@ import { useAuthStore } from "../stores/authStore";
 // LAYOUTS
 import Auth from "../layouts/Auth.vue";
 import Admin from "../layouts/Admin.vue";
+// inicio
+import Inicio from "../pages/admin/Inicio.vue";
+// orden ventas
+import IndexOrdenVentas from "../pages/admin/orden_ventas/Index.vue";
+import CreateOrdenVentas from "../pages/admin/orden_ventas/Create.vue";
+import EditOrdenVentas from "../pages/admin/orden_ventas/Edit.vue";
+import ImprimirOrdenVentas from "../pages/admin/orden_ventas/Imprimir.vue";
 
 const routes = [
   // LOGIN
@@ -17,7 +24,8 @@ const routes = [
   {
     path: "/admin/inicio",
     name: "Inicio",
-    component: () => import("../pages/admin/Inicio.vue"),
+    // component: () => import("../pages/admin/Inicio.vue"),
+    component: Inicio,
     meta: { layout: Admin, requiresAuth: true },
   },
   // Redirección base
@@ -162,27 +170,31 @@ const routes = [
   {
     path: "/admin/orden_ventas",
     name: "orden_ventas.index",
-    component: () => import("../pages/admin/orden_ventas/Index.vue"),
+    // component: () => import("../pages/admin/orden_ventas/Index.vue"),
+    component: IndexOrdenVentas,
     meta: { layout: Admin, requiresAuth: true },
   },
   {
     path: "/admin/orden_ventas/create",
     name: "orden_ventas.create",
-    component: () => import("../pages/admin/orden_ventas/Create.vue"),
+    // component: () => import("../pages/admin/orden_ventas/Create.vue"),
+    component: CreateOrdenVentas,
     meta: { layout: Admin, requiresAuth: true },
   },
   {
     path: "/admin/orden_ventas/:id",
     name: "orden_ventas.edit",
     props: true,
-    component: () => import("../pages/admin/orden_ventas/Edit.vue"),
+    // component: () => import("../pages/admin/orden_ventas/Edit.vue"),
+    component: EditOrdenVentas,
     meta: { layout: Admin, requiresAuth: true },
   },
   {
     path: "/admin/orden_ventas/imprimir/:id",
     name: "orden_ventas.imprimir",
     props: true,
-    component: () => import("../pages/admin/orden_ventas/Imprimir.vue"),
+    // component: () => import("../pages/admin/orden_ventas/Imprimir.vue"),
+    component: ImprimirOrdenVentas,
     meta: { layout: Admin, requiresAuth: true },
   },
 
@@ -253,6 +265,7 @@ const router = createRouter({
 });
 
 import { validateToken } from "../composables/auth";
+import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 // Guard global
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();

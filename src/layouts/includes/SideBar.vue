@@ -8,6 +8,8 @@
   import { verificaImagen } from "../../composables/useLoadings/verificaImagen";
   import { useAuthStore } from "../../stores/authStore";
   import { useRoute, useRouter } from "vue-router";
+  import { useConnectivityStore } from "../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
   const router = useRouter();
   const authStore = useAuthStore();
 
@@ -184,6 +186,7 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="connectivityStore.isOnline"
                 :label="'Devolución de Stock'"
                 :ruta="'devolucion_stocks.index'"
                 :icon="'fa fa-angle-right'"
@@ -195,7 +198,7 @@
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="connectivityStore.isOnline">
             <a
               href="#"
               class="nav-link sub-menu"
@@ -244,6 +247,7 @@
             :icon="'fa fa-user-friends'"
           ></ItemMenu>
           <ItemMenu
+            v-if="connectivityStore.isOnline"
             :label="'Proveedores'"
             :ruta="'proveedors.index'"
             :icon="'fa fa-clipboard-list'"
@@ -276,28 +280,32 @@
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="connectivityStore.isOnline"
                 :label="'Unidades de Medida'"
                 :ruta="'unidad_medidas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="connectivityStore.isOnline"
                 :label="'Marcas'"
                 :ruta="'marcas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="connectivityStore.isOnline"
                 :label="'Subcategorías'"
                 :ruta="'sub_categorias.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="connectivityStore.isOnline"
                 :label="'Categorías'"
                 :ruta="'categorias.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="connectivityStore.isOnline">
             <a
               href="#"
               class="nav-link sub-menu"
@@ -328,7 +336,7 @@
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="connectivityStore.isOnline">
             <a
               href="#"
               class="nav-link sub-menu"
@@ -362,7 +370,7 @@
             </ul>
           </li>
           <li class="nav-header font-weight-bold bg3">REPORTES</li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="connectivityStore.isOnline">
             <a
               href="#"
               class="nav-link sub-menu"
@@ -410,11 +418,13 @@
           </li>
           <li class="nav-header font-weight-bold bg3">OTROS</li>
           <ItemMenu
+            v-if="connectivityStore.isOnline"
             :label="'Configuración Sistema'"
             :ruta="'configuracions.index'"
             :icon="'fa fa-cog'"
           ></ItemMenu>
           <ItemMenu
+            v-if="connectivityStore.isOnline"
             :label="'Perfil'"
             :ruta="'profile.edit'"
             :params="{ id: authStore?.user?.id ?? 0 }"

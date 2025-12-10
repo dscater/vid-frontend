@@ -4,6 +4,10 @@
   import { onMounted, onUnmounted, ref } from "vue";
   import { useSideBar } from "../../composables/useSidebar.js";
   import { useConfiguracionStore } from "../../stores/configuracion/configuracionStore";
+  import { useConnectivityStore } from "../../stores/offlineStores/useConnectivityStore";
+  import { useSyncStore } from "../../stores/offlineStores/syncStore.js";
+  const connectivityStore = useConnectivityStore();
+  const syncStore = useSyncStore();
   const configuracionStore = useConfiguracionStore();
   import { useRouter } from "vue-router";
   import { useAuthStore } from "../../stores/authStore";
@@ -37,6 +41,22 @@
           @click.prevent="toggleSidebar"
           ><i class="fas fa-bars text-white"></i
         ></a>
+      </li>
+      <li class="nav-item d-flex align-items-center">
+        <span
+          :class="[connectivityStore.isOnline ? 'text-success' : 'text-danger']"
+        >
+          <i class="fa fa-circle"></i>
+          {{ connectivityStore.isOnline ? "Conectado" : "Sin Conexión" }}</span
+        >
+        <button
+          v-if="connectivityStore.isOnline"
+          class="btn btn-sm btn-success ml-1"
+          @click.prevent="syncStore.initialSyncAndCache"
+          :disabled="syncStore.isSyncing"
+        >
+          <i class="fa fa-download"></i>
+        </button>
       </li>
       <!-- <li class="nav-item d-none d-sm-inline-block">
                 <Link :href="route('pagos.create')" class="nav-link">Nuevo Pago</Link>

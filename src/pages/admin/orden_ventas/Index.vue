@@ -7,6 +7,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useOrdenVentaStore } from "../../../stores/offlineStores/ordenVentaStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const ordenVentaStore = useOrdenVentaStore();
   const router = useRouter();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
@@ -15,12 +19,16 @@
     appStore.startLoading();
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     appStore.stopLoading();
+    if (!connectivityStore.isOnline) {
+      dataOffline.value = await ordenVentaStore.getAll();
+    }
   });
 
   const { setOrdenVenta, limpiarOrdenVenta } = useOrdenVentas();
 
+  const dataOffline = ref([]);
   const miTable = ref(null);
   const headers = [
     {
@@ -104,14 +112,6 @@
 
   const accion_formulario_detalle = ref(0);
   const muestra_formulario_detalle = ref(false);
-  const aprobarOrdenVenta = (item) => {
-    api.get("/admin/orden_ventas/" + item.id).then((response) => {
-      setOrdenVenta(response.data.orden_venta);
-      accion_formulario_detalle.value = 1;
-      muestra_formulario_detalle.value = true;
-    });
-  };
-
   const eliminarOrdenVenta = (item) => {
     Swal.fire({
       title: "¿Quierés eliminar este registro?",
@@ -207,12 +207,91 @@
         <div class="row">
           <div class="col-12">
             <MiTable
+              v-if="connectivityStore.isOnline"
               :tableClass="'bg-white mitabla'"
               ref="miTable"
               :cols="headers"
               :api="true"
               :url="apiUrl + '/admin/orden_ventas/paginado'"
               :numPages="5"
+              :multiSearch="multiSearch"
+              :token="authStore.token"
+              :syncOrderBy="'id'"
+              :syncOrderAsc="'DESC'"
+              table-responsive
+              :header-class="'bg__primary'"
+              fixed-header
+            >
+              <template #user="{ item }">
+                {{ item.user.nombre }} {{ item.user.paterno }}
+                {{ item.user.materno }}
+              </template>
+
+              <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Imprimir"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="imprimirOrdenVenta(item)"
+                  >
+                    <i class="fa fa-print"></i></button
+                ></el-tooltip>
+                <template
+                  v-if="
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('orden_ventas.edit'))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Editar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-warning"
+                      @click="editarOrdenVenta(item)"
+                    >
+                      <i class="fa fa-pen"></i></button
+                  ></el-tooltip>
+                </template>
+
+                <template
+                  v-if="
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'orden_ventas.destroy'
+                      ))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Eliminar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarOrdenVenta(item)"
+                    >
+                      <i class="fa fa-trash-alt"></i></button
+                  ></el-tooltip>
+                </template>
+              </template>
+            </MiTable>
+            <MiTable
+              v-if="!connectivityStore.isOnline"
+              :tableClass="'bg-white mitabla'"
+              ref="miTable"
+              :cols="headers"
+              :numPages="5"
+              :data="dataOffline"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"
