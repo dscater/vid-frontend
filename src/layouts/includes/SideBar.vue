@@ -169,7 +169,8 @@
               href="#"
               class="nav-link sub-menu"
               :class="[
-                routeCurrent == 'devolucion_stocks.index'
+                routeCurrent == 'devolucion_stocks.index' ||
+                routeCurrent == 'devolucion_clientes.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
