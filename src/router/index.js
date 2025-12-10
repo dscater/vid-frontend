@@ -13,6 +13,13 @@ import EditOrdenVentas from "../pages/admin/orden_ventas/Edit.vue";
 import ImprimirOrdenVentas from "../pages/admin/orden_ventas/Imprimir.vue";
 
 const routes = [
+  // Redirección base
+  {
+    path: "/",
+    // redirect: "/login",
+    component: () => import("../pages/auth/Login.vue"),
+    meta: { layout: Auth, guest: true },
+  },
   // LOGIN
   {
     path: "/login",
@@ -27,11 +34,6 @@ const routes = [
     // component: () => import("../pages/admin/Inicio.vue"),
     component: Inicio,
     meta: { layout: Admin, requiresAuth: true },
-  },
-  // Redirección base
-  {
-    path: "/",
-    redirect: "/login",
   },
   // PROFILE
   {

@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-f7c39696'], (function (workbox) { 'use strict';
+define(['./workbox-177f9cb0'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
@@ -79,14 +79,45 @@ define(['./workbox-f7c39696'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "index.html",
-    "revision": "0.8tts3r3f2m"
+    "revision": "0.kt1rcu5hf1g"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
     allowlist: [/^\/$/]
   }));
+  workbox.registerRoute(({
+    request
+  }) => request.destination === "style" || request.destination === "script" || request.destination === "worker", new workbox.StaleWhileRevalidate({
+    "cacheName": "static-resources",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 50,
+      maxAgeSeconds: 2592000
+    })]
+  }), 'GET');
+  workbox.registerRoute(({
+    request
+  }) => request.mode === "navigate", new workbox.NetworkFirst({
+    "cacheName": "pages-cache",
+    plugins: []
+  }), 'GET');
+  workbox.registerRoute(({
+    request
+  }) => ["script", "style", "image", "font"].includes(request.destination), new workbox.CacheFirst({
+    "cacheName": "assets-cache",
+    plugins: []
+  }), 'GET');
   workbox.registerRoute(/^.*\.js$/, new workbox.CacheFirst({
     "cacheName": "js-assets-cache",
+    plugins: []
+  }), 'GET');
+  workbox.registerRoute(/.*\.js$/, new workbox.CacheFirst({
+    "cacheName": "js-chunks",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 100
+    })]
+  }), 'GET');
+  workbox.registerRoute(/.*\.html$/, new workbox.NetworkFirst({
+    "cacheName": "html-cache",
     plugins: []
   }), 'GET');
 

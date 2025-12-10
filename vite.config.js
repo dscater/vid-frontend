@@ -19,8 +19,9 @@ export default defineConfig({
     }),
     // Configuración del plugin VitePWA
     VitePWA({
+      navigateFallback: "/index.html",
+
       registerType: "autoUpdate",
-      injectRegister: "auto",
       // Configuración de Workbox (caching)
       workbox: {
         globDirectory: "dist",
@@ -35,10 +36,56 @@ export default defineConfig({
         // Esto es útil si tienes muchas rutas lazy-loaded
         runtimeCaching: [
           {
+            urlPattern: ({ request }) =>
+              request.destination === "style" ||
+              request.destination === "script" ||
+              request.destination === "worker",
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "static-resources",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "pages-cache",
+            },
+          },
+          {
+            urlPattern: ({ request }) =>
+              ["script", "style", "image", "font"].includes(
+                request.destination
+              ),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "assets-cache",
+            },
+          },
+          {
             urlPattern: /^.*\.js$/, // Captura cualquier petición .js
             handler: "CacheFirst",
             options: {
               cacheName: "js-assets-cache",
+            },
+          },
+          {
+            urlPattern: /.*\.js$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "js-chunks",
+              expiration: { maxEntries: 100 },
+            },
+          },
+          {
+            urlPattern: /.*\.html$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-cache",
             },
           },
         ],
