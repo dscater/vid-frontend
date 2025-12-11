@@ -32,3 +32,7 @@ import { registerSW } from "virtual:pwa-register";
 registerSW({
   immediate: true,
 });
+
+import { useAuthStore } from "./stores/authStore";
+const authStore = useAuthStore();
+authStore.verificaSesion();

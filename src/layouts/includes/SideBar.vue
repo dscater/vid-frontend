@@ -236,6 +236,7 @@
             </ul>
           </li>
           <ItemMenu
+            v-if="connectivityStore.isOnline"
             :label="'Registro de Gastos'"
             :ruta="'gastos.index'"
             :icon="'fa fa-clipboard-list'"
@@ -252,7 +253,7 @@
             :ruta="'proveedors.index'"
             :icon="'fa fa-clipboard-list'"
           ></ItemMenu>
-          <li class="nav-item">
+          <li class="nav-item" v-if="connectivityStore.isOnline">
             <a
               href="#"
               class="nav-link sub-menu"
@@ -280,25 +281,21 @@
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
-                v-if="connectivityStore.isOnline"
                 :label="'Unidades de Medida'"
                 :ruta="'unidad_medidas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
-                v-if="connectivityStore.isOnline"
                 :label="'Marcas'"
                 :ruta="'marcas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
-                v-if="connectivityStore.isOnline"
                 :label="'Subcategorías'"
                 :ruta="'sub_categorias.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
-                v-if="connectivityStore.isOnline"
                 :label="'Categorías'"
                 :ruta="'categorias.index'"
                 :icon="'fa fa-angle-right'"

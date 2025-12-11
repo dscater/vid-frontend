@@ -7,12 +7,14 @@ import { useSucursalProductoStore } from "./sucursalProductoStore.js";
 import { useClienteStore } from "./clienteStore.js";
 import { useSucursalStore } from "./sucursalStore.js";
 import { useUnidadMedidaStore } from "./unidadMedidaStore.js";
+import { useCuentaCobrarStore } from "./cuentaCobrarStore.js";
 import { useAuthStore } from "../authStore.js";
 export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
   const connectivityStore = useConnectivityStore();
   const sucursalProductoStore = useSucursalProductoStore();
   const clienteStore = useClienteStore();
   const sucursalStore = useSucursalStore();
+  const cuentaCobrarStore = useCuentaCobrarStore();
   const unidadMedidaStore = useUnidadMedidaStore();
   const authStore = useAuthStore();
   const isOnline = computed(() => connectivityStore.isOnline);
@@ -68,7 +70,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
       if (!data.cliente_id) {
         throw new Error(`No se seleccionó ningun cliente`);
       }
-      if (!data.cancelado) {
+      if (!data.cancelado && data.cancelado < 0) {
         throw new Error(`Debes ingresar el monto Cancelado`);
       }
       await db.transaction(
@@ -77,6 +79,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
         db.sucursal_productos,
         db.clientes,
         db.sucursals,
+        db.cuenta_cobrars,
         async (tx) => {
           if (
             !data.orden_venta_detalles ||
@@ -103,6 +106,9 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
                 sucursalId,
                 productoId
               );
+
+            console.log("Registro Stock:");
+            console.log(registroStock);
 
             if (!registroStock) {
               throw new Error(
@@ -226,6 +232,29 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           // Insertar la cabecera y obtener el ID generado (clave primaria)
           ordenVentaId = await db.orden_ventas.add({ ...nuevoRegistro });
           console.log(`Orden de Venta ID insertada: ${ordenVentaId}`);
+
+          // VERIFICAR TIPO DE PAGO
+          if (nuevoRegistro.forma_pago == "CRÉDITO") {
+            const now = new Date();
+            const saldo =
+              parseFloat(nuevoRegistro.total_f) -
+              parseFloat(nuevoRegistro.cancelado);
+            const orden_venta = await db.orden_ventas.get(ordenVentaId);
+            const data = {
+              cliente_id: nuevoRegistro.cliente_id,
+              cliente: cliente,
+              orden_venta: orden_venta,
+              orden_venta_id: ordenVentaId,
+              total: nuevoRegistro.total_f,
+              cancelado: nuevoRegistro.cancelado,
+              saldo: saldo,
+              fecha: now.toISOString().slice(0, 10),
+              hora: now.toTimeString().slice(0, 5),
+              cuenta_cobrar_detalles: [],
+              sync: false,
+            };
+            cuentaCobrarStore.nuevaCuentaCobrar(data);
+          }
 
           // ------------------------------------------------------------------
           // COMMIT (Automático al salir del bloque sin error)

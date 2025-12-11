@@ -4,6 +4,10 @@
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
   import { useAuthStore } from "../../../stores/authStore";
+  import { useCuentaCobrarStore } from "../../../stores/offlineStores/cuentaCobrarStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const cuentaCobrarStore = useCuentaCobrarStore();
   const authStore = useAuthStore();
   const props = defineProps({
     muestra_formulario: {
@@ -63,7 +67,7 @@
     return `<i class="fa fa-hand-holding-usd"></i> Registrar Pago`;
   });
 
-  const enviarFormulario = () => {
+  const enviarFormulario = async () => {
     if (!verificarSaldoMonto()) {
       Swal.fire({
         icon: "info",
@@ -76,26 +80,96 @@
       });
       return;
     }
-
     enviando.value = true;
-    let url =
-      accion_form.value == 0
-        ? "/admin/cuenta_cobrars"
-        : "/admin/cuenta_cobrars/pago/" + form.id;
+    if (connectivityStore.isOnline) {
+      let url =
+        accion_form.value == 0
+          ? "/admin/cuenta_cobrars"
+          : "/admin/cuenta_cobrars/pago/" + form.id;
 
-    api
-      .post(url, {
-        cancelado: montoPago.value,
-        _method: "PUT",
-      })
-      .then((response) => {
-        console.log(response);
-        montoPago.value = 0;
-        const success = response.data.message ?? "Proceso realizado con éxito";
+      api
+        .post(url, {
+          cancelado: montoPago.value,
+          _method: "PUT",
+        })
+        .then((response) => {
+          console.log(response);
+          montoPago.value = 0;
+          const success =
+            response.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          limpiarCuentaCobrar();
+          emits("envio-formulario");
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.errors
+          ) {
+            const msgError =
+              "Existen errores en el formulario, por favor verifique";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            errors.value = error.response.data.errors;
+          } else {
+            const msgError =
+              "Ocurrió un error inesperado contactese con el Administrador";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            console.error("Error inesperado:", error);
+          }
+        })
+        .finally(() => {
+          enviando.value = false;
+        });
+    } else {
+      // OFFLINE
+      try {
+        const now = new Date();
+        const dia = String(now.getDate()).padStart(2, "0");
+        const mes = String(now.getMonth() + 1).padStart(2, "0");
+        const anio = now.getFullYear();
+        const horas = String(now.getHours()).padStart(2, "0");
+        const minutos = String(now.getMinutes()).padStart(2, "0");
+
+        const fecha_c = `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+
+        const cuenta_cobrar = await cuentaCobrarStore.nuevoPago(form.id, {
+          id: 0,
+          cuenta_cobrar_id: form.id,
+          cancelado: montoPago.value, // ← corregido
+          fecha: now.toISOString().slice(0, 10),
+          hora: now.toTimeString().slice(0, 5),
+          fecha_c: fecha_c, // ← aquí va la fecha completa
+        });
+        console.log(cuenta_cobrar);
         Swal.fire({
           icon: "success",
           title: "Correcto",
-          html: `<strong>${success}</strong>`,
+          html: `<strong>Registro correcto</strong>`,
           confirmButtonText: `Aceptar`,
           customClass: {
             confirmButton: "btn-success",
@@ -103,43 +177,21 @@
         });
         limpiarCuentaCobrar();
         emits("envio-formulario");
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
-          const msgError =
-            "Existen errores en el formulario, por favor verifique";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          errors.value = error.response.data.errors;
-        } else {
-          const msgError =
-            "Ocurrió un error inesperado contactese con el Administrador";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          console.error("Error inesperado:", error);
-        }
-      })
-      .finally(() => {
+      } catch (error) {
+        const msgError = "Ocurrió un error inesperado intente nuevamente";
+        Swal.fire({
+          icon: "info",
+          title: "Error",
+          html: `<strong>${msgError}</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-error",
+          },
+        });
+      } finally {
         enviando.value = false;
-      });
+      }
+    }
   };
   const verificarSaldoMonto = () => {
     if (

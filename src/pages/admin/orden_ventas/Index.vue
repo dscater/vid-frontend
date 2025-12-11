@@ -242,6 +242,7 @@
                 ></el-tooltip>
                 <template
                   v-if="
+                    connectivityStore.isOnline &&
                     item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes('orden_ventas.edit'))
@@ -263,6 +264,7 @@
 
                 <template
                   v-if="
+                    connectivityStore.isOnline &&
                     item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(

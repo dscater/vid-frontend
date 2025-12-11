@@ -8,6 +8,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useCuentaCobrarStore } from "../../../stores/offlineStores/cuentaCobrarStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const cuentaCobrarStore = useCuentaCobrarStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -15,12 +19,16 @@
     appStore.startLoading();
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     appStore.stopLoading();
+    if (!connectivityStore.isOnline) {
+      dataOffline.value = await cuentaCobrarStore.getAll();
+    }
   });
 
   const { setCuentaCobrar, limpiarCuentaCobrar } = useCuentaCobrars();
 
+  const dataOffline = ref([]);
   const miTable = ref(null);
   const headers = [
     {
@@ -74,12 +82,21 @@
     accion_formulario.value = 0;
     muestra_formulario.value = true;
   };
-  const registrarPago = (item) => {
-    api.get("/admin/cuenta_cobrars/" + item.id).then((response) => {
-      setCuentaCobrar(response.data);
+  const registrarPago = async (item) => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/cuenta_cobrars/" + item.id).then((response) => {
+        setCuentaCobrar(response.data);
+        accion_formulario.value = 1;
+        muestra_formulario.value = true;
+      });
+    } else {
+      const data = await cuentaCobrarStore.getCuentaCobrarById(
+        parseInt(item.id)
+      );
+      setCuentaCobrar(data);
       accion_formulario.value = 1;
       muestra_formulario.value = true;
-    });
+    }
   };
 
   const updateDatatable = async () => {
@@ -185,6 +202,7 @@
         <div class="row">
           <div class="col-12">
             <MiTable
+              v-if="connectivityStore.isOnline"
               :tableClass="'bg-white mitabla'"
               ref="miTable"
               :cols="headers"
@@ -223,6 +241,66 @@
                 <template
                   v-if="
                     item.id != 2 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'cuenta_cobrars.destroy'
+                      ))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Eliminar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarCuentaCobrar(item)"
+                    >
+                      <i class="fa fa-trash-alt"></i></button
+                  ></el-tooltip>
+                </template>
+              </template>
+            </MiTable>
+            <MiTable
+              v-if="!connectivityStore.isOnline"
+              :tableClass="'bg-white mitabla'"
+              ref="miTable"
+              :cols="headers"
+              :numPages="5"
+              :data="dataOffline"
+              :multiSearch="multiSearch"
+              :token="authStore.token"
+              :syncOrderBy="'id'"
+              :syncOrderAsc="'DESC'"
+              table-responsive
+              :header-class="'bg__primary'"
+              fixed-header
+            >
+              <template #accion="{ item }">
+                <template
+                  v-if="
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('cuenta_cobrars.create')
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Pagos"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-success"
+                      @click="registrarPago(item)"
+                    >
+                      <i class="fa fa-hand-holding-usd"></i></button
+                  ></el-tooltip>
+                </template>
+
+                <template
+                  v-if="
+                    connectivityStore.isOnline &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(
                         'cuenta_cobrars.destroy'
