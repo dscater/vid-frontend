@@ -23,6 +23,10 @@ export const useSyncStore = defineStore("sync", () => {
       api: API_URL + "/admin/proformas/listado",
       hasSyncField: true,
     },
+    cuenta_cobrars: {
+      api: API_URL + "/admin/cuenta_cobrars/listado",
+      hasSyncField: true,
+    },
     clientes: { api: API_URL + "/admin/clientes/listado", hasSyncField: true },
     // Tablas que son solo lectura/catálogos (no necesitan el campo sync)
     productos: {
@@ -37,9 +41,9 @@ export const useSyncStore = defineStore("sync", () => {
       api: API_URL + "/admin/sucursal_productos/listadoSucursales",
       hasSyncField: false,
     },
-    cuenta_cobrars: {
-      api: API_URL + "/admin/cuenta_cobrars/listado",
-      hasSyncField: true,
+    unidad_medidas: {
+      api: API_URL + "/admin/unidad_medidas/listado",
+      hasSyncField: false,
     },
   };
 

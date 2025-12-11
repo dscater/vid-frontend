@@ -32,7 +32,7 @@
   const cargarOrdenVenta = async () => {
     loadingOrdenVenta.value = true;
     if (!connectivityStore.isOnline) {
-      const data = await ordenVentaStore.getOrderById(parseInt(props.id));
+      const data = await ordenVentaStore.getOrdenVentaById(parseInt(props.id));
       setOrdenVenta(data, true);
       literal.value = data.literal_txt;
       loadingOrdenVenta.value = false;
@@ -74,6 +74,7 @@
       jsPDF: { unit: "cm", format: "letter", orientation: "portrait" },
     };
 
+    // html2pdf().set(opt).from(elemento).save();
     // Generar el PDF como blob
     const pdfBlob = await html2pdf().set(opt).from(elemento).outputPdf("blob");
 
@@ -281,6 +282,10 @@
     overflow: auto;
     max-width: 21.59cm;
     margin: auto;
+  }
+
+  .contenedor_impresion table {
+    border-collapse: collapse;
   }
 
   .contenedor_factura {

@@ -67,6 +67,13 @@ export default defineConfig({
             },
           },
           {
+            urlPattern: /^.*\.css$/, // Captura cualquier petición .js
+            handler: "CacheFirst",
+            options: {
+              cacheName: "css-assets-cache",
+            },
+          },
+          {
             urlPattern: /^.*\.js$/, // Captura cualquier petición .js
             handler: "CacheFirst",
             options: {

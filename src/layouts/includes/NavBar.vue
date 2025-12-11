@@ -44,7 +44,10 @@
       </li>
       <li class="nav-item d-flex align-items-center">
         <span
-          :class="[connectivityStore.isOnline ? 'text-success' : 'text-danger']"
+          class="badge text-md"
+          :class="[
+            connectivityStore.isOnline ? 'bg4 text-success' : 'bg5 text-danger',
+          ]"
         >
           <i class="fa fa-circle"></i>
           {{ connectivityStore.isOnline ? "Conectado" : "Sin Conexión" }}</span
@@ -55,7 +58,7 @@
           @click.prevent="syncStore.initialSyncAndCache"
           :disabled="syncStore.isSyncing"
         >
-          <i class="fa fa-download"></i>
+          <i class="fa fa-download text-xs"></i>
         </button>
       </li>
       <!-- <li class="nav-item d-none d-sm-inline-block">

@@ -530,7 +530,10 @@
                           <tr v-for="(item, index) in form.proforma_detalles">
                             <td>{{ item.producto.nombre }}</td>
                             <td>
-                              <select class="form-control">
+                              <select
+                                class="form-control"
+                                v-model="item.unidad_medida_id"
+                              >
                                 <option
                                   v-for="item in listUnidadMedidas"
                                   :value="item.id"

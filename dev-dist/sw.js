@@ -79,7 +79,7 @@ define(['./workbox-177f9cb0'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "index.html",
-    "revision": "0.kt1rcu5hf1g"
+    "revision": "0.nuc7m8mni9g"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
@@ -104,6 +104,10 @@ define(['./workbox-177f9cb0'], (function (workbox) { 'use strict';
     request
   }) => ["script", "style", "image", "font"].includes(request.destination), new workbox.CacheFirst({
     "cacheName": "assets-cache",
+    plugins: []
+  }), 'GET');
+  workbox.registerRoute(/^.*\.css$/, new workbox.CacheFirst({
+    "cacheName": "css-assets-cache",
     plugins: []
   }), 'GET');
   workbox.registerRoute(/^.*\.js$/, new workbox.CacheFirst({

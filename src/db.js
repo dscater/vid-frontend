@@ -12,8 +12,9 @@ db.version(1).stores({
     "++id,nro,codigo,sucursal_id,cliente_id,fecha,hora,cantidad_total,total,total_st,solicitud_descuento,descuento,total_f,forma_pago,cs_f,observaciones,user_id,sync",
   cuenta_cobrars:
     "++id,cliente_id,orden_venta_id,total,cancelado,saldo,fecha,hora,sync",
-  clientes: "++id, razon_social,categoria,sync",
-  sucursals: "++id, nombre",
+  clientes: "++id, razon_social, categoria, sync",
+  sucursals: "++id, nombre, almacen",
+  unidad_medidas: "++id, nombre",
   productos:
     "++id, codigo,nombre,unidades_caja,descripcion,categoria_id,marca_id,precio,precio_ppp,ppp,unidad_medida_id,estado,imagen,url_imagen",
   sucursal_productos:
