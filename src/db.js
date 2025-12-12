@@ -13,6 +13,8 @@ db.version(1).stores({
   cuenta_cobrars:
     "++id,cliente_id,orden_venta_id,total,cancelado,saldo,fecha,hora,sync",
   clientes: "++id, razon_social, categoria, sync",
+  devolucion_clientes:
+    "++id, sucursal_id, cliente_id, cantidad_total, total, fecha, hora, observaciones, user_id",
   sucursals: "++id, nombre, almacen",
   unidad_medidas: "++id, nombre",
   productos:

@@ -28,6 +28,10 @@ export const useSyncStore = defineStore("sync", () => {
       hasSyncField: true,
     },
     clientes: { api: API_URL + "/admin/clientes/listado", hasSyncField: true },
+    devolucion_clientes: {
+      api: API_URL + "/admin/devolucion_clientes/listado",
+      hasSyncField: true,
+    },
     // Tablas que son solo lectura/catálogos (no necesitan el campo sync)
     productos: {
       api: API_URL + "/admin/productos/listado",

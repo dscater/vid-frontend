@@ -11,6 +11,18 @@
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
   import { useAuthStore } from "../../../stores/authStore";
+  import { useSucursalStore } from "../../../stores/offlineStores/sucursalStore";
+  import { useClienteStore } from "../../../stores/offlineStores/clienteStore";
+  import { useProductoStore } from "../../../stores/offlineStores/productoStore";
+  import { useProformaStore } from "../../../stores/offlineStores/proformaStore";
+  import { useUnidadMedidaStore } from "../../../stores/offlineStores/unidadMedidaStore";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const proformaStore = useProformaStore();
+  const sucursalStore = useSucursalStore();
+  const clienteStore = useClienteStore();
+  const productoStore = useProductoStore();
+  const unidadMedidaStore = useUnidadMedidaStore();
   const authStore = useAuthStore();
   const router = useRouter();
   // TOAST
@@ -48,78 +60,133 @@
     return `<i class="fa fa-edit"></i> Actualizar Proforma`;
   });
 
-  const enviarFormulario = () => {
+  const enviarFormulario = async () => {
     enviando.value = true;
-    let url = form.id == 0 ? "/admin/proformas" : "/admin/proformas/" + form.id;
 
-    api
-      .post(url, form)
-      .then((response) => {
-        console.log(response);
+    if (connectivityStore.isOnline) {
+      let url =
+        form.id == 0 ? "/admin/proformas" : "/admin/proformas/" + form.id;
 
-        const success = response.data.message ?? "Proceso realizado con éxito";
+      api
+        .post(url, form)
+        .then((response) => {
+          console.log(response);
+
+          const success =
+            response.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          router.push({ name: "proformas.index" });
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.errors
+          ) {
+            const msgError = error.response.data.errors.error
+              ? error.response.data.errors.error[0]
+              : "Existen errores en el formulario, por favor verifique";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            form.errors = error.response.data.errors;
+          } else {
+            const msgError =
+              "Ocurrió un error inesperado contactese con el Administrador";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            console.error("Error inesperado:", error);
+          }
+        })
+        .finally(() => {
+          enviando.value = false;
+        });
+    } else {
+      // OFFLINE
+      try {
+        const resp = await proformaStore.guardarRegistro(form);
+        console.log(resp);
+        if (resp) {
+          const success = "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          router.push({ name: "proformas.index" });
+          enviando.value = false;
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            html: `<strong>Ocurrió un error inesperado intente nuevamente y verifique que todos los campos esten llenados correctamente</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+        }
+      } catch (error) {
+        enviando.value = false;
+        console.log(error);
         Swal.fire({
-          icon: "success",
-          title: "Correcto",
-          html: `<strong>${success}</strong>`,
+          icon: "error",
+          title: "Error",
+          html: `<strong>${error}</strong>`,
           confirmButtonText: `Aceptar`,
           customClass: {
             confirmButton: "btn-success",
           },
         });
-        router.push({ name: "proformas.index" });
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
-          const msgError = error.response.data.errors.error
-            ? error.response.data.errors.error[0]
-            : "Existen errores en el formulario, por favor verifique";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          form.errors = error.response.data.errors;
-        } else {
-          const msgError =
-            "Ocurrió un error inesperado contactese con el Administrador";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          console.error("Error inesperado:", error);
-        }
-      })
-      .finally(() => {
-        enviando.value = false;
-      });
+      }
+    }
   };
 
   const listSucursals = ref([]);
-  const cargarProveedors = () => {
-    api.get("/admin/sucursals/listadoSP").then((response) => {
-      listSucursals.value = response.data.sucursals;
-    });
+  const cargarSucursals = async () => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/sucursals/listadoSP").then((response) => {
+        listSucursals.value = response.data.sucursals;
+      });
+    } else {
+      listSucursals.value = await sucursalStore.getAllSinAlmacen();
+    }
   };
 
   const listUnidadMedidas = ref([]);
-  const cargarUnidadMedidas = () => {
-    api.get("/admin/unidad_medidas/listado").then((response) => {
-      listUnidadMedidas.value = response.data.unidad_medidas;
-    });
+  const cargarUnidadMedidas = async () => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/unidad_medidas/listado").then((response) => {
+        listUnidadMedidas.value = response.data.unidad_medidas;
+      });
+    } else {
+      listUnidadMedidas.value = await unidadMedidaStore.getAll();
+    }
   };
 
   const listClientes = ref([]);
@@ -128,12 +195,17 @@
     if (query !== "") {
       loadingClientes.value = true;
       try {
-        const response = await api.get(
-          "/admin/clientes/listadoSelectElementUi" +
-            `?search=${encodeURIComponent(query)}`
-        );
-        console.log(response);
-        const data = response.data.clientes;
+        let response = null;
+        if (connectivityStore.isOnline) {
+          response = await api.get(
+            "/admin/clientes/listadoSelectElementUi" +
+              `?search=${encodeURIComponent(query)}`
+          );
+        } else {
+          response = { data: { clientes: [] } };
+          response.data.clientes = await clienteStore.getAll();
+        }
+        const data = response ? response.data.clientes : [];
         // Suponiendo que data es un array de clientes [{id, nombre}]
         listClientes.value = data.map((cliente) => ({
           value: cliente.id,
@@ -151,11 +223,11 @@
   };
 
   const cargarListas = () => {
-    cargarProveedors();
+    cargarSucursals();
     cargarUnidadMedidas();
   };
 
-  const agregarProducto = () => {
+  const agregarProducto = async () => {
     if (
       nuevoProducto.value.codigoProducto.trim() == "" ||
       ("" + nuevoProducto.value.cantidad).trim() == ""
@@ -166,65 +238,123 @@
       return;
     }
 
-    api
-      .get("/admin/productos/byCodigo", {
-        params: {
-          codigo: nuevoProducto.value.codigoProducto,
-        },
-      })
-      .then((response) => {
-        if (!response.data) {
+    if (connectivityStore.isOnline) {
+      api
+        .get("/admin/productos/byCodigo", {
+          params: {
+            codigo: nuevoProducto.value.codigoProducto,
+          },
+        })
+        .then((response) => {
+          if (!response.data) {
+            Swal.fire({
+              icon: "info",
+              title: "Atención",
+              html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-success",
+              },
+            });
+            return;
+          }
+          const prod = response.data;
+          const existe = form.proforma_detalles.filter(
+            (elem) => elem.producto_id === prod.id
+          );
+          if (existe.length > 0) {
+            toast.info("Ese producto ya fue agregado");
+            return;
+          }
+
+          const subtotal =
+            parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio);
+          form.proforma_detalles.push({
+            id: 0,
+            proforma_id: 0,
+            producto_id: prod.id,
+            unidad_medida_id: prod.unidad_medida_id,
+            producto: prod,
+            cantidad: nuevoProducto.value.cantidad,
+            precio: prod.precio,
+            descuento: 0,
+            subtotal: subtotal,
+            subtotal_f: subtotal,
+          });
+          nuevoProducto.value.codigoProducto = "";
+          calcularTotal();
+          calcularTotalConDescuento();
+          calcularCambio();
+        })
+        .catch((err) => {
+          console.log(err);
           Swal.fire({
             icon: "info",
             title: "Atención",
-            html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+            html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
               confirmButton: "btn-success",
             },
           });
-          return;
-        }
-        const prod = response.data;
-        const existe = form.proforma_detalles.filter(
-          (elem) => elem.producto_id === prod.id
-        );
-        if (existe.length > 0) {
-          toast.info("Ese producto ya fue agregado");
-          return;
-        }
-
-        const subtotal =
-          parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio);
-        form.proforma_detalles.push({
-          id: 0,
-          proforma_id: 0,
-          producto_id: prod.id,
-          unidad_medida_id: prod.unidad_medida_id,
-          producto: prod,
-          cantidad: nuevoProducto.value.cantidad,
-          precio: prod.precio,
-          descuento: 0,
-          subtotal: subtotal,
-          subtotal_f: subtotal,
         });
-        nuevoProducto.value.codigoProducto = "";
-        calcularTotal();
-        calcularTotalConDescuento();
-        calcularCambio();
-      })
-      .catch((err) => {
-        console.log(err);
+    } else {
+      // OFFLINE
+      const prod = await productoStore.getProductoByCodigo(
+        nuevoProducto.value.codigoProducto
+      );
+      if (!prod) {
         Swal.fire({
           icon: "info",
           title: "Atención",
-          html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
+          html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
           confirmButtonText: `Aceptar`,
           customClass: {
             confirmButton: "btn-success",
           },
         });
+      }
+      const existe = form.proforma_detalles.filter(
+        (elem) => elem.producto_id === prod.id
+      );
+      if (existe.length > 0) {
+        toast.info("Ese producto ya fue agregado");
+        return;
+      }
+
+      const subtotal =
+        parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio);
+      const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
+        prod.unidad_medida_id
+      );
+      form.proforma_detalles.push({
+        id: 0,
+        proforma_id: 0,
+        producto_id: prod.id,
+        unidad_medida_id: prod.unidad_medida_id,
+        unidad_medida: unidad_medida,
+        producto: prod,
+        cantidad: nuevoProducto.value.cantidad,
+        precio: prod.precio,
+        descuento: 0,
+        subtotal: subtotal,
+        subtotal_f: subtotal,
       });
+      nuevoProducto.value.codigoProducto = "";
+      calcularTotal();
+      calcularTotalConDescuento();
+      calcularCambio();
+    }
+  };
+
+  const asignaUnidadMedida = async (index, e) => {
+    form.proforma_detalles[index].unidad_medida_id = e.target.value;
+    if (!connectivityStore.isOnline) {
+      const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
+        parseInt(e.target.value)
+      );
+      form.proforma_detalles[index].unidad_medida = unidad_medida;
+    }
   };
 
   const calcularSubtotalPorCantidad = (e, index) => {
@@ -532,6 +662,7 @@
                             <td>
                               <select
                                 class="form-control"
+                                @change="asignaUnidadMedida(index, $event)"
                                 v-model="item.unidad_medida_id"
                               >
                                 <option

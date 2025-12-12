@@ -17,6 +17,17 @@
     },
   });
 
+  import { useProductoStore } from "../../../stores/offlineStores/productoStore";
+  import { useDevolucionClienteStore } from "../../../stores/offlineStores/devolucionClienteStore.js";
+  import { useSucursalStore } from "../../../stores/offlineStores/sucursalStore.js";
+  import { useClienteStore } from "../../../stores/offlineStores/clienteStore";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const devolucionClienteStore = useDevolucionClienteStore();
+  const productoStore = useProductoStore();
+  const clienteStore = useClienteStore();
+  const sucursalStore = useSucursalStore();
+
   const { oDevolucionCliente, limpiarDevolucionCliente } =
     useDevolucionClientes();
   const accion_form = ref(props.accion_formulario);
@@ -68,23 +79,81 @@
     return `<i class="fa fa-edit"></i> Actualizar`;
   });
 
-  const enviarFormulario = () => {
+  const enviarFormulario = async () => {
     enviando.value = true;
-    let url =
-      accion_form.value == 0
-        ? "/admin/devolucion_clientes"
-        : "/admin/devolucion_clientes/" + form.id;
+    if (connectivityStore.isOnline) {
+      let url =
+        accion_form.value == 0
+          ? "/admin/devolucion_clientes"
+          : "/admin/devolucion_clientes/" + form.id;
 
-    api
-      .post(url, form)
-      .then((response) => {
-        console.log(response);
+      api
+        .post(url, form)
+        .then((response) => {
+          console.log(response);
 
-        const success = response.data.message ?? "Proceso realizado con éxito";
+          const success =
+            response.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          limpiarDevolucionCliente();
+          emits("envio-formulario");
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.errors
+          ) {
+            const msgError = error.response.data.errors.error
+              ? error.response.data.errors.error[0]
+              : "Existen errores en el formulario, por favor verifique";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            form.errors = error.response.data.errors;
+          } else {
+            const msgError =
+              "Ocurrió un error inesperado contactese con el Administrador";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            console.error("Error inesperado:", error);
+          }
+        })
+        .finally(() => {
+          enviando.value = false;
+        });
+    } else {
+      // OFFLINE
+      try {
+        const devolucion_cliente = await devolucionClienteStore.guardarRegistro(
+          form
+        );
+        console.log(devolucion_cliente);
         Swal.fire({
           icon: "success",
           title: "Correcto",
-          html: `<strong>${success}</strong>`,
+          html: `<strong>Registro correcto</strong>`,
           confirmButtonText: `Aceptar`,
           customClass: {
             confirmButton: "btn-success",
@@ -92,44 +161,22 @@
         });
         limpiarDevolucionCliente();
         emits("envio-formulario");
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
-          const msgError = error.response.data.errors.error
-            ? error.response.data.errors.error[0]
-            : "Existen errores en el formulario, por favor verifique";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          form.errors = error.response.data.errors;
-        } else {
-          const msgError =
-            "Ocurrió un error inesperado contactese con el Administrador";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          console.error("Error inesperado:", error);
-        }
-      })
-      .finally(() => {
+      } catch (error) {
+        console.log(error);
+        const msgError = "Ocurrió un error inesperado intente nuevamente";
+        Swal.fire({
+          icon: "info",
+          title: "Error",
+          html: `<strong>${error}</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-error",
+          },
+        });
+      } finally {
         enviando.value = false;
-      });
+      }
+    }
   };
 
   const emits = defineEmits(["cerrar-formulario", "envio-formulario"]);
@@ -146,10 +193,14 @@
   };
 
   const listSucursals = ref([]);
-  const cargarProveedors = () => {
-    api.get("/admin/sucursals/listadoSP").then((response) => {
-      listSucursals.value = response.data.sucursals;
-    });
+  const cargarSucursals = async () => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/sucursals/listadoSP").then((response) => {
+        listSucursals.value = response.data.sucursals;
+      });
+    } else {
+      listSucursals.value = await sucursalStore.getAllSinAlmacen();
+    }
   };
 
   const listUsers = ref([]);
@@ -160,8 +211,10 @@
   };
 
   const cargarListas = () => {
-    cargarProveedors();
-    cargarUsers();
+    cargarSucursals();
+    if (connectivityStore.isOnline) {
+      cargarUsers();
+    }
   };
 
   const getFechaAtual = () => {
@@ -179,7 +232,7 @@
     return `${hours}:${minutes}`;
   };
 
-  const agregarProducto = () => {
+  const agregarProducto = async () => {
     if (codigoProducto.value.trim() == "") {
       Swal.fire({
         icon: "info",
@@ -193,58 +246,84 @@
       return;
     }
 
-    api
-      .get("/admin/productos/byCodigo", {
-        params: {
-          codigo: codigoProducto.value,
-        },
-      })
-      .then((response) => {
-        if (!response.data) {
+    if (connectivityStore.isOnline) {
+      api
+        .get("/admin/productos/byCodigo", {
+          params: {
+            codigo: codigoProducto.value,
+          },
+        })
+        .then((response) => {
+          if (!response.data) {
+            Swal.fire({
+              icon: "info",
+              title: "Atención",
+              html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-success",
+              },
+            });
+            return;
+          }
+          const prod = response.data;
+          const existe = form.devolucion_cliente_detalles.filter(
+            (elem) => elem.producto_id === prod.id
+          );
+          if (existe.length > 0) {
+            toast.info("Ese producto ya fue agregado");
+            return;
+          }
+
+          form.devolucion_cliente_detalles.push({
+            id: 0,
+            devolucion_cliente_id: 0,
+            producto_id: prod.id,
+            producto: prod,
+            cantidad: 1,
+            costo: prod.precio,
+            subtotal: prod.precio,
+          });
+          codigoProducto.value = "";
+          calcularTotal();
+        })
+        .catch((err) => {
+          console.log(err);
           Swal.fire({
             icon: "info",
             title: "Atención",
-            html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
+            html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
               confirmButton: "btn-success",
             },
           });
-          return;
-        }
-        const prod = response.data;
-        const existe = form.devolucion_cliente_detalles.filter(
-          (elem) => elem.producto_id === prod.id
-        );
-        if (existe.length > 0) {
-          toast.info("Ese producto ya fue agregado");
-          return;
-        }
+        });
+    } else {
+      // OFFLINE
+      const prod = await productoStore.getProductoByCodigo(
+        codigoProducto.value
+      );
+      const existe = form.devolucion_cliente_detalles.filter(
+        (elem) => elem.producto_id === prod.id
+      );
+      if (existe.length > 0) {
+        toast.info("Ese producto ya fue agregado");
+        return;
+      }
 
-        form.devolucion_cliente_detalles.push({
-          id: 0,
-          devolucion_cliente_id: 0,
-          producto_id: prod.id,
-          producto: prod,
-          cantidad: 1,
-          costo: prod.precio,
-          subtotal: prod.precio,
-        });
-        codigoProducto.value = "";
-        calcularTotal();
-      })
-      .catch((err) => {
-        console.log(err);
-        Swal.fire({
-          icon: "info",
-          title: "Atención",
-          html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
-          confirmButtonText: `Aceptar`,
-          customClass: {
-            confirmButton: "btn-success",
-          },
-        });
+      form.devolucion_cliente_detalles.push({
+        id: 0,
+        devolucion_cliente_id: 0,
+        producto_id: prod.id,
+        producto: prod,
+        cantidad: 1,
+        costo: prod.precio,
+        subtotal: prod.precio,
       });
+      codigoProducto.value = "";
+      calcularTotal();
+    }
   };
 
   const oUser = ref(null);
@@ -317,10 +396,16 @@
     if (query !== "") {
       loadingClientes.value = true;
       try {
-        const response = await api.get(
-          "/admin/clientes/listadoSelectElementUi" +
-            `?search=${encodeURIComponent(query)}`
-        );
+        let response = null;
+        if (connectivityStore.isOnline) {
+          response = await api.get(
+            "/admin/clientes/listadoSelectElementUi" +
+              `?search=${encodeURIComponent(query)}`
+          );
+        } else {
+          response = { data: { clientes: [] } };
+          response.data.clientes = await clienteStore.getAll();
+        }
         console.log(response);
         const data = response.data.clientes;
         // Suponiendo que data es un array de clientes [{id, nombre}]
@@ -395,7 +480,7 @@
                 </li>
               </ul>
             </div>
-            <div class="col-md-4 mb-2">
+            <div class="col-md-4 mb-2" v-if="connectivityStore.isOnline">
               <label class="required">Encargado de Sucursal</label>
               <input
                 type="text"

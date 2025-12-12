@@ -8,6 +8,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useClienteStore } from "../../../stores/offlineStores/clienteStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const clienteStore = useClienteStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -15,12 +19,16 @@
     appStore.startLoading();
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     appStore.stopLoading();
+    if (!connectivityStore.isOnline) {
+      dataOffline.value = await clienteStore.getAll();
+    }
   });
 
   const { setCliente, limpiarCliente } = useClientes();
 
+  const dataOffline = ref([]);
   const miTable = ref(null);
   const headers = [
     {
@@ -104,7 +112,11 @@
 
   const updateDatatable = async () => {
     if (miTable.value) {
-      await miTable.value.cargarDatos();
+      if (connectivityStore.isOnline) {
+        await miTable.value.cargarDatos();
+      } else {
+        dataOffline.value = await clienteStore.getAll();
+      }
       muestra_formulario.value = false;
     }
   };
@@ -205,12 +217,87 @@
         <div class="row">
           <div class="col-12">
             <MiTable
+              v-if="connectivityStore.isOnline"
               :tableClass="'bg-white mitabla'"
               ref="miTable"
               :cols="headers"
               :api="true"
               :url="apiUrl + '/admin/clientes/paginado'"
               :numPages="5"
+              :multiSearch="multiSearch"
+              :token="authStore.token"
+              :syncOrderBy="'id'"
+              :syncOrderAsc="'DESC'"
+              table-responsive
+              :header-class="'bg__primary'"
+              fixed-header
+            >
+              <template #estado="{ item }">
+                <span
+                  class="badge text-sm"
+                  :class="[
+                    {
+                      'bg-success': item.estado == 1,
+                      'bg-danger': item.estado == 0,
+                    },
+                  ]"
+                >
+                  {{ item.estado_t }}</span
+                >
+              </template>
+              <template #accion="{ item }">
+                <template
+                  v-if="
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('clientes.edit')
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Editar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-warning"
+                      @click="
+                        setCliente(item);
+                        accion_formulario = 1;
+                        muestra_formulario = true;
+                      "
+                    >
+                      <i class="fa fa-pen"></i></button
+                  ></el-tooltip>
+                </template>
+
+                <template
+                  v-if="
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('clientes.destroy')
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Eliminar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarCliente(item)"
+                    >
+                      <i class="fa fa-trash-alt"></i></button
+                  ></el-tooltip>
+                </template>
+              </template>
+            </MiTable>
+            <MiTable
+              v-if="!connectivityStore.isOnline"
+              :tableClass="'bg-white mitabla'"
+              ref="miTable"
+              :cols="headers"
+              :numPages="5"
+              :data="dataOffline"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

@@ -7,6 +7,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useProformaStore } from "../../../stores/offlineStores/ProformaStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const proformaStore = useProformaStore();
   const router = useRouter();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
@@ -15,12 +19,16 @@
     appStore.startLoading();
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     appStore.stopLoading();
+    if (!connectivityStore.isOnline) {
+      dataOffline.value = await proformaStore.getAll();
+    }
   });
 
   const { setProforma, limpiarProforma } = useProformas();
 
+  const dataOffline = ref([]);
   const miTable = ref(null);
   const headers = [
     {
@@ -194,12 +202,89 @@
         <div class="row">
           <div class="col-12">
             <MiTable
+              v-if="connectivityStore.isOnline"
               :tableClass="'bg-white mitabla'"
               ref="miTable"
               :cols="headers"
               :api="true"
               :url="apiUrl + '/admin/proformas/paginado'"
               :numPages="5"
+              :multiSearch="multiSearch"
+              :token="authStore.token"
+              :syncOrderBy="'id'"
+              :syncOrderAsc="'DESC'"
+              table-responsive
+              :header-class="'bg__primary'"
+              fixed-header
+            >
+              <template #user="{ item }">
+                {{ item.user.nombre }} {{ item.user.paterno }}
+                {{ item.user.materno }}
+              </template>
+
+              <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Imprimir"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="imprimirProforma(item)"
+                  >
+                    <i class="fa fa-print"></i></button
+                ></el-tooltip>
+                <template
+                  v-if="
+                    connectivityStore?.isOnline &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('proformas.edit'))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Editar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-warning"
+                      @click="editarProforma(item)"
+                    >
+                      <i class="fa fa-pen"></i></button
+                  ></el-tooltip>
+                </template>
+
+                <template
+                  v-if="
+                    connectivityStore?.isOnline &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('proformas.destroy'))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Eliminar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarProforma(item)"
+                    >
+                      <i class="fa fa-trash-alt"></i></button
+                  ></el-tooltip>
+                </template>
+              </template>
+            </MiTable>
+            <MiTable
+              v-if="!connectivityStore.isOnline"
+              :tableClass="'bg-white mitabla'"
+              ref="miTable"
+              :cols="headers"
+              :numPages="5"
+              :data="dataOffline"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

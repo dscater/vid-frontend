@@ -31,7 +31,7 @@
     (newValue) => {
       muestra_form.value = newValue;
       if (muestra_form.value) {
-        cargarListas();
+        // cargarListas();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
         form = oDevolucionCliente.value;
         form.errors = null;

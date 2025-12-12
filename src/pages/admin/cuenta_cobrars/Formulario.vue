@@ -133,7 +133,7 @@
             Swal.fire({
               icon: "info",
               title: "Error",
-              html: `<strong>${msgError}</strong>`,
+              html: `<strong>${error}</strong>`,
               confirmButtonText: `Aceptar`,
               customClass: {
                 confirmButton: "btn-error",

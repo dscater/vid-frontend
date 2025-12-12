@@ -3,6 +3,10 @@
   import { useClientes } from "../../../composables/clientes/useClientes";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
+  import { useClienteStore } from "../../../stores/offlineStores/clienteStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const clienteStore = useClienteStore();
   const props = defineProps({
     muestra_formulario: {
       type: Boolean,
@@ -58,21 +62,78 @@
     return `<i class="fa fa-edit"></i> Actualizar`;
   });
 
-  const enviarFormulario = () => {
+  const enviarFormulario = async () => {
     enviando.value = true;
-    let url =
-      accion_form.value == 0 ? "/admin/clientes" : "/admin/clientes/" + form.id;
+    if (connectivityStore.isOnline) {
+      let url =
+        accion_form.value == 0
+          ? "/admin/clientes"
+          : "/admin/clientes/" + form.id;
 
-    api
-      .post(url, form)
-      .then((response) => {
-        console.log(response);
+      api
+        .post(url, form)
+        .then((response) => {
+          console.log(response);
 
-        const success = response.data.message ?? "Proceso realizado con éxito";
+          const success =
+            response.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          limpiarCliente();
+          emits("envio-formulario");
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.errors
+          ) {
+            const msgError =
+              "Existen errores en el formulario, por favor verifique";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            form.errors = error.response.data.errors;
+          } else {
+            const msgError =
+              "Ocurrió un error inesperado contactese con el Administrador";
+            Swal.fire({
+              icon: "info",
+              title: "Error",
+              html: `<strong>${msgError}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-error",
+              },
+            });
+            console.error("Error inesperado:", error);
+          }
+        })
+        .finally(() => {
+          enviando.value = false;
+        });
+    } else {
+      // OFFLINE
+      try {
+        const cliente = await clienteStore.guardarRegistro(form);
+        console.log(cliente);
         Swal.fire({
           icon: "success",
           title: "Correcto",
-          html: `<strong>${success}</strong>`,
+          html: `<strong>Registro correcto</strong>`,
           confirmButtonText: `Aceptar`,
           customClass: {
             confirmButton: "btn-success",
@@ -80,43 +141,22 @@
         });
         limpiarCliente();
         emits("envio-formulario");
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errors
-        ) {
-          const msgError =
-            "Existen errores en el formulario, por favor verifique";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          form.errors = error.response.data.errors;
-        } else {
-          const msgError =
-            "Ocurrió un error inesperado contactese con el Administrador";
-          Swal.fire({
-            icon: "info",
-            title: "Error",
-            html: `<strong>${msgError}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-error",
-            },
-          });
-          console.error("Error inesperado:", error);
-        }
-      })
-      .finally(() => {
+      } catch (error) {
+        console.log(error);
+        const msgError = "Ocurrió un error inesperado intente nuevamente";
+        Swal.fire({
+          icon: "info",
+          title: "Error",
+          html: `<strong>${error}</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-error",
+          },
+        });
+      } finally {
         enviando.value = false;
-      });
+      }
+    }
   };
 
   const emits = defineEmits(["cerrar-formulario", "envio-formulario"]);

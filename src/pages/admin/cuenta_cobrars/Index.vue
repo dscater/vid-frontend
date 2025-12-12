@@ -101,7 +101,11 @@
 
   const updateDatatable = async () => {
     if (miTable.value) {
-      await miTable.value.cargarDatos();
+      if (connectivityStore.isOnline) {
+        await miTable.value.cargarDatos();
+      } else {
+        dataOffline.value = await cuentaCobrarStore.getAll();
+      }
       muestra_formulario.value = false;
     }
   };
@@ -240,7 +244,7 @@
 
                 <template
                   v-if="
-                    item.id != 2 &&
+                    connectivityStore.isOnline &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(
                         'cuenta_cobrars.destroy'

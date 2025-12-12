@@ -8,6 +8,10 @@
   import { useRouter } from "vue-router";
   import { useConfiguracionStore } from "../../../stores/configuracion/configuracionStore";
   import html2pdf from "html2pdf.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import { useProformaStore } from "../../../stores/offlineStores/proformaStore.js";
+  const connectivityStore = useConnectivityStore();
+  const proformaStore = useProformaStore();
   const configuracionStore = useConfiguracionStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
@@ -25,13 +29,20 @@
   const { setProforma, limpiarProforma, oProforma } = useProformas();
   const loadingProforma = ref(true);
   const literal = ref("");
-  const cargarProforma = () => {
+  const cargarProforma = async () => {
     loadingProforma.value = true;
-    api.get("/admin/proformas/" + props.id).then((response) => {
-      setProforma(response.data.proforma, true);
-      literal.value = response.data.literal;
+    if (!connectivityStore.isOnline) {
+      const data = await proformaStore.getProformaById(parseInt(props.id));
+      setProforma(data, true);
+      literal.value = data.literal_txt;
       loadingProforma.value = false;
-    });
+    } else {
+      api.get("/admin/proformas/" + props.id).then((response) => {
+        setProforma(response.data.proforma, true);
+        literal.value = response.data.literal;
+        loadingProforma.value = false;
+      });
+    }
   };
 
   function formatDMY(fecha) {
@@ -57,7 +68,128 @@
     };
 
     // Generar el PDF como blob
-    const pdfBlob = await html2pdf().set(opt).from(elemento).outputPdf("blob");
+    let fontSize = ``;
+    let minWidth = `21.59cm`;
+    if (!connectivityStore.isOnline) {
+      fontSize = `font-size:0.7em;`;
+      minWidth = `18cm`;
+    }
+    const html = `
+      <html>
+        <head>
+          <style>
+      .contenedor_factura {
+        width: ${minWidth};
+        overflow: auto;
+        max-width: 21.59cm;
+        margin: auto;
+          ${fontSize}
+      }
+
+      .contenedor_factura table {
+        border-collapse: collapse;
+      }
+
+      .contenedor_factura {
+        padding: 10px;
+        width: ${minWidth};
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .contenedor_factura .centreado {
+        text-align: center;
+      }
+
+      .contenedor_factura .derecha {
+        text-align: right;
+      }
+
+      .contenedor_factura .header {
+        width: 100%;
+        display: flex;
+      }
+      .contenedor_factura .header .logo {
+        text-align: center;
+        width: 150px;
+        flex: 1;
+      }
+      .contenedor_factura .tipo {
+        width: 100%;
+        font-weight: bold;
+        text-align: right;
+      }
+
+      .contenedor_factura .check {
+        display: inline-block;
+        height: 20px;
+        width: 20px;
+        text-align: center;
+        font-size: 1em;
+        border: solid 2px;
+      }
+
+      .contenedor_factura .check.active {
+        background-color: rgb(230, 230, 230);
+      }
+
+      .contenedor_factura .header .logo img {
+        height: 90px;
+      }
+
+      .contenedor_factura .header .dir {
+        text-align: center;
+        flex: 1;
+      }
+
+      .contenedor_factura .header .total {
+        text-align: right;
+        flex: 1;
+        font-weight: bold;
+      }
+
+      .contenedor_factura .header .total .monto {
+        border: solid 2px;
+        padding: 7px;
+      }
+
+      .contenedor_factura .header .total .nro {
+        font-weight: bold;
+        display: block;
+        margin-top: 20px;
+      }
+
+      .contenedor_factura .info {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .contenedor_factura .contenido {
+        width: 100%;
+      }
+      .contenedor_factura .contenido table {
+        width: 100%;
+      }
+
+      .contenedor_factura .info_pagos table tr td:nth-child(odd) {
+        text-align: right;
+      }
+
+      .contenedor_factura .tbold {
+        font-size: 1.02em;
+        font-weight: bold;
+      }
+      .contenedor_factura .final {
+        text-align: center;
+        margin-top: 100px;
+      }
+          </style>
+        </head>
+        <body>
+          ${elemento.innerHTML}
+        </body>
+      </html>
+    `;
+    const pdfBlob = await html2pdf().set(opt).from(html).outputPdf("blob");
 
     // Crear una URL temporal
     const url = URL.createObjectURL(pdfBlob);

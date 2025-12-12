@@ -9,6 +9,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useDevolucionClienteStore } from "../../../stores/offlineStores/devolucionClienteStore.js";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  const connectivityStore = useConnectivityStore();
+  const devolucionClienteStore = useDevolucionClienteStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -16,13 +20,17 @@
     appStore.startLoading();
   });
 
-  onMounted(() => {
+  onMounted(async () => {
     appStore.stopLoading();
+    if (!connectivityStore.isOnline) {
+      dataOffline.value = await devolucionClienteStore.getAll();
+    }
   });
 
   const { setDevolucionCliente, limpiarDevolucionCliente } =
     useDevolucionClientes();
 
+  const dataOffline = ref([]);
   const miTable = ref(null);
   const headers = [
     {
@@ -79,7 +87,11 @@
 
   const updateDatatable = async () => {
     if (miTable.value) {
-      await miTable.value.cargarDatos();
+      if (connectivityStore.isOnline) {
+        await miTable.value.cargarDatos();
+      } else {
+        dataOffline.value = await devolucionClienteStore.getAll();
+      }
       muestra_formulario.value = false;
       muestra_formulario_detalle.value = false;
     }
@@ -95,12 +107,23 @@
 
   const accion_formulario_detalle = ref(0);
   const muestra_formulario_detalle = ref(false);
-  const aprobarDevolucionCliente = (item) => {
-    api.get("/admin/devolucion_clientes/" + item.id).then((response) => {
-      setDevolucionCliente(response.data.devolucion_cliente);
+  const aprobarDevolucionCliente = async (item) => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/devolucion_clientes/" + item.id).then((response) => {
+        setDevolucionCliente(response.data.devolucion_cliente);
+        accion_formulario_detalle.value = 1;
+        muestra_formulario_detalle.value = true;
+      });
+    } else {
+      const data = await devolucionClienteStore.getDevolucionClienteById(
+        parseInt(item.id)
+      );
+      console.log("AAAAAAAAAAAAAAAA");
+      console.log(data);
+      setDevolucionCliente(data);
       accion_formulario_detalle.value = 1;
       muestra_formulario_detalle.value = true;
-    });
+    }
   };
 
   const eliminarDevolucionCliente = (item) => {
@@ -202,12 +225,103 @@
         <div class="row">
           <div class="col-12">
             <MiTable
+              v-if="connectivityStore.isOnline"
               :tableClass="'bg-white mitabla'"
               ref="miTable"
               :cols="headers"
               :api="true"
               :url="apiUrl + '/admin/devolucion_clientes/paginado'"
               :numPages="5"
+              :multiSearch="multiSearch"
+              :token="authStore.token"
+              :syncOrderBy="'id'"
+              :syncOrderAsc="'DESC'"
+              table-responsive
+              :header-class="'bg__primary'"
+              fixed-header
+            >
+              <template #user_aprobador="{ item }">
+                {{ item.user_aprobador.nombre }}
+                {{ item.user_aprobador.paterno }}
+                {{ item.user_aprobador.materno }}
+              </template>
+              <template #user_solicitante="{ item }">
+                {{ item.user_solicitante.nombre }}
+                {{ item.user_solicitante.paterno }}
+                {{ item.user_solicitante.materno }}
+              </template>
+              <template #user="{ item }">
+                {{ item.user.nombre }} {{ item.user.paterno }}
+                {{ item.user.materno }}
+              </template>
+
+              <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="aprobarDevolucionCliente(item)"
+                  >
+                    <i class="fa fa-list"></i></button
+                ></el-tooltip>
+                <!-- <template
+                  v-if="
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'devolucion_clientes.edit'
+                      ))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Editar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-warning"
+                      @click="editarDevolucionCliente(item)"
+                    >
+                      <i class="fa fa-pen"></i></button
+                  ></el-tooltip>
+                </template> -->
+
+                <template
+                  v-if="
+                    connectivityStore.isOnline &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'devolucion_clientes.destroy'
+                      ))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Eliminar"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="eliminarDevolucionCliente(item)"
+                    >
+                      <i class="fa fa-trash-alt"></i></button
+                  ></el-tooltip>
+                </template>
+              </template>
+            </MiTable>
+            <MiTable
+              v-if="!connectivityStore.isOnline"
+              :tableClass="'bg-white mitabla'"
+              ref="miTable"
+              :cols="headers"
+              :numPages="5"
+              :data="dataOffline"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"
