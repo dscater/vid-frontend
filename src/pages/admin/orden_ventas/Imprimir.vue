@@ -80,7 +80,7 @@
     let minWidth = `21.59cm`;
     if (!connectivityStore.isOnline) {
       fontSize = `font-size:0.7em;`;
-      minWidth = `18cm`;
+      minWidth = `20cm`;
     }
     const html = `
       <html>

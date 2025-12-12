@@ -9,7 +9,10 @@ import { useSucursalStore } from "./sucursalStore.js";
 import { useUnidadMedidaStore } from "./unidadMedidaStore.js";
 import { useCuentaCobrarStore } from "./cuentaCobrarStore.js";
 import { useAuthStore } from "../authStore.js";
+import api from "../../composables/axios.js";
+import { useAppStore } from "../aplicacion/appStore.js";
 export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
+  const appStore = useAppStore();
   const connectivityStore = useConnectivityStore();
   const sucursalProductoStore = useSucursalProductoStore();
   const clienteStore = useClienteStore();
@@ -141,6 +144,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           // Crear el objeto
           const detallesParaDB = data.orden_venta_detalles.map((d) => ({
             producto_id: d.producto_id,
+            unidad_medida_id: d.unidad_medida_id,
             cantidad: d.cantidad,
             precio: d.precio,
             descuento: d.descuento,
@@ -287,12 +291,51 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
   // --- Sincronización ---
   const API_URL = import.meta.env.VITE_API_URL;
   async function sincronizarPendientes() {
-    if (!isOnline.value || pendientesCount.value === 0) return;
+    console.log("Sincronizado: ");
+    const registros = await db.orden_ventas.toArray();
+    const pendientes = registros.filter((registro) => {
+      return registro.sync !== true;
+    });
+    // const pendientes = await db.orden_ventas.where({ sync: false }).toArray();
+    if (pendientes.length == 0) {
+      return;
+    }
+    console.log("Sincronizado: ");
+    console.log(pendientes);
+    appStore.setSync(true);
+    pendientes.forEach(async (elem) => {
+      // cuenta_cobrar
+      const cuenta_cobrar = await cuentaCobrarStore.getCuentaCobrarByOrdenId(
+        parseInt(elem.id)
+      );
+      console.log(cuenta_cobrar);
+      try {
+        await api.post(API_URL + "/orden_ventas/sincronizar", {
+          orden_venta: elem,
+          cuenta_cobrar: cuenta_cobrar ?? null,
+        });
+        if (cuenta_cobrar) {
+          // ELIMINAR CUENTA COBRAR
+          console.log("elimina cuenta cobrar");
+          await db.cuenta_cobrars.delete(cuenta_cobrar.id);
+        }
+        console.log("registrado");
+      } catch (error) {
+        console.log(error);
+      } finally {
+      }
+    });
+    appStore.setSync(false);
+    console.log("eliminar registros");
+    const ids = pendientes.map((p) => p.id);
+    await db.orden_ventas.bulkDelete(ids);
+
+    // SEGUIDO SINCRONIZAR CUENTAS POR PAGAR
+    cuentaCobrarStore.sincronizarPendientes();
   }
 
   return {
     registros,
-    pendientesCount,
     guardarRegistro,
     sincronizarPendientes,
     getAll,

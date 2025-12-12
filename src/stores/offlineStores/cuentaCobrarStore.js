@@ -4,7 +4,10 @@ import { ref, computed } from "vue";
 import { db } from "../../db.js";
 import { useConnectivityStore } from "./useConnectivityStore.js";
 
+import { useAppStore } from "../aplicacion/appStore.js";
+import api from "../../composables/axios.js";
 export const useCuentaCobrarStore = defineStore("cuenta_cobrarStore", () => {
+  const appStore = useAppStore();
   const connectivityStore = useConnectivityStore();
   const isOnline = computed(() => connectivityStore.isOnline);
   const registros = ref([]);
@@ -28,6 +31,22 @@ export const useCuentaCobrarStore = defineStore("cuenta_cobrarStore", () => {
       return cuenta_cobrar;
     } catch (error) {
       console.error(`Error al obtener el registro con ID ${id}:`, error);
+    }
+  }
+
+  async function getCuentaCobrarByOrdenId(orden_venta_id) {
+    try {
+      const codigoBuscado = parseInt(orden_venta_id);
+      const cuenta_cobrar = await db.cuenta_cobrars
+        .where("orden_venta_id")
+        .equals(codigoBuscado)
+        .first();
+      console.log("CUENTA COBRAR");
+      console.log(cuenta_cobrar);
+      return cuenta_cobrar;
+    } catch (error) {
+      console.error(`Error al buscar registros por producto ${codigo}:`, error);
+      return [];
     }
   }
 
@@ -67,11 +86,11 @@ export const useCuentaCobrarStore = defineStore("cuenta_cobrarStore", () => {
   }
 
   // --- Observador de Conexión y Carga de Datos ---
-  connectivityStore.$subscribe((mutation, state) => {
-    if (state.isOnline) {
-      sincronizarPendientes();
-    }
-  });
+  // connectivityStore.$subscribe((mutation, state) => {
+  //   if (state.isOnline) {
+  //     sincronizarPendientes();
+  //   }
+  // });
   async function guardarRegistro(data) {
     const tempRecord = { ...data, id: Date.now() };
   }
@@ -79,7 +98,33 @@ export const useCuentaCobrarStore = defineStore("cuenta_cobrarStore", () => {
   // --- Sincronización ---
   const API_URL = import.meta.env.VITE_API_URL;
   async function sincronizarPendientes() {
-    if (!isOnline.value || pendientesCount.value === 0) return;
+    console.log("Sincronizado: ");
+    const registros = await db.cuenta_cobrars.toArray();
+    const pendientes = registros.filter((registro) => {
+      return registro.sync !== true;
+    });
+    // const pendientes = await db.cuenta_cobrars.where({ sync: false }).toArray();
+    if (pendientes.length == 0) {
+      return;
+    }
+    console.log("Sincronizado: ");
+    console.log(pendientes);
+    appStore.setSync(true);
+    api
+      .post(API_URL + "/cuenta_cobrars/sincronizar", {
+        cuenta_cobrars: pendientes,
+      })
+      .then(async (response) => {
+        console.log("eliminar registros");
+        const ids = pendientes.map((p) => p.id);
+        await db.cuenta_cobrars.bulkDelete(ids);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        appStore.setSync(false);
+      });
   }
 
   return {
@@ -91,5 +136,6 @@ export const useCuentaCobrarStore = defineStore("cuenta_cobrarStore", () => {
     getCuentaCobrarById,
     nuevaCuentaCobrar,
     nuevoPago,
+    getCuentaCobrarByOrdenId,
   };
 });

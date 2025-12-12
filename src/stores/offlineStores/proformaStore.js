@@ -9,7 +9,10 @@ import { useSucursalStore } from "./sucursalStore.js";
 import { useUnidadMedidaStore } from "./unidadMedidaStore.js";
 import { useCuentaCobrarStore } from "./cuentaCobrarStore.js";
 import { useAuthStore } from "../authStore.js";
+import { useAppStore } from "../aplicacion/appStore.js";
+import api from "../../composables/axios.js";
 export const useProformaStore = defineStore("proformaStore", () => {
+  const appStore = useAppStore();
   const connectivityStore = useConnectivityStore();
   const sucursalProductoStore = useSucursalProductoStore();
   const clienteStore = useClienteStore();
@@ -116,6 +119,7 @@ export const useProformaStore = defineStore("proformaStore", () => {
           // Crear el objeto
           const detallesParaDB = data.proforma_detalles.map((d) => ({
             producto_id: d.producto_id,
+            unidad_medida_id: d.unidad_medida_id,
             cantidad: d.cantidad,
             precio: d.precio,
             descuento: d.descuento,
@@ -137,6 +141,7 @@ export const useProformaStore = defineStore("proformaStore", () => {
           const cliente = await clienteStore.getClienteById(
             parseInt(data.cliente_id)
           );
+
           const sucursal = await sucursalStore.getSucursalById(
             parseInt(data.sucursal_id)
           );
@@ -236,7 +241,33 @@ export const useProformaStore = defineStore("proformaStore", () => {
   // --- Sincronización ---
   const API_URL = import.meta.env.VITE_API_URL;
   async function sincronizarPendientes() {
-    if (!isOnline.value || pendientesCount.value === 0) return;
+    console.log("Sincronizado: ");
+    const registros = await db.proformas.toArray();
+    const pendientes = registros.filter((registro) => {
+      return registro.sync !== true;
+    });
+    // const pendientes = await db.proformas.where({ sync: false }).toArray();
+    if (pendientes.length == 0) {
+      return;
+    }
+    console.log("Sincronizado: ");
+    console.log(pendientes);
+    appStore.setSync(true);
+    api
+      .post(API_URL + "/proformas/sincronizar", {
+        proformas: pendientes,
+      })
+      .then(async (response) => {
+        console.log("eliminar registros");
+        const ids = pendientes.map((p) => p.id);
+        await db.proformas.bulkDelete(ids);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        appStore.setSync(false);
+      });
   }
 
   return {

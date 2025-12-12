@@ -74,7 +74,7 @@ export const useSyncStore = defineStore("sync", () => {
           // ⭐️ CLAVE: Inyectamos sync: 1 (o true) para indicar que viene del backend
           dataToStore = rawData[tableName].map((record) => ({
             ...record,
-            sync: true, // Datos descargados están sincronizados por defecto
+            sync: Boolean(true), // Datos descargados están sincronizados por defecto
           }));
         }
 

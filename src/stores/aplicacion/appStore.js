@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 export const useAppStore = defineStore("app_store", {
   state: () => ({
     loading: true,
+    sync: false,
     delayLoading: 300,
     user: null,
   }),
@@ -11,12 +12,14 @@ export const useAppStore = defineStore("app_store", {
     initUserInfo() {
       // this.user = usePage().props.auth.user ?? null;
     },
-
     setLoading(value) {
       this.loading = value;
     },
     startLoading() {
       this.loading = true;
+    },
+    setSync(value) {
+      this.sync = value;
     },
     async stopLoading() {
       await this.esperarCargaElementos();
@@ -34,6 +37,9 @@ export const useAppStore = defineStore("app_store", {
   getters: {
     getLoading() {
       return this.loading;
+    },
+    getSync() {
+      return Boolean(this.loading);
     },
     getDelayLoading() {
       return this.delayLoading;

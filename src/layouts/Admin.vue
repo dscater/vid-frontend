@@ -10,13 +10,32 @@
   });
 </script>
 <template>
-  <div class="loading" :class="[appStore.getLoading == true ? 'show' : '']">
+  <div class="loading" :class="[appStore.loading == true ? 'show' : '']">
     <!-- <div class="loading show"> -->
     <template v-if="$slots.loading">
       <slot name="loading"></slot>
     </template>
     <template v-else>
       <i class="fa fa-spin fa-spinner fa-4x"></i>
+    </template>
+  </div>
+
+  <div
+    class="loading sync"
+    :class="[Boolean(appStore.sync) == true ? 'show' : '']"
+  >
+    <!-- <div class="loading show"> -->
+    <template v-if="$slots.loading">
+      <slot name="loading"></slot>
+    </template>
+    <template v-else>
+      <i class="fa fa-spin fa-spinner fa-4x"></i>
+      <br />
+      <div class="d-block">
+        ESPERE
+        <br />
+        SINCRONIZANDO DATOS...
+      </div>
     </template>
   </div>
 

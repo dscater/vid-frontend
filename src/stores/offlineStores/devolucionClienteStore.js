@@ -5,12 +5,18 @@ import { db } from "../../db.js";
 import { useConnectivityStore } from "./useConnectivityStore.js";
 import { useSucursalProductoStore } from "./sucursalProductoStore.js";
 import { useAuthStore } from "../authStore.js";
-
+import { useClienteStore } from "./clienteStore.js";
+import { useSucursalStore } from "./sucursalStore.js";
+import { useAppStore } from "../aplicacion/appStore.js";
+import api from "../../composables/axios.js";
 export const useDevolucionClienteStore = defineStore(
   "devolucion_clienteStore",
   () => {
+    const appStore = useAppStore();
     const connectivityStore = useConnectivityStore();
     const sucursalProductoStore = useSucursalProductoStore();
+    const clienteStore = useClienteStore();
+    const sucursalStore = useSucursalStore();
     const authStore = useAuthStore();
     const isOnline = computed(() => connectivityStore.isOnline);
     const registros = ref([]);
@@ -67,6 +73,7 @@ export const useDevolucionClienteStore = defineStore(
         await db.transaction(
           "rw",
           db.devolucion_clientes,
+          db.sucursals,
           db.sucursal_productos,
           async (tx) => {
             if (
@@ -122,10 +129,10 @@ export const useDevolucionClienteStore = defineStore(
             // Crear el objeto
             const detallesParaDB = data.devolucion_cliente_detalles.map(
               (d) => ({
-                nombre: d.nombre,
-                fono: d.fono,
-                cel: d.cel,
-                observacion: d.observacion,
+                cantidad: d.cantidad,
+                costo: d.costo,
+                subtotal: d.subtotal,
+                producto_id: d.producto_id,
                 producto: {
                   id: d.producto.id,
                   codigo: d.producto.codigo,
@@ -136,8 +143,17 @@ export const useDevolucionClienteStore = defineStore(
               })
             );
 
+            const cliente = await clienteStore.getClienteById(
+              parseInt(data.cliente_id)
+            );
+            const sucursal = await sucursalStore.getSucursalById(
+              parseInt(data.sucursal_id)
+            );
+
             const nuevoRegistro = {
               sucursal_id: data.sucursal_id,
+              sucursal: data.sucursal,
+              cliente: data.cliente,
               cliente_id: data.cliente_id,
               cantidad_total: data.cantidad_total,
               total: data.total,
@@ -184,7 +200,33 @@ export const useDevolucionClienteStore = defineStore(
     // --- Sincronización ---
     const API_URL = import.meta.env.VITE_API_URL;
     async function sincronizarPendientes() {
-      if (!isOnline.value || pendientesCount.value === 0) return;
+      console.log("Sincronizado: ");
+      const registros = await db.devolucion_clientes.toArray();
+      const pendientes = registros.filter((registro) => {
+        return registro.sync !== true;
+      });
+      // const pendientes = await db.devolucion_clientes.where({ sync: false }).toArray();
+      if (pendientes.length == 0) {
+        return;
+      }
+      console.log("Sincronizado: ");
+      console.log(pendientes);
+      appStore.setSync(true);
+      api
+        .post(API_URL + "/devolucion_clientes/sincronizar", {
+          devolucion_clientes: pendientes,
+        })
+        .then(async (response) => {
+          console.log("eliminar registros");
+          const ids = pendientes.map((p) => p.id);
+          await db.devolucion_clientes.bulkDelete(ids);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          appStore.setSync(false);
+        });
     }
 
     return {

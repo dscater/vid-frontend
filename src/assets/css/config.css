@@ -352,6 +352,10 @@ body .nav-sidebar .nav-item .nav-link.sub-menu.menu-is-opening i.right {
   top: 0;
 }
 
+.loading.sync {
+  background-color: var(--secundario);
+}
+
 .loading.show {
   opacity: 1;
   z-index: 6050;

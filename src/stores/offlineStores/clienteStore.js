@@ -4,7 +4,10 @@ import { ref, computed } from "vue";
 import { db } from "../../db.js";
 import { useConnectivityStore } from "./useConnectivityStore.js";
 
+import { useAppStore } from "../aplicacion/appStore.js";
+import api from "../../composables/axios.js";
 export const useClienteStore = defineStore("clienteStore", () => {
+  const appStore = useAppStore();
   const connectivityStore = useConnectivityStore();
   const isOnline = computed(() => connectivityStore.isOnline);
   const registros = ref([]);
@@ -157,7 +160,33 @@ export const useClienteStore = defineStore("clienteStore", () => {
   // --- Sincronización ---
   const API_URL = import.meta.env.VITE_API_URL;
   async function sincronizarPendientes() {
-    if (!isOnline.value || pendientesCount.value === 0) return;
+    console.log("Sincronizado: ");
+    const registros = await db.clientes.toArray();
+    const pendientes = registros.filter((registro) => {
+      return registro.sync !== true;
+    });
+    // const pendientes = await db.clientes.where({ sync: false }).toArray();
+    if (pendientes.length == 0) {
+      return;
+    }
+    console.log("Sincronizado: ");
+    console.log(pendientes);
+    appStore.setSync(true);
+    api
+      .post(API_URL + "/clientes/sincronizar", {
+        clientes: pendientes,
+      })
+      .then(async (response) => {
+        console.log("eliminar registros");
+        const ids = pendientes.map((p) => p.id);
+        await db.clientes.bulkDelete(ids);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        appStore.setSync(false);
+      });
   }
 
   return {
