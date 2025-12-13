@@ -213,7 +213,7 @@ const routes = [
     props: true,
     // component: () => import("../pages/admin/orden_ventas/Imprimir.vue"),
     component: ImprimirOrdenVentas,
-    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+    meta: { layout: Admin, requiresAuth: true },
   },
 
   // TRANSFERENCIAS
@@ -294,7 +294,7 @@ const routes = [
     props: true,
     // component: () => import("../pages/admin/proformas/Imprimir.vue"),
     component: ImprimirProformas,
-    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+    meta: { layout: Admin, requiresAuth: true },
   },
 
   // ERRORS
@@ -316,6 +316,103 @@ const routes = [
     path: "/admin/reportes/productos",
     name: "reportes.productos",
     component: () => import("../pages/admin/reportes/Productos.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/clientes",
+    name: "reportes.clientes",
+    component: () => import("../pages/admin/reportes/Clientes.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/clientes",
+    name: "reportes.clientes",
+    component: () => import("../pages/admin/reportes/Clientes.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/proveedors",
+    name: "reportes.proveedors",
+    component: () => import("../pages/admin/reportes/Proveedors.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/movimiento_inventario",
+    name: "reportes.movimiento_inventario",
+    component: () => import("../pages/admin/reportes/MovimientoInventario.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/solicitud_ingresos",
+    name: "reportes.solicitud_ingresos",
+    component: () => import("../pages/admin/reportes/SolicitudIngresos.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/orden_salidas",
+    name: "reportes.orden_salidas",
+    component: () => import("../pages/admin/reportes/OrdenSalidas.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/devolucions",
+    name: "reportes.devolucions",
+    component: () => import("../pages/admin/reportes/Devolucions.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/orden_ventas",
+    name: "reportes.orden_ventas",
+    component: () => import("../pages/admin/reportes/OrdenVentas.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/utilidad_ordens",
+    name: "reportes.utilidad_ordens",
+    component: () => import("../pages/admin/reportes/UtilidadOrdens.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/cuenta_cobrars",
+    name: "reportes.cuenta_cobrars",
+    component: () => import("../pages/admin/reportes/CuentaCobrars.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/rotacion",
+    name: "reportes.rotacion",
+    component: () => import("../pages/admin/reportes/Rotacion.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/gastos",
+    name: "reportes.gastos",
+    component: () => import("../pages/admin/reportes/Gastos.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/diario_salidas",
+    name: "reportes.diario_salidas",
+    component: () => import("../pages/admin/reportes/DiarioSalidas.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/movimientos_abastecimiento",
+    name: "reportes.movimientos_abastecimiento",
+    component: () =>
+      import("../pages/admin/reportes/MovimientosAbastecimiento.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/saldos_almacen_central",
+    name: "reportes.saldos_almacen_central",
+    component: () => import("../pages/admin/reportes/SaldosAlmacenCentral.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/reportes/diario_vehiculos",
+    name: "reportes.diario_vehiculos",
+    component: () => import("../pages/admin/reportes/DiarioVehiculos.vue"),
     meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
   },
 ];

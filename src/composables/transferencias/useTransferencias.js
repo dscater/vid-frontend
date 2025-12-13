@@ -1,5 +1,5 @@
 import { onMounted, ref } from "vue";
-
+import { useAuthStore } from "../../stores/authStore";
 const oTransferencia = ref({
   id: 0,
   sucursal_id: "",
@@ -20,6 +20,7 @@ const oTransferencia = ref({
 });
 
 export const useTransferencias = () => {
+  const authStore = useAuthStore();
   const setTransferencia = (item = null) => {
     if (item) {
       oTransferencia.value.id = item.id;
@@ -44,9 +45,13 @@ export const useTransferencias = () => {
 
   const limpiarTransferencia = () => {
     oTransferencia.value.id = 0;
-    oTransferencia.value.sucursal_id = "";
+    oTransferencia.value.sucursal_id = authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "";
     oTransferencia.value.sucursal_destino = "";
-    oTransferencia.value.user_sol = "";
+    oTransferencia.value.user_sol = authStore?.user.sucursal_asignada
+      ? authStore?.user.id
+      : "";
     oTransferencia.value.user_ap = "";
     oTransferencia.value.cantidad_total = "";
     oTransferencia.value.cantidad_total_v = "";

@@ -243,6 +243,8 @@
                 ></el-tooltip>
                 <template
                   v-if="
+                    (authStore?.user.id == item.user_sol ||
+                      authStore?.user?.permisos == '*') &&
                     item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes('transferencias.edit'))

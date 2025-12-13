@@ -42,7 +42,6 @@
       </div>
       <!-- /.row -->
     </template>
-
     <el-skeleton :loading="loadingInfos" animated class="w-100 row" :count="4">
       <template #template>
         <div class="col-lg-3 col-6">

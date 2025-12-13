@@ -76,7 +76,9 @@
 
   const multiSearch = ref({
     search: "",
-    sucursal_id: "",
+    sucursal_id: authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "",
     filtro: [],
   });
 
@@ -142,7 +144,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-4" v-if="!authStore?.user.sucursal_asignada">
             <el-select
               class="w-100"
               size="large"
@@ -158,6 +160,9 @@
                 :label="item.nombre"
               ></el-option>
             </el-select>
+          </div>
+          <div class="col-md-4 font-weight-bold text-md" v-else>
+            {{ authStore?.user.sucursal_asignada.nombre }}
           </div>
           <div class="col-md-8 my-1">
             <div class="row justify-content-end">

@@ -1,5 +1,5 @@
 import { onMounted, ref } from "vue";
-
+import { useAuthStore } from "../../stores/authStore";
 const oOrdenVenta = ref({
   id: 0,
   sucursal_id: "",
@@ -29,6 +29,7 @@ const oOrdenVenta = ref({
 });
 
 export const useOrdenVentas = () => {
+  const authStore = useAuthStore();
   const setOrdenVenta = (item = null, withUser = false) => {
     if (item) {
       oOrdenVenta.value.id = item.id;
@@ -85,7 +86,9 @@ export const useOrdenVentas = () => {
 
   const limpiarOrdenVenta = () => {
     oOrdenVenta.value.id = 0;
-    oOrdenVenta.value.sucursal_id = "";
+    oOrdenVenta.value.sucursal_id = authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "";
     oOrdenVenta.value.cliente_id = "";
     oOrdenVenta.value.fecha = getFechaAtual();
     oOrdenVenta.value.hora = getHoraActual();

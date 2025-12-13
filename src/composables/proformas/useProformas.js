@@ -1,4 +1,5 @@
 import { onMounted, ref } from "vue";
+import { useAuthStore } from "../../stores/authStore";
 
 const oProforma = ref({
   id: 0,
@@ -23,6 +24,7 @@ const oProforma = ref({
 });
 
 export const useProformas = () => {
+  const authStore = useAuthStore();
   const setProforma = (item = null, withUser = false) => {
     if (item) {
       oProforma.value.id = item.id;
@@ -75,7 +77,9 @@ export const useProformas = () => {
 
   const limpiarProforma = () => {
     oProforma.value.id = 0;
-    oProforma.value.sucursal_id = "";
+    oProforma.value.sucursal_id = authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "";
     oProforma.value.cliente_id = "";
     oProforma.value.fecha = getFechaAtual();
     oProforma.value.hora = getHoraActual();

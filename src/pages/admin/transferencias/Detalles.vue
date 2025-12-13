@@ -270,6 +270,10 @@
                           v-model="item.verificado"
                           size="large"
                           class="verificaCheckbox"
+                          :disabled="
+                            !authStore?.user.sucursal_asignada ||
+                            authStore?.user.id != form.user_ap
+                          "
                         >
                           Verificar
                         </el-checkbox>
@@ -343,6 +347,8 @@
       </button>
       <button
         v-if="
+          authStore?.user.sucursal_asignada &&
+          authStore?.user.id == form.user_ap &&
           (form.verificado == 0 || form.estado == 'PENDIENTE') &&
           (authStore?.user?.permisos == '*' ||
             authStore?.user?.permisos.includes('transferencias.aprobar'))

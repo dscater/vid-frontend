@@ -1,5 +1,6 @@
 import { onMounted, ref } from "vue";
 
+import { useAuthStore } from "../../stores/authStore";
 const oDevolucionCliente = ref({
   id: 0,
   sucursal_id: "",
@@ -16,6 +17,7 @@ const oDevolucionCliente = ref({
 });
 
 export const useDevolucionClientes = () => {
+  const authStore = useAuthStore();
   const setDevolucionCliente = (item = null) => {
     if (item) {
       oDevolucionCliente.value.id = item.id;
@@ -38,7 +40,9 @@ export const useDevolucionClientes = () => {
 
   const limpiarDevolucionCliente = () => {
     oDevolucionCliente.value.id = 0;
-    oDevolucionCliente.value.sucursal_id = "";
+    oDevolucionCliente.value.sucursal_id = authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "";
     oDevolucionCliente.value.cliente_id = "";
     oDevolucionCliente.value.cantidad_total = "";
     oDevolucionCliente.value.total = "";

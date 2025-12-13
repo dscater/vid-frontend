@@ -558,7 +558,10 @@
       <div class="card">
         <div class="card-body">
           <div class="row">
-            <div class="col-md-12 mb-2">
+            <div
+              class="col-md-12 mb-2"
+              v-if="!authStore?.user.sucursal_asignada"
+            >
               <label>Seleccionar Sucursal</label>
               <el-select
                 class="w-100"
@@ -586,6 +589,9 @@
                   {{ form.errors?.sucursal_id[0] }}
                 </li>
               </ul>
+            </div>
+            <div class="col-md-12 mb-2" v-else>
+              <b>Sucursal: </b>{{ authStore?.user.sucursal_asignada.nombre }}
             </div>
             <div class="col-md-12 mb-2">
               <label>Buscar Cliente</label>

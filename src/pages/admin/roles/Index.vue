@@ -173,7 +173,7 @@
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"
-              :syncOrderAsc="'DESC'"
+              :syncOrderAsc="'ASC'"
               table-responsive
               :header-class="'bg__primary'"
               fixed-header

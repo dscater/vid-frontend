@@ -3,6 +3,9 @@
   import { useDevolucionClientes } from "../../../composables/devolucion_clientes/useDevolucionClientes";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
+
+  import { useAuthStore } from "../../../stores/authStore";
+  const authStore = useAuthStore();
   // TOAST
   import { toast } from "vue3-toastify";
   import "vue3-toastify/dist/index.css";
@@ -326,7 +329,8 @@
     }
   };
 
-  const oUser = ref(null);
+  const oUser = ref(authStore?.user.sucursal_asignada ? authStore.user : null);
+
   const getUsuarioSolicitante = () => {
     oUser.value = null;
     if (form.sucursal_id) {
@@ -450,7 +454,10 @@
             <span class="text-danger">(*)</span> son obligatorios.
           </p>
           <div class="row">
-            <div class="col-md-4 mb-2">
+            <div
+              class="col-md-4 mb-2"
+              v-if="!authStore?.user.sucursal_asignada"
+            >
               <label class="required">Seleccionar Sucursal</label>
               <el-select
                 class="w-100"
@@ -479,6 +486,11 @@
                   {{ form.errors?.sucursal_id[0] }}
                 </li>
               </ul>
+            </div>
+
+            <div class="col-md-4 mb-2" v-else>
+              <b>Sucursal: <br /></b
+              >{{ authStore?.user.sucursal_asignada.nombre }}
             </div>
             <div class="col-md-4 mb-2" v-if="connectivityStore.isOnline">
               <label class="required">Encargado de Sucursal</label>

@@ -553,18 +553,148 @@
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
-                :label="'Lista de Sucursales'"
-                :ruta="''"
-                :icon="'fa fa-angle-right'"
-              ></ItemMenu>
-              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.clientes')
+                "
                 :label="'Lista de Clientes'"
-                :ruta="''"
+                :ruta="'reportes.clientes'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.proveedors')
+                "
                 :label="'Lista de Proveedores'"
-                :ruta="''"
+                :ruta="'reportes.proveedors'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'reportes.movimiento_inventario'
+                  )
+                "
+                :label="'Movimientos de Inventario'"
+                :ruta="'reportes.movimiento_inventario'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'reportes.solicitud_ingresos'
+                  )
+                "
+                :label="'Solicitudes de Ingreso'"
+                :ruta="'reportes.solicitud_ingresos'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.orden_salidas')
+                "
+                :label="'Órdenes de Salida'"
+                :ruta="'reportes.orden_salidas'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.devolucions')
+                "
+                :label="'Devoluciones'"
+                :ruta="'reportes.devolucions'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.orden_ventas')
+                "
+                :label="'Órdenes de Ventas'"
+                :ruta="'reportes.orden_ventas'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.utilidad_ordens')
+                "
+                :label="'Utilidad de Ordenes de Ventas'"
+                :ruta="'reportes.utilidad_ordens'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.cuenta_cobrars')
+                "
+                :label="'Cuentas por Cobrar'"
+                :ruta="'reportes.cuenta_cobrars'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.rotacion')
+                "
+                :label="'Rotación de Inventario'"
+                :ruta="'reportes.rotacion'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.gastos')
+                "
+                :label="'Gastos'"
+                :ruta="'reportes.gastos'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.diario_salidas')
+                "
+                :label="'Diario de Salidas por Sucursal'"
+                :ruta="'reportes.diario_salidas'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'reportes.movimientos_abastecimiento'
+                  )
+                "
+                :label="'Semanal de Movimientos y Abastecimiento'"
+                :ruta="'reportes.movimientos_abastecimiento'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'reportes.saldos_almacen_central'
+                  )
+                "
+                :label="'Saldos del Almacén Central'"
+                :ruta="'reportes.saldos_almacen_central'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'reportes.diario_vehiculos'
+                  )
+                "
+                :label="'Control Diario de Sucursales'"
+                :ruta="'reportes.diario_vehiculos'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>

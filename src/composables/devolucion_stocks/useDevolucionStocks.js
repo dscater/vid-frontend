@@ -1,5 +1,6 @@
 import { onMounted, ref } from "vue";
 
+import { useAuthStore } from "../../stores/authStore";
 const oDevolucionStock = ref({
   id: 0,
   sucursal_id: "",
@@ -18,6 +19,7 @@ const oDevolucionStock = ref({
 });
 
 export const useDevolucionStocks = () => {
+  const authStore = useAuthStore();
   const setDevolucionStock = (item = null) => {
     if (item) {
       oDevolucionStock.value.id = item.id;
@@ -41,12 +43,14 @@ export const useDevolucionStocks = () => {
 
   const limpiarDevolucionStock = () => {
     oDevolucionStock.value.id = 0;
-    oDevolucionStock.value.sucursal_id = "";
+    oDevolucionStock.value.sucursal_id = authStore?.user.sucursal_asignada
+      ? authStore?.user.sucursal_asignada.id
+      : "";
     oDevolucionStock.value.fecha = "";
     oDevolucionStock.value.hora = "";
     oDevolucionStock.value.observaciones = "";
     oDevolucionStock.value.cantidad_total = "";
-    oDevolucionStock.value.total = "CON FATURA";
+    oDevolucionStock.value.total = "0";
     oDevolucionStock.value.estado = "";
     oDevolucionStock.value.verificado = "";
     oDevolucionStock.value.user_id = "";
