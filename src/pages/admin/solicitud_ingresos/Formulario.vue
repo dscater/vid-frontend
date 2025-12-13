@@ -236,6 +236,19 @@
       });
   };
 
+  const calcularSubtotalByCosto = (e, index) => {
+    const elem = e.target;
+    const value = elem.value;
+    if (!value || value.trim() == "") {
+      form.solicitud_ingreso_detalles[index].subtotal =
+        form.solicitud_ingreso_detalles[index].costo;
+    }
+    form.solicitud_ingreso_detalles[index].subtotal =
+      parseFloat(value) *
+      parseFloat(form.solicitud_ingreso_detalles[index].cantidad);
+    calcularTotal();
+  };
+
   const calcularSubtotal = (e, index) => {
     const elem = e.target;
     const value = elem.value;
@@ -500,8 +513,8 @@
               <thead class="bg-secundario">
                 <tr>
                   <th>PRODUCTO</th>
-                  <th width="100px">C/U</th>
-                  <th width="60px">CANTIDAD</th>
+                  <th width="140px">C/U</th>
+                  <th width="140px">CANTIDAD</th>
                   <th width="100px">SUBTOTAL</th>
                   <th width="1%"></th>
                 </tr>
@@ -510,7 +523,17 @@
                 <template v-if="form.solicitud_ingreso_detalles.length > 0">
                   <tr v-for="(item, index) in form.solicitud_ingreso_detalles">
                     <td>{{ item.producto.nombre }}</td>
-                    <td>{{ item.costo }}</td>
+                    <td>
+                      <input
+                        type="number"
+                        step="1"
+                        min="1"
+                        class="form-control"
+                        v-model="item.costo"
+                        @change="calcularSubtotalByCosto($event, index)"
+                        @keyup="calcularSubtotalByCosto($event, index)"
+                      />
+                    </td>
                     <td>
                       <input
                         type="number"

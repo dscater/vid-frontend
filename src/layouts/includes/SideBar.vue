@@ -138,6 +138,10 @@
           ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">OPERACIONES</li>
           <ItemMenu
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('orden_ventas.index')
+            "
             :class="[
               routeCurrent == 'orden_ventas.create' ||
               routeCurrent == 'orden_ventas.edit' ||
@@ -150,6 +154,10 @@
             :icon="'fa fa-clipboard-check'"
           ></ItemMenu>
           <ItemMenu
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('proformas.index')
+            "
             :class="[
               routeCurrent == 'proformas.create' ||
               routeCurrent == 'proformas.edit' ||
@@ -162,11 +170,22 @@
             :icon="'fa fa-list'"
           ></ItemMenu>
           <ItemMenu
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('cuenta_cobrars.index')
+            "
             :label="'Cuentas por Cobrar'"
             :ruta="'cuenta_cobrars.index'"
             :icon="'fa fa-list-alt'"
           ></ItemMenu>
-          <li class="nav-item">
+          <li
+            class="nav-item"
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('devolucion_stocks.index') ||
+              authStore?.user?.permisos.includes('devolucion_clientes.index')
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
@@ -186,19 +205,42 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
-                v-if="connectivityStore.isOnline"
+                v-if="
+                  connectivityStore.isOnline &&
+                  (authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes(
+                      'devolucion_stocks.index'
+                    ))
+                "
                 :label="'Devolución de Stock'"
                 :ruta="'devolucion_stocks.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'devolucion_clientes.index'
+                  )
+                "
                 :label="'Devolución de Clientes'"
                 :ruta="'devolucion_clientes.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item" v-if="connectivityStore.isOnline">
+          <li
+            class="nav-item"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes(
+                  'solicitud_ingresos.index'
+                ) ||
+                authStore?.user?.permisos.includes('orden_salidas.index') ||
+                authStore?.user?.permisos.includes('transferencias.index'))
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
@@ -219,16 +261,28 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('solicitud_ingresos.index')
+                "
                 :label="'Solicitud de Ingreso'"
                 :ruta="'solicitud_ingresos.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('orden_salidas.index')
+                "
                 :label="'Orden de Salida'"
                 :ruta="'orden_salidas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('transferencias.index')
+                "
                 :label="'Transferencias de Stock'"
                 :ruta="'transferencias.index'"
                 :icon="'fa fa-angle-right'"
@@ -236,24 +290,47 @@
             </ul>
           </li>
           <ItemMenu
-            v-if="connectivityStore.isOnline"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('gastos.index'))
+            "
             :label="'Registro de Gastos'"
             :ruta="'gastos.index'"
             :icon="'fa fa-clipboard-list'"
           ></ItemMenu>
           <li class="nav-header font-weight-bold bg3">ADMINISTRACIÓN</li>
           <ItemMenu
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('clientes.index')
+            "
             :label="'Clientes'"
             :ruta="'clientes.index'"
             :icon="'fa fa-user-friends'"
           ></ItemMenu>
           <ItemMenu
-            v-if="connectivityStore.isOnline"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('proveedors.index'))
+            "
             :label="'Proveedores'"
             :ruta="'proveedors.index'"
             :icon="'fa fa-clipboard-list'"
           ></ItemMenu>
-          <li class="nav-item" v-if="connectivityStore.isOnline">
+          <li
+            class="nav-item"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('productos.index') ||
+                authStore?.user?.permisos.includes('unidad_medidas.index') ||
+                authStore?.user?.permisos.includes('marcas.index') ||
+                authStore?.user?.permisos.includes('sub_categorias.index') ||
+                authStore?.user?.permisos.includes('categorias.index'))
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
@@ -276,33 +353,61 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('productos.index')
+                "
                 :label="'Listado Productos'"
                 :ruta="'productos.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('unidad_medidas.index')
+                "
                 :label="'Unidades de Medida'"
                 :ruta="'unidad_medidas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('marcas.index')
+                "
                 :label="'Marcas'"
                 :ruta="'marcas.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('sub_categorias.index')
+                "
                 :label="'Subcategorías'"
                 :ruta="'sub_categorias.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('categorias.index')
+                "
                 :label="'Categorías'"
                 :ruta="'categorias.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item" v-if="connectivityStore.isOnline">
+          <li
+            class="nav-item"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('sucursals.index') ||
+                authStore?.user?.permisos.includes('sucursal_productos.index'))
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
@@ -322,18 +427,34 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('sucursals.index')
+                "
                 :label="'Sucursales'"
                 :ruta="'sucursals.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('sucursal_productos.index')
+                "
                 :label="'Productos Sucursal'"
                 :ruta="'sucursal_productos.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-item" v-if="connectivityStore.isOnline">
+          <li
+            class="nav-item"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('usuarios.index') ||
+                authStore?.user?.permisos.includes('roles.index'))
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
@@ -354,11 +475,19 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('usuarios.index')
+                "
                 :label="'Usuarios'"
                 :ruta="'usuarios.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('roles.index')
+                "
                 :class="[routeCurrent == 'roles.edit' ? 'active' : '']"
                 :label="'Roles'"
                 :ruta="'roles.index'"
@@ -366,14 +495,33 @@
               ></ItemMenu>
             </ul>
           </li>
-          <li class="nav-header font-weight-bold bg3">REPORTES</li>
-          <li class="nav-item" v-if="connectivityStore.isOnline">
+          <li
+            class="nav-header font-weight-bold bg3"
+            v-if="
+              authStore?.user?.permisos == '*' ||
+              authStore?.user?.permisos.includes('reportes.usuarios') ||
+              authStore?.user?.permisos.includes('reportes.productos') ||
+              authStore?.user?.permisos.includes('reportes.sucursals')
+            "
+          >
+            REPORTES
+          </li>
+          <li
+            class="nav-item"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('reportes.usuarios') ||
+                authStore?.user?.permisos.includes('reportes.productos') ||
+                authStore?.user?.permisos.includes('reportes.sucursals'))
+            "
+          >
             <a
               href="#"
               class="nav-link sub-menu"
               :class="[
                 routeCurrent == 'reportes.usuarios' ||
-                routeCurrent == 'reportes.pagos'
+                routeCurrent == 'reportes.productos'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
@@ -387,13 +535,21 @@
             </a>
             <ul class="nav nav-treeview">
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.usuarios')
+                "
                 :label="'Usuarios'"
-                :ruta="''"
+                :ruta="'reportes.usuarios'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('reportes.productos')
+                "
                 :label="'Productos'"
-                :ruta="''"
+                :ruta="'reportes.productos'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
               <ItemMenu
@@ -415,7 +571,27 @@
           </li>
           <li class="nav-header font-weight-bold bg3">OTROS</li>
           <ItemMenu
-            v-if="connectivityStore.isOnline"
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('notificacions.index'))
+            "
+            :class="[
+              routeCurrent == 'notifiacions.index' ||
+              routeCurrent == 'notificacions.show'
+                ? 'active menu-is-opening menu-open'
+                : '',
+            ]"
+            :label="'Notificaciones'"
+            :ruta="'notificacions.index'"
+            :icon="'fa fa-bell'"
+          ></ItemMenu>
+          <ItemMenu
+            v-if="
+              connectivityStore.isOnline &&
+              (authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('configuracions.index'))
+            "
             :label="'Configuración Sistema'"
             :ruta="'configuracions.index'"
             :icon="'fa fa-cog'"

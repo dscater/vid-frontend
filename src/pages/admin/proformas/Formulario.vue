@@ -83,7 +83,13 @@
               confirmButton: "btn-success",
             },
           });
-          router.push({ name: "proformas.index" });
+          router.push({
+            name: "proformas.imprimir",
+            params: {
+              id: response.data.proforma.id,
+            },
+          });
+          // router.push({ name: "proformas.index" });
         })
         .catch((error) => {
           if (
@@ -138,7 +144,13 @@
               confirmButton: "btn-success",
             },
           });
-          router.push({ name: "proformas.index" });
+          router.push({
+            name: "proformas.imprimir",
+            params: {
+              id: resp,
+            },
+          });
+          // router.push({ name: "proformas.index" });
           enviando.value = false;
         } else {
           Swal.fire({
@@ -222,6 +234,23 @@
     }
   };
 
+  const oCliente = ref(null);
+  const detectarCliente = async (value) => {
+    console.log("CLIENTE");
+    console.log(value);
+    oCliente.value = null;
+    if (connectivityStore.isOnline) {
+      api.get("/admin/clientes/" + value).then((response) => {
+        oCliente.value = response.data;
+      });
+    } else {
+      const listClientesData = await clienteStore.getAll();
+      oCliente.value = listClientesData.filter((elem) => {
+        return elem.id == value;
+      })[0];
+    }
+  };
+
   const cargarListas = () => {
     cargarSucursals();
     cargarUnidadMedidas();
@@ -267,8 +296,14 @@
             return;
           }
 
+          let descuento = getDescuentoProducto(
+            parseFloat(nuevoProducto.value.cantidad),
+            prod
+          );
           const subtotal =
-            parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio);
+            parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
+            descuento;
+
           form.proforma_detalles.push({
             id: 0,
             proforma_id: 0,
@@ -277,7 +312,7 @@
             producto: prod,
             cantidad: nuevoProducto.value.cantidad,
             precio: prod.precio,
-            descuento: 0,
+            descuento: descuento,
             subtotal: subtotal,
             subtotal_f: subtotal,
           });
@@ -322,8 +357,14 @@
         return;
       }
 
+      let descuento = getDescuentoProducto(
+        parseFloat(nuevoProducto.value.cantidad),
+        prod
+      );
       const subtotal =
-        parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio);
+        parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
+        descuento;
+
       const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
         prod.unidad_medida_id
       );
@@ -336,7 +377,7 @@
         producto: prod,
         cantidad: nuevoProducto.value.cantidad,
         precio: prod.precio,
-        descuento: 0,
+        descuento: descuento,
         subtotal: subtotal,
         subtotal_f: subtotal,
       });
@@ -345,6 +386,22 @@
       calcularTotalConDescuento();
       calcularCambio();
     }
+  };
+
+  const getDescuentoProducto = (cantidad, producto) => {
+    let descuento = 0;
+    if (oCliente.value) {
+      if (oCliente.value.categoria == "A") {
+        // POR PRODUCTO
+        descuento = parseFloat(cantidad) * 5;
+      }
+      if (oCliente.value.categoria == "B") {
+        // POR CAJA
+        const u_caja = parseInt(parseFloat(cantidad) / producto.unidades_caja);
+        descuento = u_caja * 5;
+      }
+    }
+    return descuento;
   };
 
   const asignaUnidadMedida = async (index, e) => {
@@ -370,9 +427,14 @@
     form.proforma_detalles[index].subtotal =
       parseFloat(value) * parseFloat(form.proforma_detalles[index].precio);
 
+    let descuento = getDescuentoProducto(
+      parseFloat(value),
+      form.proforma_detalles[index].producto
+    );
+
     form.proforma_detalles[index].subtotal_f =
-      parseFloat(form.proforma_detalles[index].subtotal) -
-      parseFloat(form.proforma_detalles[index].descuento);
+      parseFloat(form.proforma_detalles[index].subtotal) - descuento;
+    form.proforma_detalles[index].descuento = descuento;
 
     calcularTotal();
     calcularTotalConDescuento();
@@ -429,16 +491,16 @@
     }
     let total = 0;
     total = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.subtotal);
+      return acum + parseFloat(item.subtotal_f);
     }, 0);
     form.total_f = total - form.descuento;
   };
 
   const detectarDescuento = () => {
     if (form.solicitud_descuento == 1) {
-      form.total_f = form.total - form.descuento;
+      form.total_f = form.total_st - form.descuento;
     } else {
-      form.total_f = form.total;
+      form.total_f = form.total_st;
     }
     calcularCambio();
   };
@@ -532,6 +594,7 @@
                 filterable
                 remote
                 :remote-method="remoteMethod"
+                @change="detectarCliente"
                 clearable
                 :options="listClientes"
                 :loading="loadingClientes"
@@ -552,6 +615,26 @@
                   {{ form.errors?.cliente_id[0] }}
                 </li>
               </ul>
+
+              <div class="row mt-2" v-if="oCliente">
+                <div class="col-12 text-center">
+                  <span class="mx-1 badge bg-secundario text-md">
+                    <div class="mb-1">{{ oCliente.rank }}</div>
+                    <i class="fa fa-flag-checkered"></i>
+                  </span>
+                  <span
+                    class="mx-1 badge text-md"
+                    :class="{
+                      'bg-success': oCliente.categoria == 'A',
+                      'bg-info': oCliente.categoria == 'B',
+                      'bg-warning': oCliente.categoria == 'C',
+                    }"
+                  >
+                    <div class="mb-1">{{ oCliente.categoria }}</div>
+                    <i class="fa fa-tag"></i>
+                  </span>
+                </div>
+              </div>
             </div>
             <div class="col-12">
               <div class="row">
@@ -664,6 +747,7 @@
                                 class="form-control"
                                 @change="asignaUnidadMedida(index, $event)"
                                 v-model="item.unidad_medida_id"
+                                disabled
                               >
                                 <option
                                   v-for="item in listUnidadMedidas"
@@ -702,6 +786,9 @@
                                 "
                                 @keyup="
                                   calcularSubtotalPorDescuento($event, index)
+                                "
+                                :disabled="
+                                  !oCliente || oCliente.categoria == 'C'
                                 "
                               />
                             </td>
@@ -826,7 +913,11 @@
                           @change="detectarDescuento"
                         >
                           <el-radio :value="0">SIN DESCUENTO</el-radio>
-                          <el-radio :value="1">CON DESCUENTO</el-radio>
+                          <el-radio
+                            :value="1"
+                            :disabled="!oCliente || oCliente.categoria == 'C'"
+                            >CON DESCUENTO</el-radio
+                          >
                         </el-radio-group>
                       </div>
                     </div>

@@ -50,6 +50,21 @@
       label: "STOCK ACTUAL",
       key: "stock_actual",
       sortable: true,
+      classRow: (item) => {
+        if (item.stock_actual == 0) {
+          return `bg-danger`;
+        }
+        if (item.stock_actual == item.cantidad_minima) {
+          return `bg-warning`;
+        }
+        if (
+          item.stock_actual < item.cantidad_minima ||
+          item.stock_actual == 0
+        ) {
+          return `bg-danger`;
+        }
+        return ``;
+      },
     },
     {
       label: "ACCIÓN",

@@ -532,3 +532,9 @@ body.app-blank.login {
 .el-collapse-item__content {
   padding-bottom: 5px !important;
 }
+
+/* NOTIFICACIONES */
+.nav-item.dropdown.notificaciones .dropdown-item {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

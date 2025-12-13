@@ -4,6 +4,8 @@
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
   import { useAuthStore } from "../../../stores/authStore";
+  import { useNotificacionStore } from "../../../stores/notificacionStore.js";
+  const notificacionStore = useNotificacionStore();
   const authStore = useAuthStore();
 
   // TOAST
@@ -108,6 +110,8 @@
             confirmButton: "btn-success",
           },
         });
+        notificacionStore.cargarNotificacions();
+
         limpiarTransferencia();
         emits("envio-formulario");
       })

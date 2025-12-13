@@ -6,8 +6,10 @@
   import { useConfiguracionStore } from "../../stores/configuracion/configuracionStore";
   import { useConnectivityStore } from "../../stores/offlineStores/useConnectivityStore";
   import { useSyncStore } from "../../stores/offlineStores/syncStore.js";
+  import { useNotificacionStore } from "../../stores/notificacionStore.js";
   const connectivityStore = useConnectivityStore();
   const syncStore = useSyncStore();
+  const notificacionStore = useNotificacionStore();
   const configuracionStore = useConfiguracionStore();
   import { useRouter } from "vue-router";
   import { useAuthStore } from "../../stores/authStore";
@@ -22,7 +24,9 @@
     // router.push({ name: "Login" });
   };
 
-  onMounted(() => {});
+  onMounted(() => {
+    notificacionStore.cargarNotificacions();
+  });
 
   onUnmounted(() => {});
 </script>
@@ -71,10 +75,62 @@
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-          <i class="fas fa-expand-arrows-alt text-white"></i>
+      <li
+        class="nav-item dropdown notificaciones show"
+        v-if="
+          authStore?.user?.permisos == '*' ||
+          authStore?.user?.permisos.includes('notificacions.index')
+        "
+      >
+        <a
+          class="nav-link"
+          data-toggle="dropdown"
+          href="#"
+          aria-expanded="true"
+        >
+          <i class="far fa-bell text-white"></i>
+          <span class="badge badge-warning navbar-badge">{{
+            notificacionStore.notificacions.length
+          }}</span>
         </a>
+        <div
+          class="dropdown-menu dropdown-menu-lg dropdown-menu-right"
+          style="left: inherit; right: 0px"
+        >
+          <span class="dropdown-item dropdown-header"
+            >{{ notificacionStore.notificacions.length }} Notifications</span
+          >
+          <div class="dropdown-divider"></div>
+          <template v-if="notificacionStore.notificacions.length > 0">
+            <router-link
+              :to="{
+                name: 'notificacions.show',
+                params: {
+                  id: item.id,
+                },
+              }"
+              class="dropdown-item"
+              v-for="item in notificacionStore.notificacions"
+            >
+              <i class="fas fa-envelope mr-2"></i>
+              <span v-html="item.descripcion"></span>
+              <span class="float-right text-muted text-sm">{{
+                item.hace
+              }}</span>
+            </router-link>
+          </template>
+          <template v-else>
+            <span class="dropdown-item text-muted text-center text-sm"
+              >SIN NOTIFICACIONES</span
+            >
+          </template>
+          <div class="dropdown-divider"></div>
+          <router-link
+            :to="{ name: 'notificacions.index' }"
+            class="dropdown-item dropdown-footer"
+            >Ver todas las notifiacciones</router-link
+          >
+        </div>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#" role="button" @click.prevent="logout()">

@@ -328,7 +328,7 @@
                                     <td colspan="4"></td>
                                     <td class="tbold derecha">DESCUENTO</td>
                                     <td class="tbold derecha">
-                                      {{ oOrdenVenta.descuento }}
+                                      {{ oOrdenVenta.descuento ?? 0 }}
                                     </td>
                                   </tr>
                                   <tr>

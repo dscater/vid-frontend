@@ -24,6 +24,16 @@ export const useAuthStore = defineStore("auth", {
           return true;
         }
         const res = await api.get("/authCheck");
+        const data = res.data;
+        if (data.valid) {
+          if (data.refresh) {
+            console.log("REFRESCANDO TOKEN");
+            this.token = data.token;
+            localStorage.setItem("token", data.token);
+          }
+        } else {
+          this.logout();
+        }
       } catch (err) {
         console.log(err);
         if (err.status === 401) {
