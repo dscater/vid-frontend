@@ -5,6 +5,7 @@
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
+  import PPP from "./PPP.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -38,6 +39,18 @@
       width: "13%",
     },
     {
+      label: "PRECIO VENTA",
+      key: "precio",
+      fixed: true,
+      sortable: true,
+    },
+    {
+      label: "PRECIO PPP",
+      key: "precio_ppp",
+      fixed: true,
+      sortable: true,
+    },
+    {
       label: "UNIDADES/CAJA",
       key: "unidades_caja",
       sortable: true,
@@ -55,11 +68,6 @@
     {
       label: "MARCA",
       key: "marca.nombre",
-      sortable: true,
-    },
-    {
-      label: "PRECIO VENTA",
-      key: "precio",
       sortable: true,
     },
     {
@@ -90,6 +98,8 @@
     filtro: [],
   });
 
+  const accion_formulario_ppp = ref(0);
+  const muestra_formulario_ppp = ref(false);
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
 
@@ -237,6 +247,29 @@
                   <el-tooltip
                     class="box-item"
                     effect="dark"
+                    content="PPP"
+                    placement="left-start"
+                  >
+                    <button
+                      class="btn btn-primary"
+                      @click="
+                        setProducto(item);
+                        accion_formulario_ppp = 1;
+                        muestra_formulario_ppp = true;
+                      "
+                    >
+                      <i class="fa fa-table"></i></button
+                  ></el-tooltip>
+                </template>
+                <template
+                  v-if="
+                    authStore?.user?.permisos == '*' ||
+                    authStore?.user?.permisos.includes('productos.edit')
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
                     content="Editar"
                     placement="left-start"
                   >
@@ -283,5 +316,14 @@
       @envio-formulario="updateDatatable"
       @cerrar-formulario="muestra_formulario = false"
     ></Formulario>
+    <PPP
+      :muestra_formulario="muestra_formulario_ppp"
+      :accion_formulario="accion_formulario_ppp"
+      @envio-formulario="
+        updateDatatable();
+        muestra_formulario_ppp = false;
+      "
+      @cerrar-formulario="muestra_formulario_ppp = false"
+    ></PPP>
   </Content>
 </template>

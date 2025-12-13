@@ -39,6 +39,10 @@ export const useClientes = () => {
       oCliente.value.ciudad = item.ciudad;
       oCliente.value.contactos = item.contactos;
       oCliente.value.estado = item.estado;
+      oCliente.value.rank = item.rank;
+      oCliente.value.categoria = item.categoria;
+      oCliente.value.score = item.score;
+      oCliente.value.factor = item.factor;
       oCliente.value._method = "PUT";
       return oCliente;
     }

@@ -5,6 +5,7 @@
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
+  import Parametros from "./Parametros.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -34,6 +35,18 @@
     {
       label: "RAZÓN SOCIAL",
       key: "razon_social",
+      sortable: true,
+      fixed: true,
+    },
+    {
+      label: "RANK",
+      key: "rank",
+      sortable: true,
+      fixed: true,
+    },
+    {
+      label: "CATEGORÍA",
+      key: "categoria",
       sortable: true,
       fixed: true,
     },
@@ -103,11 +116,18 @@
 
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
+  const accion_formulario_parametros = ref(0);
+  const muestra_formulario_parametros = ref(false);
 
   const agregarRegistro = () => {
     limpiarCliente();
     accion_formulario.value = 0;
     muestra_formulario.value = true;
+  };
+
+  const verParametros = () => {
+    accion_formulario_parametros.value = 0;
+    muestra_formulario_parametros.value = true;
   };
 
   const updateDatatable = async () => {
@@ -179,7 +199,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <button
               v-if="
                 authStore?.user?.permisos == '*' ||
@@ -191,8 +211,22 @@
             >
               <i class="fa fa-plus"></i> Nuevo Cliente
             </button>
+            <button
+              v-if="
+                connectivityStore.isOnline &&
+                (authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'clientes.parametro_clientes'
+                  ))
+              "
+              type="button"
+              class="btn btn-primary ml-1"
+              @click="verParametros"
+            >
+              <i class="fa fa-list"></i> Parametros Ranking
+            </button>
           </div>
-          <div class="col-md-8 my-1">
+          <div class="col-md-6 my-1">
             <div class="row justify-content-end">
               <div class="col-md-5">
                 <div class="input-group" style="align-items: end">
@@ -375,5 +409,14 @@
       @envio-formulario="updateDatatable"
       @cerrar-formulario="muestra_formulario = false"
     ></Formulario>
+    <Parametros
+      :muestra_formulario="muestra_formulario_parametros"
+      :accion_formulario="accion_formulario_parametros"
+      @envio-formulario="
+        updateDatatable();
+        muestra_formulario_parametros = false;
+      "
+      @cerrar-formulario="muestra_formulario_parametros = false"
+    ></Parametros>
   </Content>
 </template>
