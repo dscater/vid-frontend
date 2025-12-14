@@ -325,12 +325,6 @@ const routes = [
     meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
   },
   {
-    path: "/admin/reportes/clientes",
-    name: "reportes.clientes",
-    component: () => import("../pages/admin/reportes/Clientes.vue"),
-    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
-  },
-  {
     path: "/admin/reportes/proveedors",
     name: "reportes.proveedors",
     component: () => import("../pages/admin/reportes/Proveedors.vue"),

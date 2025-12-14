@@ -304,7 +304,16 @@
                           </el-select>
                         </template>
                       </template>
-                      <template v-else> VERIFICADO </template>
+                      <template v-else>
+                        VERIFICADO
+                        <div
+                          v-if="item.o_sucursal_ajuste"
+                          class="text-muted border-top"
+                        >
+                          {{ item.o_sucursal_ajuste.nombre }}<br />
+                          {{ item.motivo }}
+                        </div>
+                      </template>
                     </td>
                   </tr>
                 </template>
