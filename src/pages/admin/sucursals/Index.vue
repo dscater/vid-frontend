@@ -60,6 +60,11 @@
       sortable: true,
     },
     {
+      label: "MAXIMO VENTA DIARIO",
+      key: "monto_dia",
+      sortable: true,
+    },
+    {
       label: "ACCIÓN",
       key: "accion",
       fixed: "right",

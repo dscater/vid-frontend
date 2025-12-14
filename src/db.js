@@ -5,9 +5,9 @@ import Dexie from "dexie";
 export const db = new Dexie("VidDB");
 
 // Define el esquema de la base de datos y las tablas
-db.version(2).stores({
+db.version(4).stores({
   orden_ventas:
-    "++id, nro,codigo,sucursal_id,cliente_id,fecha,hora,fecha_c,cantidad_total,total,total_st,solicitud_descuento,solicitud_sw,user_ap,monto_solicitud,descuento,total_f,forma_pago,cancelado,cambio,cs_f,observaciones,estado,verificado,user_id,sync",
+    "++id, nro,codigo,sucursal_id,cliente_id,fecha,hora,fecha_c,cantidad_total,total,total_st,solicitud_descuento,solicitud_sw,user_ap,monto_solicitud,descuento,total_f,forma_pago,cancelado,cambio,cs_f,observaciones,estado,verificado,user_id,sync,[fecha+sucursal_id]",
   proformas:
     "++id,nro,codigo,sucursal_id,cliente_id,fecha,hora,cantidad_total,total,total_st,solicitud_descuento,descuento,total_f,forma_pago,cs_f,observaciones,user_id,sync",
   cuenta_cobrars:
@@ -15,7 +15,7 @@ db.version(2).stores({
   clientes: "++id, razon_social, rank, categoria, sync",
   devolucion_clientes:
     "++id, sucursal_id, cliente_id, cantidad_total, total, fecha, hora, observaciones, user_id",
-  sucursals: "++id, nombre, almacen",
+  sucursals: "++id, nombre, almacen, monto_dia",
   unidad_medidas: "++id, nombre",
   productos:
     "++id, codigo,nombre,unidades_caja,descripcion,categoria_id,marca_id,precio,precio_ppp,ppp,unidad_medida_id,estado,imagen,url_imagen",

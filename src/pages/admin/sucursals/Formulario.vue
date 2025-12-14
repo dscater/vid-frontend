@@ -296,6 +296,28 @@
               </li>
             </ul>
           </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Maximo ventas diario</label>
+            <input
+              type="number"
+              step="0.1"
+              class="form-control"
+              :class="{
+                'parsley-error': form.errors?.monto_dia,
+              }"
+              v-model="form.monto_dia"
+              placeholder="Seleccionar"
+              filterable
+            />
+            <ul
+              v-if="form.errors?.monto_dia"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.monto_dia[0] }}
+              </li>
+            </ul>
+          </div>
         </div>
       </form>
     </template>

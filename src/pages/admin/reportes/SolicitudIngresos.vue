@@ -11,12 +11,19 @@
   onBeforeMount(() => {
     appStore.startLoading();
   });
+
+  const getFechaAtual = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const form = reactive({
     tipo: "pdf",
-    categoria_id: "todos",
-    marca_id: "todos",
-    unidad_medida_id: "todos",
-    sucursal_id: "todos",
+    proveedor_id: "todos",
+    fecha: getFechaAtual(),
     estado: "todos",
     errors: null,
   });
@@ -43,7 +50,7 @@
   const generarReporte = () => {
     generando.value = true;
     api
-      .post("admin/reportes/productos", form, {
+      .post("admin/reportes/solicitud_ingresos", form, {
         responseType: "blob",
       })
       .then((response) => {
@@ -58,7 +65,7 @@
           const fileURL = window.URL.createObjectURL(new Blob([response.data]));
           const fileLink = document.createElement("a");
           fileLink.href = fileURL;
-          fileLink.setAttribute("download", "productos.xlsx");
+          fileLink.setAttribute("download", "solicitud_ingresos.xlsx");
           document.body.appendChild(fileLink);
           fileLink.click();
         }
@@ -88,43 +95,13 @@
       });
   };
 
-  const listCategorias = ref([]);
-  const cargarCategorias = () => {
-    api.get("/admin/categorias/listado").then((response) => {
-      listCategorias.value = response.data.categorias;
-      listCategorias.value.unshift({
+  const listProveedors = ref([]);
+  const cargarProveedors = () => {
+    api.get("/admin/proveedors/listado").then((response) => {
+      listProveedors.value = response.data.proveedors;
+      listProveedors.value.unshift({
         id: "todos",
-        nombre: "TODOS",
-      });
-    });
-  };
-  const listMarcas = ref([]);
-  const cargarMarcas = () => {
-    api.get("/admin/marcas/listado").then((response) => {
-      listMarcas.value = response.data.marcas;
-      listMarcas.value.unshift({
-        id: "todos",
-        nombre: "TODOS",
-      });
-    });
-  };
-  const listUnidadMedidas = ref([]);
-  const cargarUnidadMedidas = () => {
-    api.get("/admin/unidad_medidas/listado").then((response) => {
-      listUnidadMedidas.value = response.data.unidad_medidas;
-      listUnidadMedidas.value.unshift({
-        id: "todos",
-        nombre: "TODOS",
-      });
-    });
-  };
-  const listSucursals = ref([]);
-  const cargarSucursals = () => {
-    api.get("/admin/sucursals/listado").then((response) => {
-      listSucursals.value = response.data.sucursals;
-      listSucursals.value.unshift({
-        id: "todos",
-        nombre: "TODOS",
+        razon_social: "TODOS",
       });
     });
   };
@@ -134,19 +111,20 @@
       label: "TODOS",
     },
     {
-      value: 1,
-      label: "ACTIVO",
+      value: "PENDIENTE",
+      label: "PENDIENTE",
     },
     {
-      value: 0,
-      label: "INACTIVO",
+      value: "APROBADO",
+      label: "APROBADO",
+    },
+    {
+      value: "APROBADO CON OBSERVACIONES",
+      label: "APROBADO CON OBSERVACIONES",
     },
   ]);
   const cargarListas = () => {
-    cargarCategorias();
-    cargarMarcas();
-    cargarUnidadMedidas();
-    cargarSucursals();
+    cargarProveedors();
   };
 
   onMounted(async () => {
@@ -159,7 +137,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Reportes > Productos</h1>
+          <h1 class="m-0">Reportes > Solicitudes de Ingreso</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -167,7 +145,9 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Reportes > Productos</li>
+            <li class="breadcrumb-item active">
+              Reportes > Solicitudes de Ingreso
+            </li>
           </ol>
         </div>
         <!-- /.col -->
@@ -189,36 +169,23 @@
                   </select>
                 </div>
                 <div class="col-md-12">
-                  <label>Seleccionar categoría</label>
-                  <select v-model="form.categoria_id" class="form-control">
-                    <option v-for="item in listCategorias" :value="item.id">
-                      {{ item.nombre }}
-                    </option>
-                  </select>
+                  <label>Seleccionar proveedor</label>
+                  <el-select v-model="form.proveedor_id" filterable>
+                    <el-option
+                      v-for="item in listProveedors"
+                      :value="item.id"
+                      :label="item.razon_social"
+                    >
+                    </el-option>
+                  </el-select>
                 </div>
                 <div class="col-md-12">
-                  <label>Seleccionar marca</label>
-                  <select v-model="form.marca_id" class="form-control">
-                    <option v-for="item in listMarcas" :value="item.id">
-                      {{ item.nombre }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-12">
-                  <label>Seleccionar unidad de medida</label>
-                  <select v-model="form.unidad_medida_id" class="form-control">
-                    <option v-for="item in listUnidadMedidas" :value="item.id">
-                      {{ item.nombre }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-12">
-                  <label>Seleccionar Sucursal</label>
-                  <select v-model="form.sucursal_id" class="form-control">
-                    <option v-for="item in listSucursals" :value="item.id">
-                      {{ item.nombre }}
-                    </option>
-                  </select>
+                  <label>Fecha</label>
+                  <input
+                    type="date"
+                    v-model="form.fecha"
+                    class="form-control"
+                  />
                 </div>
                 <div class="col-md-12">
                   <label>Seleccionar Estado</label>

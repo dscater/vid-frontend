@@ -609,6 +609,8 @@
   };
 
   const calcularTotal = () => {
+    form.total_f = 0;
+    form.cancelado = 0;
     if (form.orden_venta_detalles.length == 0) {
       form.total = 0;
       form.cantidad_total = 0;
@@ -627,6 +629,7 @@
       return acum + parseFloat(item.cantidad);
     }, 0);
     form.cantidad_total = total;
+    total_vendido.value = parseFloat(total_vendido_aux.value) + form.total_f;
   };
 
   const calcularTotalConDescuento = () => {
@@ -640,6 +643,7 @@
       return acum + parseFloat(item.subtotal_f);
     }, 0);
     form.total_f = total - form.descuento;
+    total_vendido.value = parseFloat(total_vendido_aux.value) + form.total_f;
   };
 
   const detectarDescuento = () => {
@@ -648,6 +652,7 @@
     } else {
       form.total_f = form.total_st;
     }
+    total_vendido.value = parseFloat(total_vendido_aux.value) + form.total_f;
     calcularCambio();
   };
 
@@ -659,14 +664,15 @@
     return subtotal;
   });
 
-  const eliminarDetalle = (index, id) => {
+  const eliminarDetalle = async (index, id) => {
     if (id != 0) {
       form.eliminados_detalles.push(id);
     }
     form.orden_venta_detalles.splice(index, 1);
-    calcularTotal();
-    calcularTotalConDescuento();
-    calcularCambio();
+    await calcularTotal();
+    await calcularTotalConDescuento();
+    await calcularCambio();
+    total_vendido.value = parseFloat(total_vendido_aux.value) + form.total_f;
   };
 
   const calcularCambio = () => {
@@ -691,10 +697,55 @@
       form.errors = null;
     });
   };
+  const getFechaAtual = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const total_vendido = ref(0);
+  const total_vendido_aux = ref(0);
+  const monto_maximo = ref(0);
+  const verificarMontoMaximo = async () => {
+    const fecha = getFechaAtual();
+    total_vendido.value = 0;
+    total_vendido_aux.value = 0;
+    monto_maximo.value = 0;
+    if (form.sucursal_id) {
+      if (connectivityStore.isOnline) {
+        api
+          .get("/admin/orden_ventas/montoMaximo", {
+            params: {
+              fecha: fecha,
+              sucursal_id: form.sucursal_id,
+            },
+          })
+          .then((response) => {
+            total_vendido_aux.value = response.data.total_vendido;
+            total_vendido.value = response.data.total_vendido;
+            monto_maximo.value = response.data.monto_dia;
+          });
+      } else {
+        //
+        const total = await ordenVentaStore.totalPorFechaSucursal(
+          fecha,
+          form.sucursal_id
+        );
+
+        const sucursal = await sucursalStore.getSucursalById(form.sucursal_id);
+        total_vendido_aux.value = total;
+        total_vendido.value = total;
+        monto_maximo.value = sucursal.monto_dia;
+      }
+    }
+  };
 
   onMounted(() => {
     cargarListas();
     verificarOrdenVenta();
+    verificarMontoMaximo();
   });
 </script>
 
@@ -719,6 +770,7 @@
                 placeholder="Seleccione"
                 no-data-text="Sin datos"
                 no-match-text="No se encontró"
+                @change="verificarMontoMaximo"
               >
                 <el-option
                   v-for="item in listSucursals"
@@ -738,6 +790,14 @@
             </div>
             <div class="col-md-12 mb-2" v-else>
               <b>Sucursal: </b>{{ authStore?.user.sucursal_asignada.nombre }}
+            </div>
+            <div class="col-md mb">
+              <span class="badge bg-success text-sm"
+                >Vendido Hoy: {{ total_vendido }}</span
+              >
+              <span class="badge bg-warning text-sm ml-2"
+                >Monto Maximo: {{ monto_maximo }}</span
+              >
             </div>
             <div class="col-md-12 mb-2">
               <label>Buscar Cliente</label>
@@ -1150,7 +1210,10 @@
                       @click.prevent="enviarFormulario"
                     ></button>
                     <button
-                      v-if="form.solicitud_descuento == 0"
+                      v-if="
+                        form.solicitud_descuento == 0 &&
+                        monto_maximo >= total_vendido
+                      "
                       class="btn btn-primary w-100"
                       v-html="textBtn"
                       :disabled="enviando"

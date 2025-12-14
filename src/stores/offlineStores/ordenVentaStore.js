@@ -61,6 +61,18 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
     }
   }
 
+  async function totalPorFechaSucursal(fecha, sucursalId) {
+    console.log("FECHA ", fecha);
+    console.log("SUCURSAL ", sucursalId);
+    const ordenes = await db.orden_ventas
+      .where("[fecha+sucursal_id]")
+      .equals([fecha, sucursalId])
+      .and((ov) => ov.estado === "FINALIZADO")
+      .toArray();
+
+    return ordenes.reduce((sum, ov) => sum + Number(ov.total_f || 0), 0);
+  }
+
   // GUARDAR
   async function guardarRegistro(data) {
     let ordenVentaId = 0;
@@ -341,5 +353,6 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
     getAll,
     getOrdenVentaById,
     guardarRegistro,
+    totalPorFechaSucursal,
   };
 });
