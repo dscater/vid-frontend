@@ -15,8 +15,14 @@ const oOrdenVenta = ref({
   monto_solicitud: 0,
   descuento: 0,
   total_f: "",
-  forma_pago: "",
+  con: "",
+  cancelado_c: "",
+  qr: "",
+  cancelado_qr: "",
+  cre: "",
+  credito: "",
   cancelado: "",
+  forma_pago: "",
   cambio: "",
   cs_f: "",
   observaciones: "",
@@ -50,8 +56,14 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.monto_solicitud = item.monto_solicitud;
       oOrdenVenta.value.descuento = item.descuento;
       oOrdenVenta.value.total_f = item.total_f;
-      oOrdenVenta.value.forma_pago = item.forma_pago;
+      oOrdenVenta.value.con = item.con;
+      oOrdenVenta.value.cancelado_c = item.cancelado_c;
+      oOrdenVenta.value.qr = item.qr;
+      oOrdenVenta.value.cancelado_qr = item.cancelado_qr;
+      oOrdenVenta.value.cre = item.cre;
+      oOrdenVenta.value.credito = item.credito;
       oOrdenVenta.value.cancelado = item.cancelado;
+      oOrdenVenta.value.forma_pago = item.forma_pago;
       oOrdenVenta.value.cambio = item.cambio;
       oOrdenVenta.value.cs_f = item.cs_f;
       oOrdenVenta.value.observaciones = item.observaciones;
@@ -101,8 +113,15 @@ export const useOrdenVentas = () => {
     oOrdenVenta.value.monto_solicitud = 0;
     oOrdenVenta.value.descuento = 0;
     oOrdenVenta.value.total_f = "";
-    oOrdenVenta.value.forma_pago = "EFECTIVO";
+    oOrdenVenta.value.con = 1;
+    oOrdenVenta.value.cancelado_c = 0;
+    oOrdenVenta.value.qr = 0;
+    oOrdenVenta.value.cancelado_qr = 0;
+    oOrdenVenta.value.cre = 0;
+    oOrdenVenta.value.credito = 0;
+
     oOrdenVenta.value.cancelado = "";
+    oOrdenVenta.value.forma_pago = "EFECTIVO";
     oOrdenVenta.value.cambio = "";
     oOrdenVenta.value.cs_f = "CON FACTURA";
     oOrdenVenta.value.observaciones = "";

@@ -109,7 +109,7 @@
       if (result.isConfirmed) {
         enviando.value = true;
         if (connectivityStore.isOnline) {
-          if (form.forma_pago != "CRÉDITO") {
+          if (form.cre == 0) {
             if (parseFloat(form.cancelado) < parseFloat(form.total_f)) {
               Swal.fire({
                 icon: "info",
@@ -348,34 +348,50 @@
 
   const listClientes = ref([]);
   const loadingClientes = ref(false);
-  const remoteMethod = async (query) => {
-    if (query !== "") {
-      loadingClientes.value = true;
-      try {
-        let response = null;
-        if (connectivityStore.isOnline) {
-          response = await api.get(
-            "/admin/clientes/listadoSelectElementUi" +
-              `?search=${encodeURIComponent(query)}`
-          );
-        } else {
-          response = { data: { clientes: [] } };
-          response.data.clientes = await clienteStore.getAll();
-        }
-        const data = response ? response.data.clientes : [];
-        // Suponiendo que data es un array de clientes [{id, nombre}]
-        listClientes.value = data.map((cliente) => ({
-          value: cliente.id,
-          // label: `${cliente.razon_social} - ${cliente.ci}`,
-          label: `${cliente.razon_social}`,
-        }));
-      } catch (error) {
-        console.log(error);
-        listClientes.value = [];
+  const intervalClientes = ref(null);
+  const onInputSelectClientes = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 2) {
+      clearInterval(intervalClientes.value);
+      intervalClientes.value = setTimeout(() => {
+        remoteMethodClientes(query);
+      }, 400);
+    }
+  };
+  const remoteMethodClientes = async (query) => {
+    if (!query || query.length < 2) {
+      return;
+    }
+    loadingClientes.value = true;
+    try {
+      let response = null;
+      if (connectivityStore.isOnline) {
+        response = await api.get(
+          "/admin/clientes/listadoSelectElementUi" +
+            `?search=${encodeURIComponent(query)}`
+        );
+      } else {
+        response = { data: { clientes: [] } };
+        response.data.clientes = await clienteStore.getAll();
       }
-      loadingClientes.value = false;
-    } else {
+      const data = response ? response.data.clientes : [];
+      // Suponiendo que data es un array de clientes [{id, nombre}]
+      listClientes.value = data.map((cliente) => ({
+        value: cliente.id,
+        // label: `${cliente.razon_social} - ${cliente.ci}`,
+        label: `${cliente.razon_social}`,
+      }));
+    } catch (error) {
+      console.log(error);
       listClientes.value = [];
+    } finally {
+      loadingClientes.value = false;
     }
   };
 
@@ -393,6 +409,55 @@
       oCliente.value = listClientesData.filter((elem) => {
         return elem.id == value;
       })[0];
+    }
+  };
+
+  const listProductos = ref([]);
+  const loadingProductos = ref(false);
+  const intervalProductos = ref(null);
+  const onInputSelectProductos = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 2) {
+      clearInterval(intervalProductos.value);
+      intervalProductos.value = setTimeout(() => {
+        remoteMethodProductos(query);
+      }, 400);
+    }
+  };
+  const remoteMethodProductos = async (query) => {
+    if (!query || query.length < 2) {
+      return;
+    }
+    loadingProductos.value = true;
+    try {
+      let response = null;
+      if (connectivityStore.isOnline) {
+        response = await api.get(
+          "/admin/productos/byCodigoListSelectElementUi" +
+            `?search=${encodeURIComponent(query)}`
+        );
+      } else {
+        response = { data: { productos: [] } };
+        response.data.productos = await productoStore.getAll();
+      }
+      const data = response ? response.data.productos : [];
+      // Suponiendo que data es un array de productos [{id, nombre}]
+      listProductos.value = data.map((producto) => ({
+        value: producto.codigo,
+        // label: `${producto.codigo} - ${producto.ci}`,
+        label: `${producto.codigo}`,
+      }));
+    } catch (error) {
+      console.log(error);
+      listProductos.value = [];
+    } finally {
+      loadingProductos.value = false;
     }
   };
 
@@ -677,9 +742,28 @@
 
   const calcularCambio = () => {
     form.cambio = 0;
+    sumaCancelado();
     if (form.total_f && form.cancelado && form.cancelado != 0) {
       form.cambio = parseFloat(form.total_f) - parseFloat(form.cancelado);
       form.cambio *= -1;
+      if (form.cambio < 0) {
+        form.cambio = 0;
+      }
+    }
+  };
+
+  const sumaCancelado = () => {
+    let total = 0;
+    if (form.con == 1) {
+      total += parseFloat(form.cancelado_c);
+    }
+    if (form.qr == 1) {
+      total += parseFloat(form.cancelado_qr);
+    }
+    form.cancelado = total;
+
+    if (form.cre == 1) {
+      form.credito = form.total_f - form.cancelado;
     }
   };
 
@@ -804,9 +888,9 @@
               <el-select-v2
                 v-model="form.cliente_id"
                 filterable
-                remote
-                :remote-method="remoteMethod"
+                @input="onInputSelectClientes"
                 @change="detectarCliente"
+                :reserve-keyword="false"
                 clearable
                 :options="listClientes"
                 :loading="loadingClientes"
@@ -814,9 +898,6 @@
                 size="large"
                 no-data-text="Sin resultados"
                 loading-text="Buscando..."
-                :class="{
-                  'is-invalid': form.errors?.cliente_id,
-                }"
                 class="rounded-0"
               />
               <ul
@@ -844,6 +925,11 @@
                   >
                     <div class="mb-1">{{ oCliente.categoria }}</div>
                     <i class="fa fa-tag"></i>
+                  </span>
+                </div>
+                <div class="col-12 text-center mt-1">
+                  <span class="badge bg-info text-sm">
+                    {{ oCliente.dir }}
                   </span>
                 </div>
               </div>
@@ -909,11 +995,20 @@
                 >Código de Producto</small
               >
               <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
+                <el-select-v2
                   v-model="nuevoProducto.codigoProducto"
-                  @keypress.enter="agregarProducto"
+                  filterable
+                  @input="onInputSelectProductos"
+                  :reserve-keyword="false"
+                  clearable
+                  :options="listProductos"
+                  :loading="loadingProductos"
+                  placeholder="Código..."
+                  size="large"
+                  no-data-text="Sin resultados"
+                  loading-text="Buscando..."
+                  class="rounded-0"
+                  style="width: calc(100% - 38px)"
                 />
                 <div class="input-group-append">
                   <button
@@ -942,7 +1037,7 @@
                         <tr>
                           <th>PRODUCTO</th>
                           <th style="min-width: 140px">UNIDAD MEDIDA</th>
-                          <th width="100px">C/U</th>
+                          <th width="100px">P/U</th>
                           <th style="min-width: 120px">CANTIDAD</th>
                           <th width="100px">SUBTOTAL</th>
                           <th style="min-width: 120px">DESCUENTO</th>
@@ -1052,26 +1147,6 @@
                 </ul>
                 <div class="row">
                   <div class="col-md-6">
-                    <small class="font-weight-bold">Forma de pago</small><br />
-                    <el-radio-group
-                      v-model="form.forma_pago"
-                      :disabled="form.id != 0 && form.forma_pago == 'CRÉDITO'"
-                    >
-                      <el-radio value="EFECTIVO">EFECTIVO</el-radio>
-                      <el-radio value="QR">QR</el-radio>
-                      <el-radio
-                        value="CRÉDITO"
-                        v-if="
-                          authStore?.user?.permisos == '*' ||
-                          authStore?.user?.permisos.includes(
-                            'cuenta_cobrars.create'
-                          )
-                        "
-                        >CRÉDITO</el-radio
-                      >
-                    </el-radio-group>
-                  </div>
-                  <div class="col-md-6">
                     <small class="font-weight-bold"
                       >Con Factura/Sin Factura</small
                     ><br />
@@ -1158,12 +1233,99 @@
                     />
                   </div>
                   <div class="col-12">
-                    <small class="font-weight-bold">Cancelado</small>
+                    <small class="font-weight-bold">Métodos de Pago</small>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <el-checkbox
+                          v-model="form.con"
+                          :true-value="1"
+                          :false-value="0"
+                          >EFECTIVO</el-checkbox
+                        >
+                        <el-checkbox
+                          v-model="form.qr"
+                          :true-value="1"
+                          :false-value="0"
+                          >QR</el-checkbox
+                        >
+                        <el-checkbox
+                          v-model="form.cre"
+                          :true-value="1"
+                          :false-value="0"
+                          v-if="
+                            authStore?.user?.permisos == '*' ||
+                            authStore?.user?.permisos.includes(
+                              'cuenta_cobrars.create'
+                            )
+                          "
+                          >CRÉDITO</el-checkbox
+                        >
+                      </div>
+                      <div class="col-md-12" v-if="form.con">
+                        <small class="text-muted font-weight-bold"
+                          >Efectivo</small
+                        >
+                        <input
+                          type="number"
+                          v-model="form.cancelado_c"
+                          class="form-control"
+                          @keyup="calcularCambio"
+                        />
+                        <ul
+                          v-if="form.errors?.cancelado_c"
+                          class="d-block text-danger mb-0 list-unstyled"
+                        >
+                          <li class="parsley-required">
+                            {{ form.errors?.cancelado_c[0] }}
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="col-md-12" v-if="form.qr == 1">
+                        <small class="text-muted font-weight-bold">QR</small>
+                        <input
+                          type="number"
+                          v-model="form.cancelado_qr"
+                          class="form-control"
+                          @keyup="calcularCambio"
+                        />
+                        <ul
+                          v-if="form.errors?.cancelado_qr"
+                          class="d-block text-danger mb-0 list-unstyled"
+                        >
+                          <li class="parsley-required">
+                            {{ form.errors?.cancelado_qr[0] }}
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="col-md-12" v-if="form.cre == 1">
+                        <small class="text-muted font-weight-bold"
+                          >Crédito</small
+                        >
+                        <input
+                          type="number"
+                          v-model="form.credito"
+                          class="form-control bg5"
+                          @keyup="calcularCambio"
+                        />
+                        <ul
+                          v-if="form.errors?.credito"
+                          class="d-block text-danger mb-0 list-unstyled"
+                        >
+                          <li class="parsley-required">
+                            {{ form.errors?.credito[0] }}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <small class="font-weight-bold">Total Cancelado</small>
                     <input
                       type="number"
                       v-model="form.cancelado"
                       class="form-control"
                       @keyup="calcularCambio"
+                      readonly
                     />
                     <ul
                       v-if="form.errors?.cancelado"
