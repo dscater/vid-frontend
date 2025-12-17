@@ -224,6 +224,14 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
             cantidad_total: data.cantidad_total,
             cs_f: data.cs_f,
             forma_pago: data.forma_pago,
+
+            con: data.con,
+            cancelado_c: data.cancelado_c,
+            qr: data.qr,
+            cancelado_qr: data.cancelado_qr,
+            cre: data.cre,
+            credito: data.credito,
+
             cancelado: data.cancelado,
             cambio: data.cambio,
             total: data.total,
@@ -250,7 +258,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           console.log(`Orden de Venta ID insertada: ${ordenVentaId}`);
 
           // VERIFICAR TIPO DE PAGO
-          if (nuevoRegistro.forma_pago == "CRÉDITO") {
+          if (nuevoRegistro.cre == 1) {
             const now = new Date();
             const saldo =
               parseFloat(nuevoRegistro.total_f) -
