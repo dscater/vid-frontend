@@ -43,27 +43,6 @@
       sortable: true,
     },
     {
-      label: "CLIENTE",
-      key: "cliente.razon_social",
-      sortable: true,
-    },
-
-    {
-      label: "CANTIDAD TOTAL",
-      key: "cantidad_total",
-      sortable: true,
-    },
-    {
-      label: "MONTO TOTAL",
-      key: "total",
-      sortable: true,
-    },
-    {
-      label: "FORMA DE PAGO",
-      key: "forma_pago",
-      sortable: true,
-    },
-    {
       label: "FECHA",
       key: "fecha_c",
       sortable: true,
@@ -223,7 +202,7 @@
               </template>
 
               <template #accion="{ item }">
-                <el-tooltip
+                <!-- <el-tooltip
                   class="box-item"
                   effect="dark"
                   content="Imprimir"
@@ -234,7 +213,7 @@
                     @click="imprimirProforma(item)"
                   >
                     <i class="fa fa-print"></i></button
-                ></el-tooltip>
+                ></el-tooltip> -->
                 <template
                   v-if="
                     connectivityStore?.isOnline &&
@@ -299,18 +278,6 @@
               </template>
 
               <template #accion="{ item }">
-                <el-tooltip
-                  class="box-item"
-                  effect="dark"
-                  content="Imprimir"
-                  placement="left-start"
-                >
-                  <button
-                    class="btn btn-primary"
-                    @click="imprimirProforma(item)"
-                  >
-                    <i class="fa fa-print"></i></button
-                ></el-tooltip>
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||

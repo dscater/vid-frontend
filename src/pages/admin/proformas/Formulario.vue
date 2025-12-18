@@ -7,6 +7,7 @@
     nextTick,
     reactive,
     onBeforeMount,
+    onUnmounted,
   } from "vue";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -62,119 +63,118 @@
 
   const enviarFormulario = async () => {
     enviando.value = true;
+    if (validarDetalles()) {
+      enviando.value = true;
+      if (connectivityStore.isOnline) {
+        let url =
+          form.id == 0 ? "/admin/proformas" : "/admin/proformas/" + form.id;
 
-    if (connectivityStore.isOnline) {
-      let url =
-        form.id == 0 ? "/admin/proformas" : "/admin/proformas/" + form.id;
+        api
+          .post(url, form)
+          .then((response) => {
+            console.log(response);
 
-      api
-        .post(url, form)
-        .then((response) => {
-          console.log(response);
-
-          const success =
-            response.data.message ?? "Proceso realizado con éxito";
-          Swal.fire({
-            icon: "success",
-            title: "Correcto",
-            html: `<strong>${success}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-success",
-            },
-          });
-          router.push({
-            name: "proformas.imprimir",
-            params: {
-              id: response.data.proforma.id,
-            },
-          });
-          // router.push({ name: "proformas.index" });
-        })
-        .catch((error) => {
-          if (
-            error.response &&
-            error.response.data &&
-            error.response.data.errors
-          ) {
-            const msgError = error.response.data.errors.error
-              ? error.response.data.errors.error[0]
-              : "Existen errores en el formulario, por favor verifique";
+            const success =
+              response.data.message ?? "Proceso realizado con éxito";
             Swal.fire({
-              icon: "info",
-              title: "Error",
-              html: `<strong>${msgError}</strong>`,
+              icon: "success",
+              title: "Correcto",
+              html: `<strong>${success}</strong>`,
               confirmButtonText: `Aceptar`,
               customClass: {
-                confirmButton: "btn-error",
+                confirmButton: "btn-success",
               },
             });
-            form.errors = error.response.data.errors;
+            router.push({
+              name: "proformas.index",
+            });
+            // router.push({ name: "proformas.index" });
+          })
+          .catch((error) => {
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.errors
+            ) {
+              const msgError = error.response.data.errors.error
+                ? error.response.data.errors.error[0]
+                : "Existen errores en el formulario, por favor verifique";
+              Swal.fire({
+                icon: "info",
+                title: "Error",
+                html: `<strong>${msgError}</strong>`,
+                confirmButtonText: `Aceptar`,
+                customClass: {
+                  confirmButton: "btn-error",
+                },
+              });
+              form.errors = error.response.data.errors;
+            } else {
+              const msgError =
+                "Ocurrió un error inesperado contactese con el Administrador";
+              Swal.fire({
+                icon: "info",
+                title: "Error",
+                html: `<strong>${msgError}</strong>`,
+                confirmButtonText: `Aceptar`,
+                customClass: {
+                  confirmButton: "btn-error",
+                },
+              });
+              console.error("Error inesperado:", error);
+            }
+          })
+          .finally(() => {
+            enviando.value = false;
+          });
+      } else {
+        // OFFLINE
+        try {
+          const resp = await proformaStore.guardarRegistro(form);
+          console.log(resp);
+          if (resp) {
+            const success = "Proceso realizado con éxito";
+            Swal.fire({
+              icon: "success",
+              title: "Correcto",
+              html: `<strong>${success}</strong>`,
+              confirmButtonText: `Aceptar`,
+              customClass: {
+                confirmButton: "btn-success",
+              },
+            });
+            router.push({
+              name: "proformas.imprimir",
+              params: {
+                id: resp,
+              },
+            });
+            // router.push({ name: "proformas.index" });
+            enviando.value = false;
           } else {
-            const msgError =
-              "Ocurrió un error inesperado contactese con el Administrador";
             Swal.fire({
-              icon: "info",
+              icon: "error",
               title: "Error",
-              html: `<strong>${msgError}</strong>`,
+              html: `<strong>Ocurrió un error inesperado intente nuevamente y verifique que todos los campos esten llenados correctamente</strong>`,
               confirmButtonText: `Aceptar`,
               customClass: {
-                confirmButton: "btn-error",
+                confirmButton: "btn-success",
               },
             });
-            console.error("Error inesperado:", error);
           }
-        })
-        .finally(() => {
+        } catch (error) {
           enviando.value = false;
-        });
-    } else {
-      // OFFLINE
-      try {
-        const resp = await proformaStore.guardarRegistro(form);
-        console.log(resp);
-        if (resp) {
-          const success = "Proceso realizado con éxito";
-          Swal.fire({
-            icon: "success",
-            title: "Correcto",
-            html: `<strong>${success}</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-success",
-            },
-          });
-          router.push({
-            name: "proformas.imprimir",
-            params: {
-              id: resp,
-            },
-          });
-          // router.push({ name: "proformas.index" });
-          enviando.value = false;
-        } else {
+          console.log(error);
           Swal.fire({
             icon: "error",
             title: "Error",
-            html: `<strong>Ocurrió un error inesperado intente nuevamente y verifique que todos los campos esten llenados correctamente</strong>`,
+            html: `<strong>${error}</strong>`,
             confirmButtonText: `Aceptar`,
             customClass: {
               confirmButton: "btn-success",
             },
           });
         }
-      } catch (error) {
-        enviando.value = false;
-        console.log(error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          html: `<strong>${error}</strong>`,
-          confirmButtonText: `Aceptar`,
-          customClass: {
-            confirmButton: "btn-success",
-          },
-        });
       }
     }
   };
@@ -201,9 +201,42 @@
     }
   };
 
+  const listProductos = ref([]);
+  const cargarSucursalsProductos = () => {
+    if (connectivityStore.isOnline) {
+      api
+        .get("/admin/sucursal_productos/listado", {
+          params: {
+            sucursal_id: form.sucursal_id,
+          },
+        })
+        .then((response) => {
+          listProductos.value = response.data.sucursal_productos;
+        });
+    } else {
+      // OFFLINE
+    }
+  };
+
   const listClientes = ref([]);
   const loadingClientes = ref(false);
-  const remoteMethod = async (query) => {
+  const intervalClientes = ref(null);
+  const onInputSelectClientes = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 2) {
+      clearInterval(intervalClientes.value);
+      intervalClientes.value = setTimeout(() => {
+        remoteMethodClientes(query);
+      }, 400);
+    }
+  };
+  const remoteMethodClientes = async (query) => {
     if (query !== "") {
       loadingClientes.value = true;
       try {
@@ -251,300 +284,158 @@
     }
   };
 
+  const agregarDetalle = () => {
+    // preparar los productos
+    let proforma_detalle_productos = [];
+    listProductos.value.forEach((elem) => {
+      proforma_detalle_productos.push({
+        proforma_id: "",
+        proforma_detalle_id: "",
+        producto_id: elem.id,
+        unidad_medida_id: elem.unidad_medida_id,
+        unidad_medida: {
+          id: elem.unidad_medida_id,
+          nombre: elem.nombre_unidad,
+        },
+        cantidad: "",
+        cantidad_entregada: "",
+        precio: elem.precio,
+        subtotal: "",
+        verificado: 0,
+      });
+    });
+
+    // agregar el detalle
+    form.proforma_detalles.push({
+      proforma_id: "",
+      cliente_id: "",
+      cantidad: "",
+      cantidad_entregada: "",
+      precio: "",
+      total: "",
+      estado: "",
+      verificado: 0,
+      proforma_detalle_productos: proforma_detalle_productos,
+    });
+  };
+
+  const stockSuperado = ref(false);
+  const actualizaStockProducto = (index_detalle, fila) => {
+    getTotalColumna(index_detalle);
+    sumaTotalPorFila(fila);
+  };
+
+  const sumaTotalPorFila = (fila) => {
+    let total = 0;
+    let total_cantidad = 0;
+    console.log(fila);
+    console.log(form.proforma_detalles);
+    form.proforma_detalles[fila].proforma_detalle_productos.forEach(
+      (elem_detalle, index_detalle) => {
+        if (elem_detalle.cantidad) {
+          total +=
+            parseFloat(elem_detalle.cantidad) * parseFloat(elem_detalle.precio);
+          total_cantidad += parseFloat(elem_detalle.cantidad);
+          form.proforma_detalles[fila].proforma_detalle_productos[
+            index_detalle
+          ].subtotal =
+            parseFloat(elem_detalle.cantidad) * parseFloat(elem_detalle.precio);
+        }
+      }
+    );
+
+    form.proforma_detalles[fila].total = total == 0 ? "" : total;
+    form.proforma_detalles[fila].saldo = total == 0 ? "" : total;
+    form.proforma_detalles[fila].cantidad =
+      total_cantidad == 0 ? "" : total_cantidad;
+  };
+
+  const quitarDetalle = (id, index) => {
+    if (id != 0) {
+      if (connectivityStore.isOnline) {
+        form.eliminados_detalles.push(id);
+      } else if (form.sync_db) {
+        form.eliminados_detalles.push(id);
+      }
+      //TODO: AGREGAR COL sync_db para saber si viene o no de la BD
+    }
+    form.proforma_detalles.splice(index, 1);
+
+    recalcularCantidades();
+  };
+
+  const recalcularCantidades = () => {
+    listProductos.value.forEach((item, index) => {
+      getTotalColumna(index);
+    });
+  };
+
+  const getTotalColumna = (index_col) => {
+    stockSuperado.value = false;
+
+    listProductos.value[index_col].stock_actual =
+      listProductos.value[index_col].stock_actual_aux;
+    let total = 0;
+
+    form.proforma_detalles.forEach((element) => {
+      const cantidad = element.proforma_detalle_productos[index_col].cantidad;
+      if (cantidad) {
+        total += parseFloat(cantidad);
+      }
+    });
+
+    const total_sucursal = listProductos.value[index_col].stock_actual;
+    const nombre_producto = listProductos.value[index_col].nombre;
+
+    listProductos.value[index_col].stock_actual =
+      parseFloat(total_sucursal) - parseFloat(total);
+
+    if (total > total_sucursal) {
+      toast.error(
+        "Se supero el stock disponible del producto " + nombre_producto
+      );
+      stockSuperado.value = true;
+    }
+    return total;
+  };
+
   const cargarListas = () => {
     cargarSucursals();
     cargarUnidadMedidas();
   };
 
-  const agregarProducto = async () => {
-    if (
-      nuevoProducto.value.codigoProducto.trim() == "" ||
-      ("" + nuevoProducto.value.cantidad).trim() == ""
-    ) {
-      toast.error("Debes ingresar la cantidad y el código de Producto", {
-        html: `<i class="fa fa-times"></i>`,
-      });
-      return;
-    }
-
-    if (connectivityStore.isOnline) {
-      api
-        .get("/admin/productos/byCodigo", {
-          params: {
-            codigo: nuevoProducto.value.codigoProducto,
-          },
-        })
-        .then((response) => {
-          if (!response.data) {
-            Swal.fire({
-              icon: "info",
-              title: "Atención",
-              html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
-              confirmButtonText: `Aceptar`,
-              customClass: {
-                confirmButton: "btn-success",
-              },
-            });
-            return;
-          }
-          const prod = response.data;
-          const existe = form.proforma_detalles.filter(
-            (elem) => elem.producto_id === prod.id
-          );
-          if (existe.length > 0) {
-            toast.info("Ese producto ya fue agregado");
-            return;
-          }
-
-          let descuento = getDescuentoProducto(
-            parseFloat(nuevoProducto.value.cantidad),
-            prod
-          );
-          const subtotal =
-            parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
-            descuento;
-
-          form.proforma_detalles.push({
-            id: 0,
-            proforma_id: 0,
-            producto_id: prod.id,
-            unidad_medida_id: prod.unidad_medida_id,
-            producto: prod,
-            cantidad: nuevoProducto.value.cantidad,
-            precio: prod.precio,
-            descuento: descuento,
-            subtotal: subtotal,
-            subtotal_f: subtotal,
-          });
-          nuevoProducto.value.codigoProducto = "";
-          calcularTotal();
-          calcularTotalConDescuento();
-          calcularCambio();
-        })
-        .catch((err) => {
-          console.log(err);
-          Swal.fire({
-            icon: "info",
-            title: "Atención",
-            html: `<strong>Ocurrió un error al intentar obtener el registro</strong>`,
-            confirmButtonText: `Aceptar`,
-            customClass: {
-              confirmButton: "btn-success",
-            },
-          });
-        });
-    } else {
-      // OFFLINE
-      const prod = await productoStore.getProductoByCodigo(
-        nuevoProducto.value.codigoProducto
-      );
-      if (!prod) {
-        Swal.fire({
-          icon: "info",
-          title: "Atención",
-          html: `<strong>No se encontró ningún producto con el código ingresado</strong>`,
-          confirmButtonText: `Aceptar`,
-          customClass: {
-            confirmButton: "btn-success",
-          },
-        });
-      }
-      const existe = form.proforma_detalles.filter(
-        (elem) => elem.producto_id === prod.id
-      );
-      if (existe.length > 0) {
-        toast.info("Ese producto ya fue agregado");
-        return;
-      }
-
-      let descuento = getDescuentoProducto(
-        parseFloat(nuevoProducto.value.cantidad),
-        prod
-      );
-      const subtotal =
-        parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
-        descuento;
-
-      const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
-        prod.unidad_medida_id
-      );
-      form.proforma_detalles.push({
-        id: 0,
-        proforma_id: 0,
-        producto_id: prod.id,
-        unidad_medida_id: prod.unidad_medida_id,
-        unidad_medida: unidad_medida,
-        producto: prod,
-        cantidad: nuevoProducto.value.cantidad,
-        precio: prod.precio,
-        descuento: descuento,
-        subtotal: subtotal,
-        subtotal_f: subtotal,
-      });
-      nuevoProducto.value.codigoProducto = "";
-      calcularTotal();
-      calcularTotalConDescuento();
-      calcularCambio();
-    }
-  };
-
-  const getDescuentoProducto = (cantidad, producto) => {
-    let descuento = 0;
-    if (oCliente.value) {
-      if (oCliente.value.categoria == "A") {
-        // POR PRODUCTO
-        descuento = parseFloat(cantidad) * 5;
-      }
-      if (oCliente.value.categoria == "B") {
-        // POR CAJA
-        const u_caja = parseInt(parseFloat(cantidad) / producto.unidades_caja);
-        descuento = u_caja * 5;
-      }
-    }
-    return descuento;
-  };
-
-  const asignaUnidadMedida = async (index, e) => {
-    form.proforma_detalles[index].unidad_medida_id = e.target.value;
-    if (!connectivityStore.isOnline) {
-      const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
-        parseInt(e.target.value)
-      );
-      form.proforma_detalles[index].unidad_medida = unidad_medida;
-    }
-  };
-
-  const calcularSubtotalPorCantidad = (e, index) => {
-    const elem = e.target;
-    const value = elem.value;
-    if (!value || value.trim() == "") {
-      form.proforma_detalles[index].subtotal =
-        form.proforma_detalles[index].precio;
-      form.proforma_detalles[index].subtotal_f =
-        parseFloat(form.proforma_detalles[index].subtotal) -
-        parseFloat(form.proforma_detalles[index].descuento);
-    }
-    form.proforma_detalles[index].subtotal =
-      parseFloat(value) * parseFloat(form.proforma_detalles[index].precio);
-
-    let descuento = getDescuentoProducto(
-      parseFloat(value),
-      form.proforma_detalles[index].producto
-    );
-
-    form.proforma_detalles[index].subtotal_f =
-      parseFloat(form.proforma_detalles[index].subtotal) - descuento;
-    form.proforma_detalles[index].descuento = descuento;
-
-    calcularTotal();
-    calcularTotalConDescuento();
-    calcularCambio();
-  };
-  const calcularSubtotalPorDescuento = (e, index) => {
-    const elem = e.target;
-    const value = elem.value;
-    if (!value || value.trim() == "") {
-      form.proforma_detalles[index].subtotal_f =
-        form.proforma_detalles[index].subtotal;
-    }
-    form.proforma_detalles[index].subtotal_f =
-      parseFloat(form.proforma_detalles[index].subtotal) - parseFloat(value);
-    calcularTotal();
-  };
-  const calcularSubtotalPorCantidadIndex = (index) => {
-    const value = form.proforma_detalles[index].cantidad;
-    if (!value) {
-      form.proforma_detalles[index].subtotal =
-        form.proforma_detalles[index].precio;
-    }
-    form.proforma_detalles[index].subtotal =
-      parseFloat(value) * parseFloat(form.proforma_detalles[index].precio);
-    calcularTotal();
-  };
-
-  const calcularTotal = () => {
-    if (form.proforma_detalles.length == 0) {
-      form.total = 0;
-      form.cantidad_total = 0;
-      return;
-    }
-    let total = 0;
-    total = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.subtotal);
-    }, 0);
-    form.total = total;
-    total = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.subtotal_f);
-    }, 0);
-    form.total_f = total;
-    total = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.cantidad);
-    }, 0);
-    form.cantidad_total = total;
-  };
-
-  const calcularTotalConDescuento = () => {
-    if (form.proforma_detalles.length == 0) {
-      form.total = 0;
-      form.cantidad_total = 0;
-      return;
-    }
-    let total = 0;
-    total = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.subtotal_f);
-    }, 0);
-    form.total_f = total - form.descuento;
-  };
-
-  const detectarDescuento = () => {
-    if (form.solicitud_descuento == 1) {
-      form.total_f = form.total_st - form.descuento;
-    } else {
-      form.total_f = form.total_st;
-    }
-    calcularCambio();
-  };
-
-  const subTotalFinal = computed(() => {
-    const subtotal = form.proforma_detalles.reduce((acum, item) => {
-      return acum + parseFloat(item.subtotal_f);
-    }, 0);
-    form.total_st = subtotal;
-    return subtotal;
-  });
-
-  const eliminarDetalle = (index, id) => {
-    if (id != 0) {
-      form.eliminados_detalles.push(id);
-    }
-    form.proforma_detalles.splice(index, 1);
-    calcularTotal();
-    calcularTotalConDescuento();
-    calcularCambio();
-  };
-
-  const calcularCambio = () => {
-    form.cambio = 0;
-    if (form.total_f && form.cancelado && form.cancelado != 0) {
-      form.cambio = parseFloat(form.total_f) - parseFloat(form.cancelado);
-      form.cambio *= -1;
-    }
-  };
-
   const verificarProforma = async () => {
-    await nextTick(() => {
+    await nextTick(async () => {
       if (form.id != 0) {
-        listClientes.value.push({
-          value: form.cliente_id,
-          label: `${form.cliente.razon_social}`,
-        });
-
-        // form.fecha = getFechaAtual();
-        // form.hora = getHoraActual();
+        await cargarSucursalsProductos();
+        setTimeout(() => {
+          recalcularCantidades();
+        }, 500);
       }
       form.errors = null;
     });
   };
+
+  const validarDetalles = () => {
+    let error = true;
+    form.proforma_detalles.forEach((item, index) => {
+      if (!item.cliente_id) {
+        toast.error(`No se agregó ningún cliente en la Fila ${index + 1}`);
+        error = false;
+      }
+      if (!item.total) {
+        toast.error(
+          `No se detectó ningún producto agregado en la Fila ${index + 1}`
+        );
+        error = false;
+      }
+    });
+    enviando.value = false;
+
+    return error;
+  };
+
+  onUnmounted(() => {});
 
   onMounted(() => {
     cargarListas();
@@ -554,12 +445,15 @@
 
 <template>
   <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-12">
       <div class="card">
         <div class="card-body">
           <div class="row">
+            <div class="col-12" v-if="form.id != 0">
+              <h4>{{ form.codigo }}</h4>
+            </div>
             <div
-              class="col-md-12 mb-2"
+              class="col-md-4 mb-0"
               v-if="!authStore?.user.sucursal_asignada"
             >
               <label>Seleccionar Sucursal</label>
@@ -573,6 +467,7 @@
                 placeholder="Seleccione"
                 no-data-text="Sin datos"
                 no-match-text="No se encontró"
+                @change="cargarSucursalsProductos"
               >
                 <el-option
                   v-for="item in listSucursals"
@@ -590,411 +485,199 @@
                 </li>
               </ul>
             </div>
-            <div class="col-md-12 mb-2" v-else>
+            <div class="col-md-4 mb-0" v-else>
               <b>Sucursal: </b>{{ authStore?.user.sucursal_asignada.nombre }}
             </div>
-            <div class="col-md-12 mb-2">
-              <label>Buscar Cliente</label>
-              <el-select-v2
-                v-model="form.cliente_id"
-                filterable
-                remote
-                :remote-method="remoteMethod"
-                @change="detectarCliente"
-                clearable
-                :options="listClientes"
-                :loading="loadingClientes"
-                placeholder="Razón Social..."
-                size="large"
-                no-data-text="Sin resultados"
-                loading-text="Buscando..."
+            <div class="col-md-4 mb-0">
+              <label>Fecha</label>
+              <input
+                type="date"
+                class="form-control"
                 :class="{
-                  'is-invalid': form.errors?.cliente_id,
+                  'parsley-error': form.errors?.fecha,
                 }"
-                class="rounded-0"
+                v-model="form.fecha"
+                autosize
               />
               <ul
-                v-if="form.errors?.cliente_id"
+                v-if="form.errors?.fecha"
                 class="d-block text-danger mb-0 list-unstyled"
               >
                 <li class="parsley-required">
-                  {{ form.errors?.cliente_id[0] }}
+                  {{ form.errors?.fecha[0] }}
                 </li>
               </ul>
-
-              <div class="row mt-2" v-if="oCliente">
-                <div class="col-12 text-center">
-                  <span class="mx-1 badge bg-secundario text-md">
-                    <div class="mb-1">{{ oCliente.rank }}</div>
-                    <i class="fa fa-flag-checkered"></i>
-                  </span>
-                  <span
-                    class="mx-1 badge text-md"
-                    :class="{
-                      'bg-success': oCliente.categoria == 'A',
-                      'bg-info': oCliente.categoria == 'B',
-                      'bg-warning': oCliente.categoria == 'C',
-                    }"
-                  >
-                    <div class="mb-1">{{ oCliente.categoria }}</div>
-                    <i class="fa fa-tag"></i>
-                  </span>
-                </div>
-              </div>
             </div>
-            <div class="col-12">
-              <div class="row">
-                <div class="col-md-6 mb-2">
-                  <label>Fecha</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    :class="{
-                      'parsley-error': form.errors?.fecha,
-                    }"
-                    v-model="form.fecha"
-                    autosize
-                  />
-                  <ul
-                    v-if="form.errors?.fecha"
-                    class="d-block text-danger mb-0 list-unstyled"
-                  >
-                    <li class="parsley-required">
-                      {{ form.errors?.fecha[0] }}
-                    </li>
-                  </ul>
-                </div>
-                <div class="col-md-6 mb-2">
-                  <label>Hora</label>
-                  <input
-                    type="time"
-                    class="form-control"
-                    :class="{
-                      'parsley-error': form.errors?.hora,
-                    }"
-                    v-model="form.hora"
-                    autosize
-                  />
-                  <ul
-                    v-if="form.errors?.hora"
-                    class="d-block text-danger mb-0 list-unstyled"
-                  >
-                    <li class="parsley-required">
-                      {{ form.errors?.hora[0] }}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="col-12">
-              <h4>Agregar Productos</h4>
-            </div>
-            <div class="col-md-4 mb-2">
-              <small class="text-muted font-weight-bold">Cantidad</small>
+            <div class="col-md-4 mb-0">
+              <label>Hora</label>
               <input
-                type="number"
+                type="time"
                 class="form-control"
-                v-model="nuevoProducto.cantidad"
+                :class="{
+                  'parsley-error': form.errors?.hora,
+                }"
+                v-model="form.hora"
                 autosize
               />
-            </div>
-            <div class="col-md-8 mb-2">
-              <small class="text-muted font-weight-bold"
-                >Código de Producto</small
+              <ul
+                v-if="form.errors?.hora"
+                class="d-block text-danger mb-0 list-unstyled"
               >
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="nuevoProducto.codigoProducto"
-                  @keypress.enter="agregarProducto"
-                />
-                <div class="input-group-append">
-                  <button
-                    class="btn btn-primary d-flex align-items-center justify-content-center"
-                    @click.prevent="agregarProducto"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+                <li class="parsley-required">
+                  {{ form.errors?.hora[0] }}
+                </li>
+              </ul>
+            </div>
+            <div class="col-12 mt-2 overflow-auto" v-if="form.sucursal_id">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>PRECIO</th>
+                    <th></th>
+                    <th></th>
+                    <th v-for="item in listProductos">
+                      {{ item.precio }}
+                    </th>
+                    <th colspan="2" rowspan="3"></th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th>Nro. Recibo</th>
+                    <th>Total</th>
+                    <th v-for="item in listProductos">
+                      {{ item.nombre }}<br />
+                      {{ item.nombre_unidad }}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>STOCK ACTUAL</th>
+                    <th></th>
+                    <th></th>
+                    <th
+                      v-for="item in listProductos"
+                      :class="{
+                        'bg-danger': item.stock_actual < 0,
+                      }"
+                    >
+                      {{ item.stock_actual }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-if="form.proforma_detalles.length > 0">
+                    <tr v-for="(item, index) in form.proforma_detalles">
+                      <td class="p-0">
+                        <el-select-v2
+                          v-model="item.cliente_id"
+                          filterable
+                          @input="onInputSelectClientes"
+                          @change="detectarCliente"
+                          :reserve-keyword="false"
+                          clearable
+                          :options="listClientes"
+                          :loading="loadingClientes"
+                          placeholder="Razón Social..."
+                          size="large"
+                          no-data-text="Sin resultados"
+                          loading-text="Buscando..."
+                          class="rounded-0"
+                        />
+                      </td>
+                      <td>
+                        <small v-if="!item.id" class="text-muted"
+                          >(automatico)</small
+                        >
+                        <span v-else v-text="item.id"></span>
+                      </td>
+                      <td>{{ item.total }}</td>
+                      <td
+                        v-for="(
+                          item_detalle, index_detalle
+                        ) in item.proforma_detalle_productos"
+                        class="p-0"
+                      >
+                        <input
+                          type="number"
+                          class="form-control"
+                          min="1"
+                          @keyup="actualizaStockProducto(index_detalle, index)"
+                          v-model="item_detalle.cantidad"
+                        />
+                      </td>
+                      <td>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          @click.prevent="quitarDetalle(item, index)"
+                        >
+                          <i class="fa fa-times"></i>
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          class="btn btn-warning btn-sm"
+                          v-if="form.id != 0"
+                        >
+                          <i class="fa fa-sync"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </template>
+                  <template v-else>
+                    <tr>
+                      <td
+                        :colspan="listProductos.length + 3"
+                        class="text-center font-weight-bold text-muted"
+                      >
+                        NO SE AGREGÓ NINGÚN CLIENTE
+                      </td>
+                    </tr>
+                  </template>
+                  <tr>
+                    <td class="p-0">
+                      <button
+                        class="btn btn-primary btn-sm w-100 rounded-0"
+                        @click="agregarDetalle"
+                      >
+                        + Nuevo Cliente
+                      </button>
+                    </td>
+                    <td :colspan="listProductos.length + 2"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div
+              class="col-12 border p-2 mt-2 text-center text-muted font-weight-bold"
+              v-else
+            >
+              DEBES SELECCIONAR UNA SUCURSAL
+            </div>
+          </div>
+          <div class="row" v-if="stockSuperado">
+            <div class="alert alert-danger col-12">
+              El stock de uno de los productos se supero
+            </div>
+          </div>
+          <div
+            class="row mt-2"
+            v-if="!stockSuperado && form.proforma_detalles.length > 0"
+          >
+            <div class="col-md-4 offset-md-8">
+              <button
+                class="btn btn-primary w-100"
+                v-html="textBtn"
+                @click="enviarFormulario"
+              ></button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-7">
-      <form @submit.prevent="enviarFormulario()">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-12 overflow-auto">
-                    <table class="table table-bordered mb-0">
-                      <thead class="bg-secundario">
-                        <tr>
-                          <th>PRODUCTO</th>
-                          <th style="min-width: 140px">UNIDAD MEDIDA</th>
-                          <th width="100px">C/U</th>
-                          <th style="min-width: 120px">CANTIDAD</th>
-                          <th width="100px">SUBTOTAL</th>
-                          <th style="min-width: 120px">DESCUENTO</th>
-                          <th width="100px">SUBTOTAL FINAL</th>
-                          <th width="1%"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <template v-if="form.proforma_detalles.length > 0">
-                          <tr v-for="(item, index) in form.proforma_detalles">
-                            <td>{{ item.producto.nombre }}</td>
-                            <td>
-                              <select
-                                class="form-control"
-                                @change="asignaUnidadMedida(index, $event)"
-                                v-model="item.unidad_medida_id"
-                                disabled
-                              >
-                                <option
-                                  v-for="item in listUnidadMedidas"
-                                  :value="item.id"
-                                >
-                                  {{ item.nombre }}
-                                </option>
-                              </select>
-                            </td>
-                            <td>{{ item.precio }}</td>
-                            <td>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                class="form-control"
-                                v-model="item.cantidad"
-                                @change="
-                                  calcularSubtotalPorCantidad($event, index)
-                                "
-                                @keyup="
-                                  calcularSubtotalPorCantidad($event, index)
-                                "
-                              />
-                            </td>
-                            <td>{{ item.subtotal }}</td>
-                            <td>
-                              <input
-                                type="number"
-                                step="1"
-                                min="1"
-                                class="form-control"
-                                v-model="item.descuento"
-                                @change="
-                                  calcularSubtotalPorDescuento($event, index)
-                                "
-                                @keyup="
-                                  calcularSubtotalPorDescuento($event, index)
-                                "
-                                :disabled="
-                                  !oCliente || oCliente.categoria == 'C'
-                                "
-                              />
-                            </td>
-                            <td>{{ item.subtotal_f }}</td>
-                            <td>
-                              <button
-                                class="btn btn-danger btn-sm"
-                                @click.prevent="eliminarDetalle(index, item.id)"
-                              >
-                                X
-                              </button>
-                            </td>
-                          </tr>
-                        </template>
-                        <template v-else>
-                          <tr>
-                            <td
-                              colspan="4"
-                              class="text-muted text-sm text-center"
-                            >
-                              NO SE AGREGARÓN PRODUCTOS
-                            </td>
-                          </tr>
-                        </template>
-                        <tr class="bg2">
-                          <td class="font-weight-bold text-right" colspan="2">
-                            TOTALES
-                          </td>
-                          <td></td>
-                          <td>{{ form.cantidad_total }}</td>
-                          <td>{{ form.total }}</td>
-                          <td></td>
-                          <td>{{ subTotalFinal }}</td>
-                          <td></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <ul
-                  v-if="form.errors?.proforma_detalles"
-                  class="d-block text-danger mb-0 list-unstyled"
-                >
-                  <li class="parsley-required">
-                    {{ form.errors?.proforma_detalles[0] }}
-                  </li>
-                </ul>
-                <div class="row">
-                  <div class="col-md-6">
-                    <small class="font-weight-bold">Forma de pago</small><br />
-                    <el-radio-group
-                      v-model="form.forma_pago"
-                      :disabled="form.id != 0 && form.forma_pago == 'CRÉDITO'"
-                    >
-                      <el-radio value="EFECTIVO">EFECTIVO</el-radio>
-                      <el-radio value="QR">QR</el-radio>
-                      <el-radio
-                        value="CRÉDITO"
-                        v-if="
-                          authStore?.user?.permisos == '*' ||
-                          authStore?.user?.permisos.includes(
-                            'cuenta_cobrars.create'
-                          )
-                        "
-                        >CRÉDITO</el-radio
-                      >
-                    </el-radio-group>
-                  </div>
-                  <div class="col-md-6">
-                    <small class="font-weight-bold"
-                      >Con Factura/Sin Factura</small
-                    ><br />
-                    <el-radio-group v-model="form.cs_f">
-                      <el-radio value="CON FACTURA">CON FACTURA</el-radio>
-                      <el-radio value="SIN FACTURA">SIN FACTURA</el-radio>
-                    </el-radio-group>
-                  </div>
-                  <div class="col-12">
-                    <div class="row">
-                      <div
-                        class="col-md-6"
-                        v-if="form.solicitud_descuento == 1"
-                      >
-                        <small class="font-weight-bold">Descuento</small>
-                        <input
-                          type="number"
-                          v-model="form.descuento"
-                          class="form-control"
-                          @keyup="calcularTotalConDescuento"
-                          :disabled="form.verificado == 1"
-                        />
-                        <ul
-                          v-if="form.errors?.descuento"
-                          class="d-block text-danger mb-0 list-unstyled"
-                        >
-                          <li class="parsley-required">
-                            {{ form.errors?.descuento[0] }}
-                          </li>
-                        </ul>
-                        <button
-                          v-if="
-                            form.id != 0 &&
-                            form.verificado == 0 &&
-                            (authStore?.user?.permisos == '*' ||
-                              authStore?.user?.permisos.includes(
-                                'proformas.aprobar_descuentos'
-                              ))
-                          "
-                          class="btn btn-success btn-sm w-100 mt-1 text-xs"
-                          @click.prevent="aprobarDescuento"
-                        >
-                          <i class="fa fa-check"></i>
-                          Aprobar Descuento
-                        </button>
-                      </div>
-                      <div class="col-md-6">
-                        <small class="font-weight-bold"
-                          >Descuento adicional</small
-                        ><br />
-                        <el-radio-group
-                          v-model="form.solicitud_descuento"
-                          @change="detectarDescuento"
-                        >
-                          <el-radio :value="0">SIN DESCUENTO</el-radio>
-                          <el-radio
-                            :value="1"
-                            :disabled="!oCliente || oCliente.categoria == 'C'"
-                            >CON DESCUENTO</el-radio
-                          >
-                        </el-radio-group>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12">
-                    <small class="font-weight-bold">Total Pagar</small>
-                    <input
-                      type="number"
-                      v-model="form.total_f"
-                      class="form-control"
-                      readonly
-                    />
-                  </div>
-                  <!-- <div class="col-12">
-                    <small class="font-weight-bold">Cancelado</small>
-                    <input
-                      type="number"
-                      v-model="form.cancelado"
-                      class="form-control"
-                      @keyup="calcularCambio"
-                    />
-                    <ul
-                      v-if="form.errors?.cancelado"
-                      class="d-block text-danger mb-0 list-unstyled"
-                    >
-                      <li class="parsley-required">
-                        {{ form.errors?.cancelado[0] }}
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="col-12">
-                    <small class="font-weight-bold">Dar cambio</small>
-                    <input
-                      type="number"
-                      v-model="form.cambio"
-                      class="form-control"
-                      :class="{
-                        'bg-danger': form.cambio < 0,
-                      }"
-                    />
-                  </div> -->
-                  <ul
-                    v-if="form.errors?.total"
-                    class="d-block text-danger mb-0 list-unstyled w-100"
-                  >
-                    <li class="parsley-required">
-                      {{ form.errors?.total[0] }}
-                    </li>
-                  </ul>
-                  <ul
-                    v-if="form.errors?.total_f"
-                    class="d-block text-danger mb-0 list-unstyled w-100"
-                  >
-                    <li class="parsley-required">
-                      {{ form.errors?.total_f[0] }}
-                    </li>
-                  </ul>
-                  <div class="col-12 my-1">
-                    <button
-                      class="btn btn-primary w-100"
-                      v-html="textBtn"
-                      :disabled="enviando"
-                      @click.prevent="enviarFormulario"
-                    ></button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
   </div>
 </template>
+
+<style scoped>
+  table {
+    min-width: 900px;
+  }
+</style>

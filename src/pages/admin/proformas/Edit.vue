@@ -82,7 +82,7 @@
               class="row"
             >
               <template #template>
-                <div class="col-md-6">
+                <div class="col-md-12">
                   <el-skeleton-item style="height: 200px"></el-skeleton-item>
                 </div>
               </template>
