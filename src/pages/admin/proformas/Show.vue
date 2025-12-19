@@ -7,6 +7,10 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import { useProformaStore } from "../../../stores/offlineStores/proformaStore";
+  const connectivityStore = useConnectivityStore();
+  const proformaStore = useProformaStore();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const props = defineProps({
@@ -22,13 +26,20 @@
 
   const { setProforma, limpiarProforma, oProforma } = useProformas();
   const loadingProforma = ref(true);
-  const cargarProforma = () => {
+  const cargarProforma = async () => {
     loadingProforma.value = true;
-    api.get("/admin/proformas/" + props.id).then((response) => {
-      setProforma(response.data.proforma);
-      console.log(response.data.proforma);
+    if (connectivityStore.isOnline) {
+      api.get("/admin/proformas/" + props.id).then((response) => {
+        setProforma(response.data.proforma);
+        console.log(response.data.proforma);
+        loadingProforma.value = false;
+      });
+    } else {
+      const proforma = await proformaStore.getProformaById(parseInt(props.id));
+      setProforma(proforma);
+      console.log(proforma);
       loadingProforma.value = false;
-    });
+    }
   };
   onMounted(() => {
     cargarProforma();
