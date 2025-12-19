@@ -287,6 +287,50 @@
     calcularTotal();
   };
 
+  const listProductos = ref([]);
+  const loadingProductos = ref(false);
+  const intervalProductos = ref(null);
+  const onInputSelectProductos = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 2) {
+      clearInterval(intervalProductos.value);
+      intervalProductos.value = setTimeout(() => {
+        remoteMethodProductos(query);
+      }, 400);
+    }
+  };
+  const remoteMethodProductos = async (query) => {
+    if (!query || query.length < 2) {
+      return;
+    }
+    loadingProductos.value = true;
+    try {
+      let response = null;
+      response = await api.get(
+        "/admin/productos/byCodigoListSelectElementUi" +
+          `?search=${encodeURIComponent(query)}`
+      );
+      const data = response ? response.data.productos : [];
+      // Suponiendo que data es un array de productos [{id, nombre}]
+      listProductos.value = data.map((producto) => ({
+        value: producto.codigo,
+        // label: `${producto.codigo} - ${producto.ci}`,
+        label: `${producto.codigo}`,
+      }));
+    } catch (error) {
+      console.log(error);
+      listProductos.value = [];
+    } finally {
+      loadingProductos.value = false;
+    }
+  };
+
   onMounted(() => {});
 </script>
 
@@ -492,11 +536,20 @@
               >Código de Producto</small
             >
             <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
+              <el-select-v2
                 v-model="codigoProducto"
-                @keypres.enter="agregarProducto"
+                filterable
+                @input="onInputSelectProductos"
+                :reserve-keyword="false"
+                clearable
+                :options="listProductos"
+                :loading="loadingProductos"
+                placeholder="Código..."
+                size="large"
+                no-data-text="Sin resultados"
+                loading-text="Buscando..."
+                class="rounded-0"
+                style="width: calc(100% - 38px)"
               />
               <div class="input-group-append">
                 <button
@@ -513,9 +566,9 @@
               <thead class="bg-secundario">
                 <tr>
                   <th>PRODUCTO</th>
-                  <th width="140px">C/U</th>
+                  <!-- <th width="140px">C/U</th> -->
                   <th width="140px">CANTIDAD</th>
-                  <th width="100px">SUBTOTAL</th>
+                  <!-- <th width="100px">SUBTOTAL</th> -->
                   <th width="1%"></th>
                 </tr>
               </thead>
@@ -523,7 +576,7 @@
                 <template v-if="form.solicitud_ingreso_detalles.length > 0">
                   <tr v-for="(item, index) in form.solicitud_ingreso_detalles">
                     <td>{{ item.producto.nombre }}</td>
-                    <td>
+                    <!-- <td>
                       <input
                         type="number"
                         step="1"
@@ -533,7 +586,7 @@
                         @change="calcularSubtotalByCosto($event, index)"
                         @keyup="calcularSubtotalByCosto($event, index)"
                       />
-                    </td>
+                    </td> -->
                     <td>
                       <input
                         type="number"
@@ -545,7 +598,7 @@
                         @keyup="calcularSubtotal($event, index)"
                       />
                     </td>
-                    <td>{{ item.subtotal }}</td>
+                    <!-- <td>{{ item.subtotal }}</td> -->
                     <td>
                       <button
                         class="btn btn-danger btn-sm"
@@ -564,12 +617,11 @@
                   </tr>
                 </template>
                 <tr>
-                  <td class="font-weight-bold text-right" colspan="2">
+                  <td class="font-weight-bold text-right" colspan="">
                     TOTALES
                   </td>
                   <td>{{ form.cantidad_total }}</td>
-                  <td>{{ form.total }}</td>
-                  <td></td>
+                  <!-- <td>{{ form.total }}</td> -->
                 </tr>
               </tbody>
             </table>

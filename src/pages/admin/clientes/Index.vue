@@ -77,11 +77,6 @@
       sortable: true,
     },
     {
-      label: "CORREO",
-      key: "correo",
-      sortable: true,
-    },
-    {
       label: "CELULAR",
       key: "cel",
       sortable: true,
@@ -280,6 +275,24 @@
                 >
               </template>
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <router-link
+                    class="btn btn-primary"
+                    :to="{
+                      name: 'clientes.show',
+                      params: {
+                        id: item.id,
+                      },
+                    }"
+                  >
+                    <i class="fa fa-list"></i></router-link
+                ></el-tooltip>
+
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||
@@ -354,6 +367,24 @@
                 >
               </template>
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <router-link
+                    class="btn btn-primary"
+                    :to="{
+                      name: 'clientes.show',
+                      params: {
+                        id: item.id,
+                      },
+                    }"
+                  >
+                    <i class="fa fa-list"></i></router-link
+                ></el-tooltip>
+
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||

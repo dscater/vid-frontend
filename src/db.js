@@ -5,11 +5,11 @@ import Dexie from "dexie";
 export const db = new Dexie("VidDB");
 
 // Define el esquema de la base de datos y las tablas
-db.version(5).stores({
+db.version(6).stores({
   orden_ventas:
     "++id, nro,codigo,sucursal_id,cliente_id,fecha,hora,fecha_c,cantidad_total,total,total_st,solicitud_descuento,solicitud_sw,user_ap,monto_solicitud,descuento,con,cancelado_c,qr,cancelado_qr,cre,credito,total_f,forma_pago,cancelado,cambio,cs_f,observaciones,estado,verificado,user_id,sync,[fecha+sucursal_id]",
   proformas:
-    "++id,nro,codigo,sucursal_id,cliente_id,fecha,hora,cantidad_total,total,total_st,solicitud_descuento,descuento,total_f,forma_pago,cs_f,observaciones,user_id,sync",
+    "++id,nro,codigo,sucursal_ids,fecha,hora,cantidad_total,total, user_id,sync",
   cuenta_cobrars:
     "++id,cliente_id,orden_venta_id,total,cancelado,saldo,fecha,hora,sync",
   clientes: "++id, razon_social, rank, categoria, dir, sync",

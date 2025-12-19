@@ -194,10 +194,9 @@
     }
   };
   const verificarSaldoMonto = () => {
-    if (
-      parseFloat(montoPago.value) > parseFloat(form.saldo) ||
-      montoPago.value == 0
-    ) {
+    const saldo_restante = form.total - parseFloat(form.cancelado);
+    console.log("restante: ", saldo_restante);
+    if (saldo_restante < 0 || montoPago.value == 0) {
       return false;
     }
     return true;

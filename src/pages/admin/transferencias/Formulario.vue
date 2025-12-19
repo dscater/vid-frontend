@@ -335,6 +335,49 @@
     calcularTotal();
   };
 
+  const listProductos = ref([]);
+  const loadingProductos = ref(false);
+  const intervalProductos = ref(null);
+  const onInputSelectProductos = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 2) {
+      clearInterval(intervalProductos.value);
+      intervalProductos.value = setTimeout(() => {
+        remoteMethodProductos(query);
+      }, 400);
+    }
+  };
+  const remoteMethodProductos = async (query) => {
+    if (!query || query.length < 2) {
+      return;
+    }
+    loadingProductos.value = true;
+    try {
+      let response = null;
+      response = await api.get(
+        "/admin/productos/byCodigoListSelectElementUi" +
+          `?search=${encodeURIComponent(query)}`
+      );
+      const data = response ? response.data.productos : [];
+      // Suponiendo que data es un array de productos [{id, nombre}]
+      listProductos.value = data.map((producto) => ({
+        value: producto.codigo,
+        // label: `${producto.codigo} - ${producto.ci}`,
+        label: `${producto.codigo}`,
+      }));
+    } catch (error) {
+      console.log(error);
+      listProductos.value = [];
+    } finally {
+      loadingProductos.value = false;
+    }
+  };
   onMounted(() => {});
 </script>
 
@@ -515,11 +558,20 @@
                 >Código de Producto</small
               >
               <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
+                <el-select-v2
                   v-model="codigoProducto"
-                  @keypres.enter="agregarProducto"
+                  filterable
+                  @input="onInputSelectProductos"
+                  :reserve-keyword="false"
+                  clearable
+                  :options="listProductos"
+                  :loading="loadingProductos"
+                  placeholder="Código..."
+                  size="large"
+                  no-data-text="Sin resultados"
+                  loading-text="Buscando..."
+                  class="rounded-0"
+                  style="width: calc(100% - 38px)"
                 />
                 <div class="input-group-append">
                   <button

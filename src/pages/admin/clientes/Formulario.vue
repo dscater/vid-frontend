@@ -403,46 +403,20 @@
           </div>
           <div class="col-md-4 mb-2">
             <label class="required">Dirección GPS</label>
-            <div class="row">
-              <div class="col-6">
-                <input
-                  type="text"
-                  class="form-control"
-                  :class="{
-                    'parsley-error': form.errors?.latitud,
-                  }"
-                  v-model="form.latitud"
-                />
-                <small class="text-xs text-muted">Latitud</small>
-                <ul
-                  v-if="form.errors?.latitud"
-                  class="list-unstyled text-danger"
-                >
-                  <li class="parsley-required">
-                    {{ form.errors?.latitud[0] }}
-                  </li>
-                </ul>
-              </div>
-              <div class="col-6">
-                <input
-                  type="text"
-                  class="form-control"
-                  :class="{
-                    'parsley-error': form.errors?.longitud,
-                  }"
-                  v-model="form.longitud"
-                />
-                <small class="text-xs text-muted">Longitud</small>
-                <ul
-                  v-if="form.errors?.longitud"
-                  class="list-unstyled text-danger"
-                >
-                  <li class="parsley-required">
-                    {{ form.errors?.longitud[0] }}
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <el-input
+              type="textarea"
+              :class="{
+                'parsley-error': form.errors?.ubicacion,
+              }"
+              v-model="form.ubicacion"
+              autosize
+            ></el-input>
+            <small class="text-xs text-muted">URL</small>
+            <ul v-if="form.errors?.ubicacion" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.ubicacion[0] }}
+              </li>
+            </ul>
           </div>
           <div class="col-md-4 mb-2">
             <label class="required">Ciudad</label>

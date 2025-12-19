@@ -80,6 +80,10 @@
     router.push({ name: "proformas.edit", params: { id: item.id } });
   };
 
+  const mostrarProforma = (item) => {
+    router.push({ name: "proformas.show", params: { id: item.id } });
+  };
+
   const imprimirProforma = (item) => {
     router.push({ name: "proformas.imprimir", params: { id: item.id } });
   };
@@ -215,6 +219,19 @@
                   >
                     <i class="fa fa-print"></i></button
                 ></el-tooltip> -->
+
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="mostrarProforma(item)"
+                  >
+                    <i class="fa fa-list"></i></button
+                ></el-tooltip>
                 <template
                   v-if="
                     connectivityStore?.isOnline &&
@@ -279,6 +296,19 @@
               </template>
 
               <template #accion="{ item }">
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  content="Detalles"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-primary"
+                    @click="mostrarProforma(item)"
+                  >
+                    <i class="fa fa-list"></i></button
+                ></el-tooltip>
+
                 <template
                   v-if="
                     authStore?.user?.permisos == '*' ||

@@ -32,6 +32,7 @@ export const useProformas = () => {
       oProforma.value.id = item.id;
       oProforma.value.nro = item.nro;
       oProforma.value.codigo = item.codigo;
+      oProforma.value.sucursals_txt = item.sucursals_txt;
       oProforma.value.sucursal_ids = item.sucursal_ids;
       oProforma.value.cliente_id = item.cliente_id;
       oProforma.value.fecha = item.fecha;

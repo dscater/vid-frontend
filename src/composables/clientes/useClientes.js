@@ -12,11 +12,14 @@ const oCliente = ref({
   cel: "",
   fono: "",
   dir: "",
-  latitud: "",
-  longitud: "",
+  ubicacion: "",
   ciudad: "",
   contactos: [],
   estado: 1,
+  rank: "",
+  categoria: "",
+  score: "",
+  factor: "",
   _method: "POST",
 });
 
@@ -34,8 +37,7 @@ export const useClientes = () => {
       oCliente.value.cel = item.cel;
       oCliente.value.fono = item.fono;
       oCliente.value.dir = item.dir;
-      oCliente.value.latitud = item.latitud;
-      oCliente.value.longitud = item.longitud;
+      oCliente.value.ubicacion = item.ubicacion;
       oCliente.value.ciudad = item.ciudad;
       oCliente.value.contactos = item.contactos;
       oCliente.value.estado = item.estado;
@@ -61,12 +63,15 @@ export const useClientes = () => {
     oCliente.value.cel = "";
     oCliente.value.fono = "";
     oCliente.value.dir = "";
-    oCliente.value.latitud = "";
-    oCliente.value.longitud = "";
+    oCliente.value.ubicacion = "";
     oCliente.value.ciudad = "";
     oCliente.value.contactos = [
       { nombre: "", fono: "", cel: "", observacion: "" },
     ];
+    oCliente.value.rank = "";
+    oCliente.value.categoria = "";
+    oCliente.value.score = "";
+    oCliente.value.factor = "";
     oCliente.value.estado = 1;
     oCliente.value._method = "POST";
   };

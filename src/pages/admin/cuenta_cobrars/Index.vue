@@ -244,6 +244,7 @@
 
                 <template
                   v-if="
+                    item.saldo > 0 &&
                     connectivityStore.isOnline &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(

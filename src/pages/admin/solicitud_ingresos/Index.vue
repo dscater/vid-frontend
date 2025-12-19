@@ -229,6 +229,17 @@
                 {{ item.user.materno }}
               </template>
 
+              <template #total="{ item }">
+                <span
+                  class="badge text-sm"
+                  :class="{
+                    'text-muted bg10': item.verificado != 3,
+                    'bg-success': item.verificado == 3,
+                  }"
+                  >{{ item.total }}</span
+                >
+              </template>
+
               <template #accion="{ item }">
                 <el-tooltip
                   class="box-item"

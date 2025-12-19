@@ -18,6 +18,7 @@
   import { useProformaStore } from "../../../stores/offlineStores/proformaStore";
   import { useUnidadMedidaStore } from "../../../stores/offlineStores/unidadMedidaStore";
   import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import Verifica from "./Verifica.vue";
   const connectivityStore = useConnectivityStore();
   const proformaStore = useProformaStore();
   const sucursalStore = useSucursalStore();
@@ -322,6 +323,7 @@
 
   const agregarProducto = () => {
     form.proforma_productos.push({
+      id: "",
       proforma_id: "",
       producto_id: "",
       precio: "",
@@ -335,11 +337,13 @@
     // agregar el detalle
     form.proforma_detalles.forEach((elem, index) => {
       elem.proforma_detalle_productos.push({
+        id: "",
         proforma_id: "",
         proforma_detalle_id: "",
         producto_id: elem.producto_id ?? "",
         unidad_medida_id: elem.unidad_medida_id ?? "",
         cantidad: "",
+        resta: "",
         cantidad_entregada: "",
         precio: elem.precio ?? "",
         subtotal: "",
@@ -363,6 +367,44 @@
   const actualizarStockProductos = async () => {
     form.proforma_productos.forEach(async (elem, col) => {
       obtenerStockProducto(elem.producto_id, col);
+    });
+
+    setTimeout(() => {
+      recalcularCantidades();
+    }, 500);
+  };
+
+  const actualizarStockAuxProductos = async () => {
+    form.proforma_productos.forEach(async (elem, col) => {
+      obtenerAuxSucursaleProductos(elem.producto_id, col);
+    });
+
+    setTimeout(() => {
+      recalcularCantidades();
+    }, 1000);
+  };
+
+  const obtenerAuxSucursaleProductos = async (value, col) => {
+    // SUMAR EL TOTAL DE STOCK
+    let total = 0;
+
+    const requests = form.sucursal_ids.map((element) =>
+      api.get("/admin/sucursal_productos/getSucursalProducto", {
+        params: {
+          producto_id: value,
+          sucursal_id: element,
+        },
+      })
+    );
+
+    const responses = await Promise.all(requests);
+
+    responses.forEach((resp) => {
+      total += parseFloat(resp.data.sucursal_producto.stock_actual);
+    });
+
+    api.get("/admin/productos/" + value).then((response) => {
+      form.proforma_productos[col].stock_actual_aux = total;
     });
   };
 
@@ -408,11 +450,13 @@
     let proforma_detalle_productos = [];
     form.proforma_productos.forEach((elem) => {
       proforma_detalle_productos.push({
+        id: "",
         proforma_id: "",
         proforma_detalle_id: "",
         producto_id: elem.producto_id ?? "",
         unidad_medida_id: elem.unidad_medida_id ?? "",
         cantidad: "",
+        resta: "",
         cantidad_entregada: "",
         precio: elem.precio ?? "",
         subtotal: "",
@@ -422,6 +466,7 @@
 
     // agregar el detalle
     form.proforma_detalles.push({
+      id: "",
       proforma_id: "",
       cliente_id: "",
       cantidad: "",
@@ -470,6 +515,7 @@
 
   const quitarDetalle = (id, index) => {
     if (id != 0) {
+      // RESTAR CANTIDADES
       if (connectivityStore.isOnline) {
         form.eliminados_detalles.push(id);
       } else if (form.sync_db) {
@@ -497,8 +543,17 @@
 
     form.proforma_detalles.forEach((element) => {
       const cantidad = element.proforma_detalle_productos[index_col].cantidad;
-      if (cantidad) {
-        total += parseFloat(cantidad);
+      const resta = element.proforma_detalle_productos[index_col].resta;
+      if (resta) {
+        // existente
+        if (cantidad) {
+          // total += parseFloat(cantidad) - parseFloat(resta);
+          total += parseFloat(cantidad);
+        } else {
+          total -= parseFloat(resta);
+        }
+      } else if (cantidad) {
+        total += parseFloat(cantidad ?? 0);
       }
     });
 
@@ -542,7 +597,7 @@
         });
 
         setTimeout(() => {
-          recalcularCantidades();
+          actualizarStockAuxProductos();
         }, 500);
       }
       form.errors = null;
@@ -566,6 +621,35 @@
     enviando.value = false;
 
     return error;
+  };
+
+  // VERIFICAR CELDA
+  const muestra_form_verifica = ref(false);
+  const accion_form_verifica = ref(0);
+  const oVerifica = ref(null);
+  const filaVerifica = ref(-1);
+  const colVerifica = ref(-1);
+
+  const verificarCelda = (item, index, col) => {
+    accion_form_verifica.value = 1;
+    muestra_form_verifica.value = true;
+    oVerifica.value = item;
+    filaVerifica.value = index;
+    colVerifica.value = col;
+  };
+
+  const detectaCierre = () => {
+    muestra_form_verifica.value = false;
+    oVerifica.value = null;
+    filaVerifica.value = -1;
+    colVerifica.value = -1;
+  };
+
+  const actualizaDetalleProducto = (verificado) => {
+    form.proforma_detalles[filaVerifica.value].proforma_detalle_productos[
+      colVerifica.value
+    ].verificado = verificado;
+    detectaCierre();
   };
 
   onUnmounted(() => {
@@ -770,29 +854,49 @@
                           item_detalle, col_index
                         ) in item.proforma_detalle_productos"
                         class="p-0"
+                        :class="{
+                          bg9: item_detalle.verificado == 1,
+                        }"
                       >
-                        <div class="input-group">
+                        <div
+                          class="input-group"
+                          v-if="item_detalle.verificado == 0"
+                        >
                           <input
                             type="number"
-                            class="form-control"
+                            class="form-control text-center"
                             min="1"
                             @keyup="actualizaStockProducto(col_index, index)"
+                            @change="actualizaStockProducto(col_index, index)"
                             v-model="item_detalle.cantidad"
                           />
                           <div class="input-group-append">
                             <button
                               class="btn btn-xs bg4 text-success text-xs"
-                              v-if="item_detalle.id && item_detalle.id != 0"
+                              v-if="
+                                item_detalle.id &&
+                                item_detalle.id != 0 &&
+                                item_detalle.cantidad
+                              "
+                              @click="
+                                verificarCelda(item_detalle, index, col_index)
+                              "
                             >
                               <i class="fa fa-check"></i>
                             </button>
                           </div>
                         </div>
+                        <div
+                          v-else
+                          class="w-100 d-block h-100 text-center text-success font-weight-bold"
+                        >
+                          {{ item_detalle.cantidad }}
+                        </div>
                       </td>
                       <td>
                         <button
                           class="btn btn-danger btn-sm"
-                          @click.prevent="quitarDetalle(item, index)"
+                          @click.prevent="quitarDetalle(item.id, index)"
                         >
                           X
                         </button>
@@ -868,6 +972,14 @@
         </div>
       </div>
     </div>
+    <verifica
+      :accion_formulario="accion_form_verifica"
+      :muestra_formulario="muestra_form_verifica"
+      :proforma_detalle_producto="oVerifica"
+      @cerrar-formulario="detectaCierre"
+      @envio-formulario="actualizaDetalleProducto"
+    >
+    </verifica>
   </div>
 </template>
 

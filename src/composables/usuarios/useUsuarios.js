@@ -16,8 +16,7 @@ const oUsuario = ref({
   fono: "",
   cel_dom: "",
   dir: "",
-  latitud: "",
-  longitud: "",
+  ubicacion: "",
   correo: "",
   foto: "",
   carnet: "",
@@ -51,8 +50,7 @@ export const useUsuarios = () => {
       oUsuario.value.fono = item.fono;
       oUsuario.value.cel_dom = item.cel_dom;
       oUsuario.value.dir = item.dir;
-      oUsuario.value.latitud = item.latitud;
-      oUsuario.value.longitud = item.longitud;
+      oUsuario.value.ubicacion = item.ubicacion;
       oUsuario.value.correo = item.correo;
       // oUsuario.value.foto = item.foto;
       // oUsuario.value.carnet = item.carnet;
@@ -87,8 +85,7 @@ export const useUsuarios = () => {
     oUsuario.value.fono = "";
     oUsuario.value.cel_dom = "";
     oUsuario.value.dir = "";
-    oUsuario.value.latitud = "";
-    oUsuario.value.longitud = "";
+    oUsuario.value.ubicacion = "";
     oUsuario.value.correo = "";
     oUsuario.value.foto = "";
     oUsuario.value.carnet = "";

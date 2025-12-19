@@ -17,10 +17,12 @@ import IndexCuentaCobrars from "../pages/admin/cuenta_cobrars/Index.vue";
 
 // clientes
 import IndexClientes from "../pages/admin/clientes/Index.vue";
+import ShowClientes from "../pages/admin/clientes/Show.vue";
 
 // proformas
 import IndexProformas from "../pages/admin/proformas/Index.vue";
 import CreateProformas from "../pages/admin/proformas/Create.vue";
+import ShowProformas from "../pages/admin/proformas/Show.vue";
 import EditProformas from "../pages/admin/proformas/Edit.vue";
 import ImprimirProformas from "../pages/admin/proformas/Imprimir.vue";
 
@@ -150,6 +152,14 @@ const routes = [
     // component: () => import("../pages/admin/clientes/Index.vue"),
     component: IndexClientes,
     meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/clientes/:id",
+    name: "clientes.show",
+    props: true,
+    // component: () => import("../pages/admin/clientes/Index.vue"),
+    component: ShowClientes,
+    meta: { layout: Admin, requiresAuth: true },
   },
 
   // PROVEEDORES
@@ -287,6 +297,14 @@ const routes = [
     // component: () => import("../pages/admin/proformas/Edit.vue"),
     component: EditProformas,
     meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+  {
+    path: "/admin/proformas/detalles/:id",
+    name: "proformas.show",
+    props: true,
+    // component: () => import("../pages/admin/proformas/Edit.vue"),
+    component: ShowProformas,
+    meta: { layout: Admin, requiresAuth: true },
   },
   {
     path: "/admin/proformas/imprimir/:id",

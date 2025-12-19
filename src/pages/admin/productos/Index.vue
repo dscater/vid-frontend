@@ -9,6 +9,7 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import Imagen from "./Imagen.vue";
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -102,6 +103,19 @@
   const muestra_formulario_ppp = ref(false);
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
+
+  const muestra_imagen = ref(false);
+  const link_imagen = ref("");
+
+  const mostrarImagen = (url) => {
+    muestra_imagen.value = true;
+    link_imagen.value = url;
+  };
+
+  const cerrarImagen = () => {
+    muestra_imagen.value = false;
+    link_imagen.value = "";
+  };
 
   const agregarRegistro = () => {
     limpiarProducto();
@@ -227,7 +241,14 @@
               fixed-header
             >
               <template #imagen="{ item }">
-                <img class="" height="40" :src="item.url_imagen" alt="Foto" />
+                <img
+                  class="cursor-pointer"
+                  title="Mostrar Imagen"
+                  height="40"
+                  :src="item.url_imagen"
+                  alt="Foto"
+                  @click="mostrarImagen(item.url_imagen)"
+                />
               </template>
               <template #estado="{ item }">
                 <div
@@ -325,5 +346,10 @@
       "
       @cerrar-formulario="muestra_formulario_ppp = false"
     ></PPP>
+    <Imagen
+      :muestra_formulario="muestra_imagen"
+      :url="link_imagen"
+      @cerrar-formulario="cerrarImagen"
+    ></Imagen>
   </Content>
 </template>

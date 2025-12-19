@@ -85,6 +85,17 @@
     }
   });
 
+  const textBtn2 = computed(() => {
+    if (enviando.value) {
+      return `<i class="fa fa-spin fa-spinner"></i> Enviando...`;
+    }
+    if (accion_form.value == 0) {
+      return `<i class="fa fa-save"></i> Guardar`;
+    }
+
+    return `<i class="fa fa-check"></i> Aprobar Costos`;
+  });
+
   const enviarFormulario = () => {
     verificarObservaciones();
     enviando.value = true;
@@ -92,6 +103,70 @@
       accion_form.value == 0
         ? "/admin/solicitud_ingresos"
         : "/admin/solicitud_ingresos/aprobar/" + form.id;
+
+    api
+      .post(url, form)
+      .then((response) => {
+        // console.log(response);
+
+        const success = response.data.message ?? "Proceso realizado con éxito";
+        Swal.fire({
+          icon: "success",
+          title: "Correcto",
+          html: `<strong>${success}</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-success",
+          },
+        });
+        limpiarSolicitudIngreso();
+        emits("envio-formulario");
+      })
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          const msgError =
+            "Existen errores en el formulario, por favor verifique";
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          form.errors = error.response.data.errors;
+        } else {
+          const msgError =
+            "Ocurrió un error inesperado contactese con el Administrador";
+          Swal.fire({
+            icon: "info",
+            title: "Error",
+            html: `<strong>${msgError}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-error",
+            },
+          });
+          console.error("Error inesperado:", error);
+        }
+      })
+      .finally(() => {
+        enviando.value = false;
+      });
+  };
+
+  const enviarFormulario2 = () => {
+    verificarObservaciones();
+    enviando.value = true;
+    let url =
+      accion_form.value == 0
+        ? "/admin/solicitud_ingresos"
+        : "/admin/solicitud_ingresos/aprobar_costos/" + form.id;
 
     api
       .post(url, form)
@@ -188,6 +263,50 @@
   const cargarListas = () => {
     cargarSucursals();
   };
+
+  const calcularSubtotalByCosto = (e, index) => {
+    const elem = e.target;
+    const value = elem.value;
+    if (!value || value.trim() == "") {
+      form.solicitud_ingreso_detalles[index].subtotal =
+        form.solicitud_ingreso_detalles[index].costo;
+    }
+    form.solicitud_ingreso_detalles[index].subtotal =
+      parseFloat(value) *
+      parseFloat(form.solicitud_ingreso_detalles[index].cantidad);
+    calcularTotal();
+  };
+
+  const calcularSubtotal = (e, index) => {
+    const elem = e.target;
+    const value = elem.value;
+    if (!value || value.trim() == "") {
+      form.solicitud_ingreso_detalles[index].subtotal =
+        form.solicitud_ingreso_detalles[index].costo;
+    }
+    form.solicitud_ingreso_detalles[index].subtotal =
+      parseFloat(value) *
+      parseFloat(form.solicitud_ingreso_detalles[index].costo);
+    calcularTotal();
+  };
+
+  const calcularTotal = () => {
+    if (form.solicitud_ingreso_detalles.length == 0) {
+      form.total = 0;
+      form.cantidad_total = 0;
+      return;
+    }
+    let total = 0;
+    total = form.solicitud_ingreso_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.subtotal);
+    }, 0);
+    form.total = total;
+    total = form.solicitud_ingreso_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.cantidad);
+    }, 0);
+    form.cantidad_total = total;
+  };
+
   onMounted(() => {});
 </script>
 
@@ -222,6 +341,8 @@
                   <th>PRODUCTO</th>
                   <th width="60px">CANTIDAD</th>
                   <th width="60px">CANTIDAD FÍSICA</th>
+                  <th width="140px" v-if="form.verificado > 0">C/U</th>
+                  <th width="100px" v-if="form.verificado > 0">SUBTOTAL</th>
                   <th width="200px">VERIFICAR</th>
                 </tr>
               </thead>
@@ -233,12 +354,8 @@
                     <td>
                       {{ item.cantidad }}
                     </td>
-                    <td>
-                      <template
-                        v-if="
-                          form.verificado == 0 || form.estado == 'PENDIENTE'
-                        "
-                      >
+                    <td v-if="form.verificado > 0">
+                      <template v-if="form.verificado == 0">
                         <input
                           type="number"
                           step="1"
@@ -253,6 +370,25 @@
                         {{ item.cantidad_fisica }}
                       </template>
                     </td>
+                    <td v-if="form.verificado > 0">
+                      <template
+                        v-if="form.verificado == 1 || form.verificado == 2"
+                      >
+                        <input
+                          type="number"
+                          step="1"
+                          min="1"
+                          class="form-control"
+                          v-model="item.costo"
+                          @change="calcularSubtotalByCosto($event, index)"
+                          @keyup="calcularSubtotalByCosto($event, index)"
+                        />
+                      </template>
+                      <template v-else>
+                        {{ item.costo }}
+                      </template>
+                    </td>
+                    <td v-if="form.verificado > 0">{{ item.subtotal }}</td>
                     <td>
                       <template
                         v-if="
@@ -356,6 +492,20 @@
         :disabled="enviando"
         @click.prevent="enviarFormulario"
         v-html="textBtn"
+      ></button>
+      <button
+        v-if="
+          (form.verificado == 1 || form.verificado == 2) &&
+          (authStore?.user?.permisos == '*' ||
+            authStore?.user?.permisos.includes(
+              'solicitud_ingresos.aprobar_costos'
+            ))
+        "
+        type="button"
+        class="btn btn-success"
+        :disabled="enviando"
+        @click.prevent="enviarFormulario2"
+        v-html="textBtn2"
       ></button>
     </template>
   </MiModal>
