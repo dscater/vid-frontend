@@ -351,29 +351,6 @@
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
                 </template>
-
-                <template
-                  v-if="
-                    item.verificado == 0 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes(
-                        'orden_ventas.destroy'
-                      ))
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Eliminar"
-                    placement="left-start"
-                  >
-                    <button
-                      class="btn btn-danger"
-                      @click="eliminarOrdenVenta(item)"
-                    >
-                      <i class="fa fa-trash-alt"></i></button
-                  ></el-tooltip>
-                </template>
               </template>
             </MiTable>
           </div>

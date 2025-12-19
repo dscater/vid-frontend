@@ -408,26 +408,6 @@
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
                 </template>
-
-                <template
-                  v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('clientes.destroy')
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Eliminar"
-                    placement="left-start"
-                  >
-                    <button
-                      class="btn btn-danger"
-                      @click="eliminarCliente(item)"
-                    >
-                      <i class="fa fa-trash-alt"></i></button
-                  ></el-tooltip>
-                </template>
               </template>
             </MiTable>
           </div>

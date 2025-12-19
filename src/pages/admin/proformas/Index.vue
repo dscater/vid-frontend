@@ -308,46 +308,6 @@
                   >
                     <i class="fa fa-list"></i></button
                 ></el-tooltip>
-
-                <template
-                  v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('proformas.edit')
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Editar"
-                    placement="left-start"
-                  >
-                    <button
-                      class="btn btn-warning"
-                      @click="editarProforma(item)"
-                    >
-                      <i class="fa fa-pen"></i></button
-                  ></el-tooltip>
-                </template>
-
-                <template
-                  v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('proformas.destroy')
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Eliminar"
-                    placement="left-start"
-                  >
-                    <button
-                      class="btn btn-danger"
-                      @click="eliminarProforma(item)"
-                    >
-                      <i class="fa fa-trash-alt"></i></button
-                  ></el-tooltip>
-                </template>
               </template>
             </MiTable>
           </div>
