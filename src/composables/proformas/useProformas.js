@@ -3,7 +3,7 @@ import { useAuthStore } from "../../stores/authStore";
 
 const oProforma = ref({
   id: 0,
-  sucursal_id: "",
+  sucursal_ids: [],
   cliente_id: "",
   fecha: "",
   hora: "",
@@ -18,6 +18,8 @@ const oProforma = ref({
   cambio: "",
   cs_f: "",
   observaciones: "",
+  proforma_productos: [],
+  eliminados_productos: [],
   proforma_detalles: [],
   eliminados_detalles: [],
   _method: "POST",
@@ -30,7 +32,7 @@ export const useProformas = () => {
       oProforma.value.id = item.id;
       oProforma.value.nro = item.nro;
       oProforma.value.codigo = item.codigo;
-      oProforma.value.sucursal_id = item.sucursal_id;
+      oProforma.value.sucursal_ids = item.sucursal_ids;
       oProforma.value.cliente_id = item.cliente_id;
       oProforma.value.fecha = item.fecha;
       oProforma.value.fecha_c = item.fecha_c;
@@ -52,6 +54,8 @@ export const useProformas = () => {
       if (withUser) {
         oProforma.value.user = item.user;
       }
+      oProforma.value.proforma_productos = item.proforma_productos;
+      oProforma.value.eliminados_productos = [];
       oProforma.value.proforma_detalles = item.proforma_detalles;
       oProforma.value.eliminados_detalles = [];
       oProforma.value._method = "PUT";
@@ -77,9 +81,7 @@ export const useProformas = () => {
 
   const limpiarProforma = () => {
     oProforma.value.id = 0;
-    oProforma.value.sucursal_id = authStore?.user.sucursal_asignada
-      ? authStore?.user.sucursal_asignada.id
-      : "";
+    oProforma.value.sucursal_ids = [];
     oProforma.value.cliente_id = "";
     oProforma.value.fecha = getFechaAtual();
     oProforma.value.hora = getHoraActual();
@@ -94,6 +96,8 @@ export const useProformas = () => {
     oProforma.value.cambio = "";
     oProforma.value.cs_f = "CON FACTURA";
     oProforma.value.observaciones = "";
+    oProforma.value.proforma_productos = [];
+    oProforma.value.eliminados_productos = [];
     oProforma.value.proforma_detalles = [];
     oProforma.value.eliminados_detalles = [];
     oProforma.value._method = "POST";

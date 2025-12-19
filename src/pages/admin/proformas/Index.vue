@@ -39,7 +39,7 @@
     },
     {
       label: "SUCURSAL",
-      key: "sucursal.nombre",
+      key: "sucursals_txt",
       sortable: true,
     },
     {
@@ -147,8 +147,9 @@
           <div class="col-md-4">
             <router-link
               v-if="
-                authStore?.user?.permisos == '*' ||
-                authStore?.user?.permisos.includes('proformas.create')
+                connectivityStore.isOnline &&
+                (authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('proformas.create'))
               "
               class="btn btn-success"
               :to="{ name: 'proformas.create' }"

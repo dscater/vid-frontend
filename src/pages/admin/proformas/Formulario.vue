@@ -201,23 +201,6 @@
     }
   };
 
-  const listProductos = ref([]);
-  const cargarSucursalsProductos = () => {
-    if (connectivityStore.isOnline) {
-      api
-        .get("/admin/sucursal_productos/listado", {
-          params: {
-            sucursal_id: form.sucursal_id,
-          },
-        })
-        .then((response) => {
-          listProductos.value = response.data.sucursal_productos;
-        });
-    } else {
-      // OFFLINE
-    }
-  };
-
   const listClientes = ref([]);
   const loadingClientes = ref(false);
   const intervalClientes = ref(null);
@@ -229,7 +212,7 @@
       query = event.target.value;
     }
 
-    if (query.length >= 2) {
+    if (query.length >= 1) {
       clearInterval(intervalClientes.value);
       intervalClientes.value = setTimeout(() => {
         remoteMethodClientes(query);
@@ -284,22 +267,154 @@
     }
   };
 
+  const listProductos = ref([]);
+  const loadingProductos = ref(false);
+  const intervalProductos = ref(null);
+  const onInputSelectProductos = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 1) {
+      clearInterval(intervalProductos.value);
+      intervalProductos.value = setTimeout(() => {
+        remoteMethodProductos(query);
+      }, 400);
+    }
+  };
+  const remoteMethodProductos = async (query) => {
+    if (!query || query.length < 1) {
+      return;
+    }
+    loadingProductos.value = true;
+    try {
+      let response = null;
+      if (connectivityStore.isOnline) {
+        response = await api.get(
+          "/admin/productos/byCodigoListSelectElementUi" +
+            `?search=${encodeURIComponent(query)}`
+        );
+      } else {
+        response = { data: { productos: [] } };
+        response.data.productos = await productoStore.getAll();
+      }
+      const data = response ? response.data.productos : [];
+      // Suponiendo que data es un array de productos [{id, nombre}]
+      listProductos.value = data.map((producto) => ({
+        value: producto.id,
+        // label: `${producto.codigo} - ${producto.ci}`,
+        label: `${producto.codigo} | ${producto.nombre} ${producto.unidad_medida.nombre}`,
+      }));
+    } catch (error) {
+      console.log(error);
+      listProductos.value = [];
+    } finally {
+      loadingProductos.value = false;
+    }
+  };
+
+  /**
+   * PRODUCTOS
+   */
+
+  const agregarProducto = () => {
+    form.proforma_productos.push({
+      proforma_id: "",
+      producto_id: "",
+      precio: "",
+      unidad_medida_id: "",
+      stock_actual: 0,
+      stock_actual_aux: 0,
+      producto: null,
+    });
+
+    // AGREGAR COLUMNA
+    // agregar el detalle
+    form.proforma_detalles.forEach((elem, index) => {
+      elem.proforma_detalle_productos.push({
+        proforma_id: "",
+        proforma_detalle_id: "",
+        producto_id: elem.producto_id ?? "",
+        unidad_medida_id: elem.unidad_medida_id ?? "",
+        cantidad: "",
+        cantidad_entregada: "",
+        precio: elem.precio ?? "",
+        subtotal: "",
+        verificado: 0,
+      });
+    });
+  };
+
+  const quitarProducto = (id, col) => {
+    if (id && id != 0) {
+      form.eliminados_productos.push(id);
+    }
+    form.proforma_productos.splice(col, 1);
+
+    form.proforma_detalles.forEach((elem, fila) => {
+      elem.proforma_detalle_productos.splice(col, 1);
+      sumaTotalPorFila(fila);
+    });
+  };
+
+  const actualizarStockProductos = async () => {
+    form.proforma_productos.forEach(async (elem, col) => {
+      obtenerStockProducto(elem.producto_id, col);
+    });
+  };
+
+  const obtenerStockProducto = async (value, col) => {
+    // SUMAR EL TOTAL DE STOCK
+    let total = 0;
+
+    const requests = form.sucursal_ids.map((element) =>
+      api.get("/admin/sucursal_productos/getSucursalProducto", {
+        params: {
+          producto_id: value,
+          sucursal_id: element,
+        },
+      })
+    );
+
+    const responses = await Promise.all(requests);
+
+    responses.forEach((resp) => {
+      total += parseFloat(resp.data.sucursal_producto.stock_actual);
+    });
+
+    api.get("/admin/productos/" + value).then((response) => {
+      form.proforma_productos[col].producto_id = response.data.id;
+      form.proforma_productos[col].producto = response.data;
+      form.proforma_productos[col].precio = response.data.precio;
+      form.proforma_productos[col].unidad_medida_id =
+        response.data.unidad_medida_id;
+      form.proforma_productos[col].stock_actual = total;
+      form.proforma_productos[col].stock_actual_aux = total;
+      form.proforma_detalles.forEach((element, fila) => {
+        sumaTotalPorFila(fila);
+      });
+    });
+  };
+
+  /** ***********************
+   *DETALLES
+   * ***************************
+   */
   const agregarDetalle = () => {
     // preparar los productos
     let proforma_detalle_productos = [];
-    listProductos.value.forEach((elem) => {
+    form.proforma_productos.forEach((elem) => {
       proforma_detalle_productos.push({
         proforma_id: "",
         proforma_detalle_id: "",
-        producto_id: elem.id,
-        unidad_medida_id: elem.unidad_medida_id,
-        unidad_medida: {
-          id: elem.unidad_medida_id,
-          nombre: elem.nombre_unidad,
-        },
+        producto_id: elem.producto_id ?? "",
+        unidad_medida_id: elem.unidad_medida_id ?? "",
         cantidad: "",
         cantidad_entregada: "",
-        precio: elem.precio,
+        precio: elem.precio ?? "",
         subtotal: "",
         verificado: 0,
       });
@@ -320,26 +435,29 @@
   };
 
   const stockSuperado = ref(false);
-  const actualizaStockProducto = (index_detalle, fila) => {
-    getTotalColumna(index_detalle);
+  const actualizaStockProducto = (index_col, fila) => {
+    getTotalColumna(index_col);
     sumaTotalPorFila(fila);
   };
 
   const sumaTotalPorFila = (fila) => {
     let total = 0;
     let total_cantidad = 0;
-    console.log(fila);
-    console.log(form.proforma_detalles);
     form.proforma_detalles[fila].proforma_detalle_productos.forEach(
-      (elem_detalle, index_detalle) => {
+      (elem_detalle, index_col) => {
         if (elem_detalle.cantidad) {
+          form.proforma_detalles[fila].proforma_detalle_productos[
+            index_col
+          ].precio = parseFloat(form.proforma_productos[index_col].precio);
           total +=
-            parseFloat(elem_detalle.cantidad) * parseFloat(elem_detalle.precio);
+            parseFloat(elem_detalle.cantidad) *
+            parseFloat(form.proforma_productos[index_col].precio);
           total_cantidad += parseFloat(elem_detalle.cantidad);
           form.proforma_detalles[fila].proforma_detalle_productos[
-            index_detalle
+            index_col
           ].subtotal =
-            parseFloat(elem_detalle.cantidad) * parseFloat(elem_detalle.precio);
+            parseFloat(elem_detalle.cantidad) *
+            parseFloat(form.proforma_productos[index_col].precio);
         }
       }
     );
@@ -365,7 +483,7 @@
   };
 
   const recalcularCantidades = () => {
-    listProductos.value.forEach((item, index) => {
+    form.proforma_productos.forEach((item, index) => {
       getTotalColumna(index);
     });
   };
@@ -373,8 +491,8 @@
   const getTotalColumna = (index_col) => {
     stockSuperado.value = false;
 
-    listProductos.value[index_col].stock_actual =
-      listProductos.value[index_col].stock_actual_aux;
+    form.proforma_productos[index_col].stock_actual =
+      form.proforma_productos[index_col].stock_actual_aux;
     let total = 0;
 
     form.proforma_detalles.forEach((element) => {
@@ -384,10 +502,10 @@
       }
     });
 
-    const total_sucursal = listProductos.value[index_col].stock_actual;
-    const nombre_producto = listProductos.value[index_col].nombre;
+    const total_sucursal = form.proforma_productos[index_col].stock_actual;
+    const nombre_producto = form.proforma_productos[index_col].producto.nombre;
 
-    listProductos.value[index_col].stock_actual =
+    form.proforma_productos[index_col].stock_actual =
       parseFloat(total_sucursal) - parseFloat(total);
 
     if (total > total_sucursal) {
@@ -407,7 +525,22 @@
   const verificarProforma = async () => {
     await nextTick(async () => {
       if (form.id != 0) {
-        await cargarSucursalsProductos();
+        api.get("/admin/productos/listado").then((response) => {
+          const data = response.data.productos;
+          listProductos.value = data.map((producto) => ({
+            value: producto.id,
+            label: `${producto.codigo} | ${producto.nombre} ${producto.unidad_medida.nombre}`,
+          }));
+        });
+
+        api.get("/admin/clientes/listado").then((response) => {
+          const data = response.data.clientes;
+          listClientes.value = data.map((cliente) => ({
+            value: cliente.id,
+            label: `${cliente.razon_social}`,
+          }));
+        });
+
         setTimeout(() => {
           recalcularCantidades();
         }, 500);
@@ -435,9 +568,14 @@
     return error;
   };
 
-  onUnmounted(() => {});
+  onUnmounted(() => {
+    // document
+    //   .getElementsByTagName("body")[0]
+    //   .classList.remove("sidebar-collapse");
+  });
 
   onMounted(() => {
+    document.getElementsByTagName("body")[0].classList.add("sidebar-collapse");
     cargarListas();
     verificarProforma();
   });
@@ -462,12 +600,13 @@
                 :class="{
                   'parsley-error': form.errors?.sucursal_id,
                 }"
-                v-model="form.sucursal_id"
+                v-model="form.sucursal_ids"
                 filterable
                 placeholder="Seleccione"
                 no-data-text="Sin datos"
                 no-match-text="No se encontró"
-                @change="cargarSucursalsProductos"
+                @change="actualizarStockProductos"
+                multiple
               >
                 <el-option
                   v-for="item in listSucursals"
@@ -528,33 +667,67 @@
                 </li>
               </ul>
             </div>
-            <div class="col-12 mt-2 overflow-auto" v-if="form.sucursal_id">
+            <div
+              class="col-12 mt-2 overflow-auto"
+              v-if="form.sucursal_ids.length > 0"
+            >
               <table class="table table-bordered">
                 <thead>
-                  <tr>
-                    <th>PRECIO</th>
+                  <tr class="bg8">
+                    <th style="min-width: 180px">PRECIO</th>
                     <th></th>
                     <th></th>
-                    <th v-for="item in listProductos">
+                    <th
+                      v-for="item in form.proforma_productos"
+                      style="min-width: 180px"
+                    >
                       {{ item.precio }}
                     </th>
-                    <th colspan="2" rowspan="3"></th>
+                    <th rowspan="3" class="p-0">
+                      <button
+                        class="btn bg4 btn-sm h-100"
+                        @click.prevent="agregarProducto"
+                        style="writing-mode: vertical-rl; max-height: 140px"
+                      >
+                        + Nuevo Producto
+                      </button>
+                    </th>
                   </tr>
-                  <tr>
+                  <tr class="bg6">
                     <th></th>
                     <th>Nro. Recibo</th>
                     <th>Total</th>
-                    <th v-for="item in listProductos">
-                      {{ item.nombre }}<br />
-                      {{ item.nombre_unidad }}
+                    <th
+                      v-for="(item, index_col) in form.proforma_productos"
+                      class="p-0"
+                    >
+                      <button
+                        class="btn btn-danger btn-sm text-xs"
+                        @click="quitarProducto(item.id, index_col)"
+                      >
+                        X
+                      </button>
+                      <el-select-v2
+                        v-model="item.producto_id"
+                        filterable
+                        @input="onInputSelectProductos"
+                        @change="obtenerStockProducto($event, index_col)"
+                        :reserve-keyword="false"
+                        clearable
+                        :options="listProductos"
+                        :loading="loadingProductos"
+                        placeholder="Código..."
+                        no-data-text="Sin resultados"
+                        loading-text="Buscando..."
+                      />
                     </th>
                   </tr>
-                  <tr>
+                  <tr class="bg7">
                     <th>STOCK ACTUAL</th>
                     <th></th>
                     <th></th>
                     <th
-                      v-for="item in listProductos"
+                      v-for="item in form.proforma_productos"
                       :class="{
                         'bg-danger': item.stock_actual < 0,
                       }"
@@ -583,41 +756,45 @@
                           class="rounded-0"
                         />
                       </td>
-                      <td>
+                      <td class="bg6 font-weight-bold text-center">
                         <small v-if="!item.id" class="text-muted"
                           >(automatico)</small
                         >
                         <span v-else v-text="item.id"></span>
                       </td>
-                      <td>{{ item.total }}</td>
+                      <td class="bg6 font-weight-bold text-center">
+                        {{ item.total }}
+                      </td>
                       <td
                         v-for="(
-                          item_detalle, index_detalle
+                          item_detalle, col_index
                         ) in item.proforma_detalle_productos"
                         class="p-0"
                       >
-                        <input
-                          type="number"
-                          class="form-control"
-                          min="1"
-                          @keyup="actualizaStockProducto(index_detalle, index)"
-                          v-model="item_detalle.cantidad"
-                        />
+                        <div class="input-group">
+                          <input
+                            type="number"
+                            class="form-control"
+                            min="1"
+                            @keyup="actualizaStockProducto(col_index, index)"
+                            v-model="item_detalle.cantidad"
+                          />
+                          <div class="input-group-append">
+                            <button
+                              class="btn btn-xs bg4 text-success text-xs"
+                              v-if="item_detalle.id && item_detalle.id != 0"
+                            >
+                              <i class="fa fa-check"></i>
+                            </button>
+                          </div>
+                        </div>
                       </td>
                       <td>
                         <button
                           class="btn btn-danger btn-sm"
                           @click.prevent="quitarDetalle(item, index)"
                         >
-                          <i class="fa fa-times"></i>
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-warning btn-sm"
-                          v-if="form.id != 0"
-                        >
-                          <i class="fa fa-sync"></i>
+                          X
                         </button>
                       </td>
                     </tr>
@@ -625,7 +802,7 @@
                   <template v-else>
                     <tr>
                       <td
-                        :colspan="listProductos.length + 3"
+                        :colspan="form.proforma_productos.length + 5"
                         class="text-center font-weight-bold text-muted"
                       >
                         NO SE AGREGÓ NINGÚN CLIENTE
@@ -635,13 +812,13 @@
                   <tr>
                     <td class="p-0">
                       <button
-                        class="btn btn-primary btn-sm w-100 rounded-0"
+                        class="btn bg4 btn-sm w-100 rounded-0"
                         @click="agregarDetalle"
                       >
                         + Nuevo Cliente
                       </button>
                     </td>
-                    <td :colspan="listProductos.length + 2"></td>
+                    <td :colspan="form.proforma_productos.length + 2"></td>
                   </tr>
                 </tbody>
               </table>
@@ -651,6 +828,24 @@
               v-else
             >
               DEBES SELECCIONAR UNA SUCURSAL
+            </div>
+          </div>
+          <div class="row" v-if="form.errors?.proforma_productos">
+            <div class="col-12">
+              <ul class="d-block text-danger mb-0 list-unstyled">
+                <li class="parsley-required">
+                  {{ form.errors?.proforma_productos[0] }}
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row" v-if="form.errors?.proforma_detalles">
+            <div class="col-12">
+              <ul class="d-block text-danger mb-0 list-unstyled">
+                <li class="parsley-required">
+                  {{ form.errors?.proforma_detalles[0] }}
+                </li>
+              </ul>
             </div>
           </div>
           <div class="row" v-if="stockSuperado">

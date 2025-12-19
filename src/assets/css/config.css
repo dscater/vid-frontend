@@ -90,6 +90,15 @@ body .mi-table tr.bg-oficial td .label-responsive {
 .bg5 {
   background-color: var(--bg5);
 }
+.bg6 {
+  background-color: var(--bg6);
+}
+.bg7 {
+  background-color: var(--bg7);
+}
+.bg8 {
+  background-color: var(--bg8);
+}
 body .sidebar .bg3,
 .bg3 {
   background-color: var(--bg3);
