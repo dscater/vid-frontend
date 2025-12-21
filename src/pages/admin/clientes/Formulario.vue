@@ -459,6 +459,28 @@
               </li>
             </ul>
           </div>
+
+          <div class="col-md-4 mt-2">
+            <label class="required">Crédito</label><br />
+            <el-switch
+              size="large"
+              v-model="form.credito"
+              class="mb-2"
+              style="
+                --el-switch-on-color: #13ce66;
+                --el-switch-off-color: #ff4949;
+              "
+              active-text="Habilitado"
+              inactive-text="Deshabilitado"
+              :active-value="1"
+              :inactive-value="0"
+            />
+            <ul v-if="form.errors?.credito" class="list-unstyled text-danger">
+              <li class="parsley-required">
+                {{ form.errors?.credito[0] }}
+              </li>
+            </ul>
+          </div>
         </div>
         <div class="row">
           <div class="col-12">

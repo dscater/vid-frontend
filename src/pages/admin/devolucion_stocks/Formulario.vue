@@ -538,9 +538,9 @@
                 <thead class="bg-secundario">
                   <tr>
                     <th>PRODUCTO</th>
-                    <th width="100px">C/U</th>
+                    <!-- <th width="100px">C/U</th> -->
                     <th width="180px">CANTIDAD</th>
-                    <th width="100px">SUBTOTAL</th>
+                    <!-- <th width="100px">SUBTOTAL</th> -->
                     <th width="1%"></th>
                   </tr>
                 </thead>
@@ -548,7 +548,7 @@
                   <template v-if="form.devolucion_stock_detalles.length > 0">
                     <tr v-for="(item, index) in form.devolucion_stock_detalles">
                       <td>{{ item.producto.nombre }}</td>
-                      <td>{{ item.costo }}</td>
+                      <!-- <td>{{ item.costo }}</td> -->
                       <td>
                         <input
                           type="number"
@@ -560,7 +560,7 @@
                           @keyup="calcularSubtotal($event, index)"
                         />
                       </td>
-                      <td>{{ item.subtotal }}</td>
+                      <!-- <td>{{ item.subtotal }}</td> -->
                       <td>
                         <button
                           class="btn btn-danger btn-sm"
@@ -579,12 +579,9 @@
                     </tr>
                   </template>
                   <tr>
-                    <td class="font-weight-bold text-right" colspan="2">
-                      TOTALES
-                    </td>
+                    <td class="font-weight-bold text-right">TOTALES</td>
                     <td>{{ form.cantidad_total }}</td>
                     <td>{{ form.total }}</td>
-                    <td></td>
                   </tr>
                 </tbody>
               </table>

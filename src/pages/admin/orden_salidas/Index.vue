@@ -186,7 +186,7 @@
               class="btn btn-success"
               @click="agregarRegistro"
             >
-              <i class="fa fa-plus"></i> Nueva Solicitud de Ingreso
+              <i class="fa fa-plus"></i> Nueva Orden de Salida
             </button>
           </div>
           <div class="col-md-8 my-1">

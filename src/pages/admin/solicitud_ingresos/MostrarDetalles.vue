@@ -343,7 +343,7 @@
                   <th width="60px">CANTIDAD FÍSICA</th>
                   <th width="140px" v-if="form.verificado > 0">C/U</th>
                   <th width="100px" v-if="form.verificado > 0">SUBTOTAL</th>
-                  <th width="200px">VERIFICAR</th>
+                  <th width="200px">ESTADO</th>
                 </tr>
               </thead>
               <tbody>
@@ -355,100 +355,14 @@
                       {{ item.cantidad }}
                     </td>
                     <td>
-                      <template v-if="form.verificado == 0">
-                        <input
-                          type="number"
-                          step="1"
-                          min="1"
-                          class="form-control"
-                          v-model="item.cantidad_fisica"
-                          @change="verificarObservaciones"
-                          @keyup="verificarObservaciones"
-                        />
-                      </template>
-                      <template v-else>
-                        {{ item.cantidad_fisica }}
-                      </template>
+                      {{ item.cantidad_fisica }}
                     </td>
                     <td v-if="form.verificado > 0">
-                      <template
-                        v-if="form.verificado == 1 || form.verificado == 2"
-                      >
-                        <input
-                          type="number"
-                          step="1"
-                          min="1"
-                          class="form-control"
-                          v-model="item.costo"
-                          @change="calcularSubtotalByCosto($event, index)"
-                          @keyup="calcularSubtotalByCosto($event, index)"
-                        />
-                      </template>
-                      <template v-else>
-                        {{ item.costo }}
-                      </template>
+                      {{ item.costo }}
                     </td>
                     <td v-if="form.verificado > 0">{{ item.subtotal }}</td>
                     <td>
-                      <template
-                        v-if="
-                          form.verificado == 0 || form.estado == 'PENDIENTE'
-                        "
-                      >
-                        <el-checkbox
-                          :true-value="1"
-                          :false-value="0"
-                          v-model="item.verificado"
-                          size="large"
-                          class="verificaCheckbox"
-                        >
-                          Verificar
-                        </el-checkbox>
-                        <template v-if="item.cantidad != item.cantidad_fisica">
-                          <el-select
-                            class="w-100 mb-2"
-                            v-model="item.sucursal_ajuste"
-                            filterable
-                            placeholder="Selecionar Sucursal"
-                            no-data-text="Sin datos"
-                            no-match-text="Sin datos"
-                            clearable
-                          >
-                            <el-option
-                              v-for="item in listSucursals"
-                              :key="item.id"
-                              :value="item.id"
-                              :label="item.nombre"
-                            ></el-option>
-                          </el-select>
-                          <el-select
-                            class="w-100"
-                            v-model="item.motivo"
-                            filterable
-                            placeholder="Selecione Motivo"
-                            no-data-text="Sin datos"
-                            no-match-text="Sin datos"
-                            clearable
-                          >
-                            <el-option
-                              v-for="(item, index) in listMotivos"
-                              :key="index"
-                              :value="item"
-                              :label="item"
-                            ></el-option>
-                          </el-select>
-                        </template>
-                      </template>
-                      <template v-else>
-                        VERIFICADO
-                        <div
-                          v-if="item.o_sucursal_ajuste"
-                          class="text-muted border-top"
-                        >
-                          {{ item.o_sucursal_ajuste.nombre }}<br />
-                          {{ item.motivo }}
-                        </div>
-                      </template>
+                      {{ form.estado }}
                     </td>
                   </tr>
                 </template>
@@ -461,14 +375,6 @@
                 </template>
               </tbody>
             </table>
-            <ul
-              v-if="form.errors?.solicitud_ingreso_detalles"
-              class="d-block text-danger list-unstyled"
-            >
-              <li class="parsley-required">
-                {{ form.errors?.solicitud_ingreso_detalles[0] }}
-              </li>
-            </ul>
           </div>
         </div>
       </form>
@@ -481,32 +387,6 @@
       >
         Cerrar
       </button>
-      <button
-        v-if="
-          (form.verificado == 0 || form.estado == 'PENDIENTE') &&
-          (authStore?.user?.permisos == '*' ||
-            authStore?.user?.permisos.includes('solicitud_ingresos.aprobar'))
-        "
-        type="button"
-        class="btn btn-success"
-        :disabled="enviando"
-        @click.prevent="enviarFormulario"
-        v-html="textBtn"
-      ></button>
-      <button
-        v-if="
-          (form.verificado == 1 || form.verificado == 2) &&
-          (authStore?.user?.permisos == '*' ||
-            authStore?.user?.permisos.includes(
-              'solicitud_ingresos.aprobar_costos'
-            ))
-        "
-        type="button"
-        class="btn btn-success"
-        :disabled="enviando"
-        @click.prevent="enviarFormulario2"
-        v-html="textBtn2"
-      ></button>
     </template>
   </MiModal>
 </template>

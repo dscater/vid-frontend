@@ -105,6 +105,18 @@
                 </p>
                 <p><strong>Ciudad: </strong> {{ oCliente.ciudad }}</p>
                 <p>
+                  <strong>Crédito: </strong>
+                  <span
+                    class="badge text-sm"
+                    :class="{
+                      'bg-success': oCliente.credito == 1,
+                      'bg-danger': oCliente.credito == 0,
+                    }"
+                  >
+                    {{ oCliente.credito == 1 ? "HABILITADO" : "DESHABILITADO" }}
+                  </span>
+                </p>
+                <p>
                   <strong>Categoría: </strong>
                   <span
                     class="mx-1 badge text-md"

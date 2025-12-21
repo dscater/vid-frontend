@@ -42,12 +42,14 @@
       label: "RANK",
       key: "rank",
       sortable: true,
+      width: "1%",
       fixed: true,
     },
     {
       label: "CATEGORÍA",
       key: "categoria",
       sortable: true,
+      width: "1%",
       fixed: true,
     },
     {

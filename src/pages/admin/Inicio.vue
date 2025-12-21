@@ -42,7 +42,7 @@
     cargarSucursals();
   };
 
-  const stockVacio = ref(false);
+  const stockVacio = ref(true);
   const stocks = reactive({});
 
   const cargarStocks = async () => {

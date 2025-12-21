@@ -6,6 +6,7 @@
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
   import Detalles from "./Detalles.vue";
+  import MostrarDetalles from "./MostrarDetalles.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -111,6 +112,16 @@
       setSolicitudIngreso(response.data.solicitud_ingreso);
       accion_formulario_detalle.value = 1;
       muestra_formulario_detalle.value = true;
+    });
+  };
+
+  const accion_formulario_mostrardetalle = ref(0);
+  const muestra_formulario_mostrardetalle = ref(false);
+  const muestraDetalles = (item) => {
+    api.get("/admin/solicitud_ingresos/" + item.id).then((response) => {
+      setSolicitudIngreso(response.data.solicitud_ingreso);
+      accion_formulario_mostrardetalle.value = 1;
+      muestra_formulario_mostrardetalle.value = true;
     });
   };
 
@@ -244,14 +255,52 @@
                 <el-tooltip
                   class="box-item"
                   effect="dark"
-                  content="Detalles"
+                  :content="`Detalles`"
                   placement="left-start"
                 >
                   <button
                     class="btn btn-primary"
-                    @click="aprobarSolicitudIngreso(item)"
+                    @click="muestraDetalles(item)"
                   >
                     <i class="fa fa-list"></i></button
+                ></el-tooltip>
+                <el-tooltip
+                  v-if="
+                    item.verificado == 0 &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'solicitud_ingresos.aprobar'
+                      ))
+                  "
+                  class="box-item"
+                  effect="dark"
+                  :content="`Aprobar Cantidad`"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-success"
+                    @click="aprobarSolicitudIngreso(item)"
+                  >
+                    <i class="fa fa-clipboard"></i></button
+                ></el-tooltip>
+                <el-tooltip
+                  v-if="
+                    (item.verificado == 1 || item.verificado == 2) &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'solicitud_ingresos.aprobar_costos'
+                      ))
+                  "
+                  class="box-item"
+                  effect="dark"
+                  :content="`Aprobar Costos`"
+                  placement="left-start"
+                >
+                  <button
+                    class="btn btn-info"
+                    @click="aprobarSolicitudIngreso(item)"
+                  >
+                    <i class="fa fa-clipboard-list"></i></button
                 ></el-tooltip>
                 <template
                   v-if="
@@ -274,29 +323,29 @@
                     >
                       <i class="fa fa-pen"></i></button
                   ></el-tooltip>
-                </template>
 
-                <template
-                  v-if="
-                    item.verificado == 0 &&
-                    (authStore?.user?.permisos == '*' ||
-                      authStore?.user?.permisos.includes(
-                        'solicitud_ingresos.destroy'
-                      ))
-                  "
-                >
-                  <el-tooltip
-                    class="box-item"
-                    effect="dark"
-                    content="Eliminar"
-                    placement="left-start"
+                  <template
+                    v-if="
+                      item.verificado == 0 &&
+                      (authStore?.user?.permisos == '*' ||
+                        authStore?.user?.permisos.includes(
+                          'solicitud_ingresos.destroy'
+                        ))
+                    "
                   >
-                    <button
-                      class="btn btn-danger"
-                      @click="eliminarSolicitudIngreso(item)"
+                    <el-tooltip
+                      class="box-item"
+                      effect="dark"
+                      content="Eliminar"
+                      placement="left-start"
                     >
-                      <i class="fa fa-trash-alt"></i></button
-                  ></el-tooltip>
+                      <button
+                        class="btn btn-danger"
+                        @click="eliminarSolicitudIngreso(item)"
+                      >
+                        <i class="fa fa-trash-alt"></i></button
+                    ></el-tooltip>
+                  </template>
                 </template>
               </template>
             </MiTable>
@@ -316,5 +365,11 @@
       @envio-formulario="updateDatatable"
       @cerrar-formulario="muestra_formulario_detalle = false"
     ></Detalles>
+    <MostrarDetalles
+      :muestra_formulario="muestra_formulario_mostrardetalle"
+      :accion_formulario="accion_formulario_mostrardetalle"
+      @envio-formulario="updateDatatable"
+      @cerrar-formulario="muestra_formulario_mostrardetalle = false"
+    ></MostrarDetalles>
   </Content>
 </template>

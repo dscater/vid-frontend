@@ -357,7 +357,7 @@
       query = event.target.value;
     }
 
-    if (query.length >= 2) {
+    if (query.length >= 1) {
       clearInterval(intervalClientes.value);
       intervalClientes.value = setTimeout(() => {
         remoteMethodClientes(query);
@@ -365,7 +365,7 @@
     }
   };
   const remoteMethodClientes = async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 1) {
       return;
     }
     loadingClientes.value = true;
@@ -423,7 +423,7 @@
       query = event.target.value;
     }
 
-    if (query.length >= 2) {
+    if (query.length >= 1) {
       clearInterval(intervalProductos.value);
       intervalProductos.value = setTimeout(() => {
         remoteMethodProductos(query);
@@ -431,7 +431,7 @@
     }
   };
   const remoteMethodProductos = async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 1) {
       return;
     }
     loadingProductos.value = true;
@@ -1253,10 +1253,12 @@
                           :true-value="1"
                           :false-value="0"
                           v-if="
-                            authStore?.user?.permisos == '*' ||
-                            authStore?.user?.permisos.includes(
-                              'cuenta_cobrars.create'
-                            )
+                            oCliente &&
+                            oCliente.credito == 1 &&
+                            (authStore?.user?.permisos == '*' ||
+                              authStore?.user?.permisos.includes(
+                                'cuenta_cobrars.create'
+                              ))
                           "
                           >CRÉDITO</el-checkbox
                         >
@@ -1297,7 +1299,12 @@
                           </li>
                         </ul>
                       </div>
-                      <div class="col-md-12" v-if="form.cre == 1">
+                      <div
+                        class="col-md-12"
+                        v-if="
+                          form.cre == 1 && oCliente && oCliente.credito == 1
+                        "
+                      >
                         <small class="text-muted font-weight-bold"
                           >Crédito</small
                         >

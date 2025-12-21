@@ -291,10 +291,10 @@
                                   <tr>
                                     <th width="20px">CANTIDAD</th>
                                     <th>DESCRIPCIÓN</th>
-                                    <th>P. UNIT</th>
-                                    <th>SUBTOTAL</th>
-                                    <th>DESCUENTO</th>
-                                    <th>TOTAL</th>
+                                    <th>P. UNIT Bs.</th>
+                                    <th>SUBTOTAL Bs.</th>
+                                    <th>DESCUENTO Bs.</th>
+                                    <th>TOTAL Bs.</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -321,21 +321,21 @@
                                     <td colspan="4"></td>
                                     <td class="tbold derecha">TOTAL</td>
                                     <td class="tbold derecha">
-                                      {{ oOrdenVenta.total_st }}
+                                      Bs. {{ oOrdenVenta.total_st }}
                                     </td>
                                   </tr>
                                   <tr>
                                     <td colspan="4"></td>
                                     <td class="tbold derecha">DESCUENTO</td>
                                     <td class="tbold derecha">
-                                      {{ oOrdenVenta.descuento ?? 0 }}
+                                      Bs. {{ oOrdenVenta.descuento ?? 0 }}
                                     </td>
                                   </tr>
                                   <tr>
                                     <td colspan="4">Son: {{ literal }}</td>
                                     <td class="tbold derecha">TOTAL FINAL</td>
                                     <td class="tbold derecha">
-                                      {{ oOrdenVenta.total_f }}
+                                      Bs. {{ oOrdenVenta.total_f }}
                                     </td>
                                   </tr>
                                 </tbody>
@@ -345,9 +345,9 @@
                                   <tbody>
                                     <tr>
                                       <td>A cuenta:</td>
-                                      <td>{{ oOrdenVenta.cancelado }}</td>
+                                      <td>Bs. {{ oOrdenVenta.cancelado }}</td>
                                       <td>Saldo:</td>
-                                      <td>{{ saldoRestante }}</td>
+                                      <td>Bs. {{ saldoRestante }}</td>
                                       <td>Fecha:</td>
                                       <td>{{ oOrdenVenta.fecha_t }}</td>
                                     </tr>

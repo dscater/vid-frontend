@@ -16,6 +16,7 @@ const oCliente = ref({
   ciudad: "",
   contactos: [],
   estado: 1,
+  credito: 0,
   rank: "",
   categoria: "",
   score: "",
@@ -41,6 +42,7 @@ export const useClientes = () => {
       oCliente.value.ciudad = item.ciudad;
       oCliente.value.contactos = item.contactos;
       oCliente.value.estado = item.estado;
+      oCliente.value.credito = item.credito;
       oCliente.value.rank = item.rank;
       oCliente.value.categoria = item.categoria;
       oCliente.value.score = item.score;
@@ -73,6 +75,7 @@ export const useClientes = () => {
     oCliente.value.score = "";
     oCliente.value.factor = "";
     oCliente.value.estado = 1;
+    oCliente.value.credito = 0;
     oCliente.value._method = "POST";
   };
 
