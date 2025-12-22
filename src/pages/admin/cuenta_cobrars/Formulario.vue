@@ -275,7 +275,7 @@
                       <div class="col-4 text-right">
                         <strong>Total:</strong>
                       </div>
-                      <div class="col-8">{{ form.total }}</div>
+                      <div class="col-8">{{ form.total }} Bs</div>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -283,7 +283,7 @@
                       <div class="col-4 text-right">
                         <strong>Cancelado:</strong>
                       </div>
-                      <div class="col-8">{{ form.cancelado }}</div>
+                      <div class="col-8">{{ form.cancelado }} Bs</div>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -291,7 +291,7 @@
                       <div class="col-4 text-right">
                         <strong>Saldo:</strong>
                       </div>
-                      <div class="col-8">{{ form.saldo }}</div>
+                      <div class="col-8">{{ form.saldo }} Bs</div>
                     </div>
                   </div>
                 </div>
@@ -312,7 +312,7 @@
                       <thead>
                         <tr>
                           <th>Nro.</th>
-                          <th>Monto</th>
+                          <th>Monto Bs</th>
                           <th>Fecha</th>
                         </tr>
                       </thead>
@@ -352,7 +352,7 @@
           "
         >
           <div class="col-md-12 mt-2">
-            <label class="required">Monto</label>
+            <label class="required">Monto Bs</label>
             <el-input
               type="number"
               step="0.1"

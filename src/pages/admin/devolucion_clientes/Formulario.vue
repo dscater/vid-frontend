@@ -396,35 +396,50 @@
 
   const listClientes = ref([]);
   const loadingClientes = ref(false);
-  const remoteMethod = async (query) => {
-    if (query !== "") {
-      loadingClientes.value = true;
-      try {
-        let response = null;
-        if (connectivityStore.isOnline) {
-          response = await api.get(
-            "/admin/clientes/listadoSelectElementUi" +
-              `?search=${encodeURIComponent(query)}`
-          );
-        } else {
-          response = { data: { clientes: [] } };
-          response.data.clientes = await clienteStore.getAll();
-        }
-        console.log(response);
-        const data = response.data.clientes;
-        // Suponiendo que data es un array de clientes [{id, nombre}]
-        listClientes.value = data.map((cliente) => ({
-          value: cliente.id,
-          // label: `${cliente.razon_social} - ${cliente.ci}`,
-          label: `${cliente.razon_social}`,
-        }));
-      } catch (error) {
-        console.log(error);
-        listClientes.value = [];
+  const intervalClientes = ref(null);
+  const onInputSelectClientes = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 1) {
+      clearInterval(intervalClientes.value);
+      intervalClientes.value = setTimeout(() => {
+        remoteMethodClientes(query);
+      }, 400);
+    }
+  };
+  const remoteMethodClientes = async (query) => {
+    if (!query || query.length < 1) {
+      return;
+    }
+    loadingClientes.value = true;
+    try {
+      let response = null;
+      if (connectivityStore.isOnline) {
+        response = await api.get(
+          "/admin/clientes/listadoSelectElementUi" +
+            `?search=${encodeURIComponent(query)}`
+        );
+      } else {
+        response = { data: { clientes: [] } };
+        response.data.clientes = await clienteStore.getAll();
       }
-      loadingClientes.value = false;
-    } else {
+      const data = response ? response.data.clientes : [];
+      // Suponiendo que data es un array de clientes [{id, nombre}]
+      listClientes.value = data.map((cliente) => ({
+        value: cliente.id,
+        // label: `${cliente.razon_social} - ${cliente.ci}`,
+        label: `${cliente.razon_social}`,
+      }));
+    } catch (error) {
+      console.log(error);
       listClientes.value = [];
+    } finally {
+      loadingClientes.value = false;
     }
   };
 
@@ -556,7 +571,7 @@
                 v-model="form.cliente_id"
                 filterable
                 remote
-                :remote-method="remoteMethod"
+                :remote-method="onInputSelectClientes"
                 clearable
                 :options="listClientes"
                 :loading="loadingClientes"
@@ -677,9 +692,9 @@
                 <thead class="bg-secundario">
                   <tr>
                     <th>PRODUCTO</th>
-                    <th width="100px">C/U</th>
+                    <!-- <th width="100px">C/U</th> -->
                     <th width="180px">CANTIDAD</th>
-                    <th width="100px">SUBTOTAL</th>
+                    <!-- <th width="100px">SUBTOTAL</th> -->
                     <th width="1%"></th>
                   </tr>
                 </thead>
@@ -689,7 +704,7 @@
                       v-for="(item, index) in form.devolucion_cliente_detalles"
                     >
                       <td>{{ item.producto.nombre }}</td>
-                      <td>{{ item.costo }}</td>
+                      <!-- <td>{{ item.costo }}</td> -->
                       <td>
                         <input
                           type="number"
@@ -701,7 +716,7 @@
                           @keyup="calcularSubtotal($event, index)"
                         />
                       </td>
-                      <td>{{ item.subtotal }}</td>
+                      <!-- <td>{{ item.subtotal }}</td> -->
                       <td>
                         <button
                           class="btn btn-danger btn-sm"
@@ -720,11 +735,9 @@
                     </tr>
                   </template>
                   <tr>
-                    <td class="font-weight-bold text-right" colspan="2">
-                      TOTALES
-                    </td>
+                    <td class="font-weight-bold text-right">TOTALES</td>
                     <td>{{ form.cantidad_total }}</td>
-                    <td>{{ form.total }}</td>
+                    <!-- <td>{{ form.total }}</td> -->
                     <td></td>
                   </tr>
                 </tbody>

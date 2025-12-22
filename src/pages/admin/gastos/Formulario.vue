@@ -177,7 +177,7 @@
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label class="required">Monto</label>
+            <label class="required">Monto Bs</label>
             <input
               type="number"
               class="form-control"

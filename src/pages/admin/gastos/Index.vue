@@ -183,6 +183,9 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #monto="{ item }">
+                <span>{{ item.monto }} Bs</span>
+              </template>
               <template #accion="{ item }">
                 <template
                   v-if="

@@ -48,11 +48,11 @@
       key: "cantidad_total",
       sortable: true,
     },
-    {
-      label: "MONTO TOTAL",
-      key: "total",
-      sortable: true,
-    },
+    // {
+    //   label: "MONTO TOTAL",
+    //   key: "total",
+    //   sortable: true,
+    // },
     {
       label: "FECHA",
       key: "fecha_c",
@@ -240,6 +240,10 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total }} Bs</span>
+              </template>
+
               <template #user_aprobador="{ item }">
                 {{ item.user_aprobador.nombre }}
                 {{ item.user_aprobador.paterno }}
@@ -330,6 +334,9 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total }} Bs</span>
+              </template>
               <template #user_aprobador="{ item }">
                 {{ item.user_aprobador.nombre }}
                 {{ item.user_aprobador.paterno }}

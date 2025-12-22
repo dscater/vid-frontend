@@ -1037,11 +1037,11 @@
                         <tr>
                           <th>PRODUCTO</th>
                           <th style="min-width: 140px">UNIDAD MEDIDA</th>
-                          <th width="100px">P/U</th>
+                          <th width="100px">P/U Bs</th>
                           <th style="min-width: 120px">CANTIDAD</th>
-                          <th width="100px">SUBTOTAL</th>
+                          <th width="100px">SUBTOTAL Bs</th>
                           <th style="min-width: 120px">DESCUENTO</th>
-                          <th width="100px">SUBTOTAL FINAL</th>
+                          <th width="100px">SUBTOTAL FINAL Bs</th>
                           <th width="1%"></th>
                         </tr>
                       </thead>
@@ -1224,7 +1224,7 @@
                     </div>
                   </div>
                   <div class="col-12">
-                    <small class="font-weight-bold">Total Pagar</small>
+                    <small class="font-weight-bold">Total Pagar Bs</small>
                     <input
                       type="number"
                       v-model="form.total_f"
@@ -1265,7 +1265,7 @@
                       </div>
                       <div class="col-md-12" v-if="form.con">
                         <small class="text-muted font-weight-bold"
-                          >Efectivo</small
+                          >Efectivo Bs</small
                         >
                         <input
                           type="number"
@@ -1283,7 +1283,7 @@
                         </ul>
                       </div>
                       <div class="col-md-12" v-if="form.qr == 1">
-                        <small class="text-muted font-weight-bold">QR</small>
+                        <small class="text-muted font-weight-bold">QR Bs</small>
                         <input
                           type="number"
                           v-model="form.cancelado_qr"
@@ -1306,7 +1306,7 @@
                         "
                       >
                         <small class="text-muted font-weight-bold"
-                          >Crédito</small
+                          >Crédito Bs</small
                         >
                         <input
                           type="number"
@@ -1326,7 +1326,7 @@
                     </div>
                   </div>
                   <div class="col-12">
-                    <small class="font-weight-bold">Total Cancelado</small>
+                    <small class="font-weight-bold">Total Cancelado Bs</small>
                     <input
                       type="number"
                       v-model="form.cancelado"
@@ -1344,7 +1344,7 @@
                     </ul>
                   </div>
                   <div class="col-12">
-                    <small class="font-weight-bold">Dar cambio</small>
+                    <small class="font-weight-bold">Dar cambio Bs</small>
                     <input
                       type="number"
                       v-model="form.cambio"

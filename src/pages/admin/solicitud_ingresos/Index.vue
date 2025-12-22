@@ -247,7 +247,7 @@
                     'text-muted bg10': item.verificado != 3,
                     'bg-success': item.verificado == 3,
                   }"
-                  >{{ item.total }}</span
+                  >{{ item.total }} Bs</span
                 >
               </template>
 

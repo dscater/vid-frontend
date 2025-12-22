@@ -341,8 +341,18 @@
                   <th>PRODUCTO</th>
                   <th width="60px">CANTIDAD</th>
                   <th width="60px">CANTIDAD FÍSICA</th>
-                  <th width="140px" v-if="form.verificado > 0">C/U</th>
-                  <th width="100px" v-if="form.verificado > 0">SUBTOTAL</th>
+                  <th
+                    width="145px"
+                    v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                  >
+                    C/U
+                  </th>
+                  <th
+                    width="100px"
+                    v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                  >
+                    SUBTOTAL
+                  </th>
                   <th width="200px">VERIFICAR</th>
                 </tr>
               </thead>
@@ -355,7 +365,7 @@
                       {{ item.cantidad }}
                     </td>
                     <td>
-                      <template v-if="form.verificado == 0">
+                      <template v-if="form.verificado < 3">
                         <input
                           type="number"
                           step="1"
@@ -370,25 +380,36 @@
                         {{ item.cantidad_fisica }}
                       </template>
                     </td>
-                    <td v-if="form.verificado > 0">
+                    <td
+                      v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                    >
                       <template
                         v-if="form.verificado == 1 || form.verificado == 2"
                       >
-                        <input
-                          type="number"
-                          step="1"
-                          min="1"
-                          class="form-control"
-                          v-model="item.costo"
-                          @change="calcularSubtotalByCosto($event, index)"
-                          @keyup="calcularSubtotalByCosto($event, index)"
-                        />
+                        <div class="input-group">
+                          <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            class="form-control"
+                            v-model="item.costo"
+                            @change="calcularSubtotalByCosto($event, index)"
+                            @keyup="calcularSubtotalByCosto($event, index)"
+                          />
+                          <div
+                            class="input-group-text rounded-0 text-xs text-muted font-weight-bold px-1"
+                          >
+                            Bs
+                          </div>
+                        </div>
                       </template>
-                      <template v-else>
-                        {{ item.costo }}
-                      </template>
+                      <template v-else> {{ item.costo }} Bs </template>
                     </td>
-                    <td v-if="form.verificado > 0">{{ item.subtotal }}</td>
+                    <td
+                      v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                    >
+                      {{ item.subtotal }} Bs
+                    </td>
                     <td>
                       <template
                         v-if="
@@ -495,6 +516,7 @@
       ></button>
       <button
         v-if="
+          form.estado != 'PENDIENTE' &&
           (form.verificado == 1 || form.verificado == 2) &&
           (authStore?.user?.permisos == '*' ||
             authStore?.user?.permisos.includes(

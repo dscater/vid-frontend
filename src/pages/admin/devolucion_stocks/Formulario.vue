@@ -581,7 +581,7 @@
                   <tr>
                     <td class="font-weight-bold text-right">TOTALES</td>
                     <td>{{ form.cantidad_total }}</td>
-                    <td>{{ form.total }}</td>
+                    <!-- <td>{{ form.total }}</td> -->
                   </tr>
                 </tbody>
               </table>

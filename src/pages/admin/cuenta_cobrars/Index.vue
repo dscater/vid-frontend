@@ -221,6 +221,16 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total }} Bs</span>
+              </template>
+              <template #cancelado="{ item }">
+                <span>{{ item.cancelado }} Bs</span>
+              </template>
+              <template #saldo="{ item }">
+                <span>{{ item.saldo }} Bs</span>
+              </template>
+
               <template #accion="{ item }">
                 <template
                   v-if="
@@ -282,6 +292,15 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total }} Bs</span>
+              </template>
+              <template #cancelado="{ item }">
+                <span>{{ item.cancelado }} Bs</span>
+              </template>
+              <template #saldo="{ item }">
+                <span>{{ item.saldo }} Bs</span>
+              </template>
               <template #accion="{ item }">
                 <template
                   v-if="

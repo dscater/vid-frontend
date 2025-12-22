@@ -36,6 +36,7 @@
       key: "codigo",
       sortable: true,
       width: "4%",
+      fixed: true,
     },
     {
       label: "SUCURSAL",
@@ -222,6 +223,9 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total_f }} Bs</span>
+              </template>
               <template #forma_pago="{ item }">
                 <span class="text-xs badge badge-success" v-if="item.con == 1">
                   CONTADO
@@ -313,6 +317,21 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total_f }} Bs</span>
+              </template>
+              <template #forma_pago="{ item }">
+                <span class="text-xs badge badge-success" v-if="item.con == 1">
+                  CONTADO
+                </span>
+                <span class="text-xs badge badge-primary" v-if="item.qr == 1">
+                  QR
+                </span>
+                <span class="text-xs badge badge-warning" v-if="item.cre == 1">
+                  CRÉDITO
+                </span>
+              </template>
+
               <template #user="{ item }">
                 {{ item.user.nombre }} {{ item.user.paterno }}
                 {{ item.user.materno }}

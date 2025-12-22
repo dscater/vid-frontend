@@ -228,6 +228,10 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #total="{ item }">
+                <span>{{ item.total }} Bs</span>
+              </template>
+
               <template #user_aprobador="{ item }">
                 {{ item.user_aprobador.nombre }}
                 {{ item.user_aprobador.paterno }}

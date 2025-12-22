@@ -40,11 +40,11 @@
       key: "cantidad_total",
       sortable: true,
     },
-    {
-      label: "MONTO TOTAL",
-      key: "total",
-      sortable: true,
-    },
+    // {
+    //   label: "MONTO TOTAL",
+    //   key: "total",
+    //   sortable: true,
+    // },
     {
       label: "FECHA",
       key: "fecha_c",

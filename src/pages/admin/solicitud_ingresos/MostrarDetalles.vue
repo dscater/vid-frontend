@@ -357,10 +357,8 @@
                     <td>
                       {{ item.cantidad_fisica }}
                     </td>
-                    <td v-if="form.verificado > 0">
-                      {{ item.costo }}
-                    </td>
-                    <td v-if="form.verificado > 0">{{ item.subtotal }}</td>
+                    <td v-if="form.verificado > 0">{{ item.costo }} Bs</td>
+                    <td v-if="form.verificado > 0">{{ item.subtotal }} Bs</td>
                     <td>
                       {{ form.estado }}
                     </td>
