@@ -207,7 +207,7 @@
               </template>
 
               <template #accion="{ item }">
-                <!-- <el-tooltip
+                <el-tooltip
                   class="box-item"
                   effect="dark"
                   content="Imprimir"
@@ -218,7 +218,7 @@
                     @click="imprimirProforma(item)"
                   >
                     <i class="fa fa-print"></i></button
-                ></el-tooltip> -->
+                ></el-tooltip>
 
                 <el-tooltip
                   class="box-item"

@@ -147,6 +147,44 @@
       }
     });
   };
+
+  const anularOrdenVenta = (item) => {
+    Swal.fire({
+      title: "¿Quierés anular este registro?",
+      html: `<strong>${item.codigo}</strong>`,
+      showCancelButton: true,
+      confirmButtonText: "Si, anular",
+      cancelButtonText: "No, cancelar",
+      denyButtonText: `No, cancelar`,
+      customClass: {
+        confirmButton: "btn-danger",
+      },
+    }).then(async (result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        let respuesta = await api.post(
+          "/admin/orden_ventas/anular/" + item.id,
+          {
+            _method: "PUT",
+          }
+        );
+        if (respuesta.data && respuesta.data.sw) {
+          const success =
+            respuesta.data.message ?? "Proceso realizado con éxito";
+          Swal.fire({
+            icon: "success",
+            title: "Correcto",
+            html: `<strong>${success}</strong>`,
+            confirmButtonText: `Aceptar`,
+            customClass: {
+              confirmButton: "btn-success",
+            },
+          });
+          updateDatatable();
+        }
+      }
+    });
+  };
 </script>
 <template>
   <Content>
@@ -248,6 +286,7 @@
                   effect="dark"
                   content="Imprimir"
                   placement="left-start"
+                  v-if="item.verificado != 4"
                 >
                   <button
                     class="btn btn-primary"
@@ -274,6 +313,30 @@
                       @click="editarOrdenVenta(item)"
                     >
                       <i class="fa fa-pen"></i></button
+                  ></el-tooltip>
+                </template>
+
+                <template
+                  v-if="
+                    connectivityStore.isOnline &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes(
+                        'orden_ventas.destroy'
+                      ))
+                  "
+                >
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    content="Anular"
+                    placement="left-start"
+                    v-if="item.verificado != 4"
+                  >
+                    <button
+                      class="btn btn-danger"
+                      @click="anularOrdenVenta(item)"
+                    >
+                      <i class="fa fa-ban"></i></button
                   ></el-tooltip>
                 </template>
 

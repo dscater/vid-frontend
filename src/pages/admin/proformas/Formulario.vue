@@ -408,26 +408,41 @@
     });
   };
 
+  const stockPorSucursales = ref({});
   const obtenerStockProducto = async (value, col) => {
-    // SUMAR EL TOTAL DE STOCK
-    let total = 0;
+    if (!form.proforma_productos[col]) return;
 
-    const requests = form.sucursal_ids.map((element) =>
+    let total = 0;
+    stockPorSucursales.value[value] = [];
+    const requests = form.sucursal_ids.map((sucursal_id) =>
       api.get("/admin/sucursal_productos/getSucursalProducto", {
         params: {
           producto_id: value,
-          sucursal_id: element,
+          sucursal_id: sucursal_id,
         },
       })
     );
 
     const responses = await Promise.all(requests);
 
-    responses.forEach((resp) => {
-      total += parseFloat(resp.data.sucursal_producto.stock_actual);
+    responses.forEach((resp, index) => {
+      const sucursal_id = form.sucursal_ids[index];
+
+      const stock = parseFloat(resp.data.sucursal_producto?.stock_actual ?? 0);
+
+      const sucursalNombre =
+        resp.data.sucursal_producto?.sucursal?.nombre ?? "Sin sucursal";
+      stockPorSucursales.value[value].push({
+        sucursal_id,
+        sucursal: sucursalNombre,
+        stock,
+      });
+
+      total += stock;
     });
 
-    api.get("/admin/productos/" + value).then((response) => {
+    const response = await api.get("/admin/productos/" + value);
+    if (response.data) {
       form.proforma_productos[col].producto_id = response.data.id;
       form.proforma_productos[col].producto = response.data;
       form.proforma_productos[col].precio = response.data.precio;
@@ -435,10 +450,11 @@
         response.data.unidad_medida_id;
       form.proforma_productos[col].stock_actual = total;
       form.proforma_productos[col].stock_actual_aux = total;
-      form.proforma_detalles.forEach((element, fila) => {
+
+      form.proforma_detalles.forEach((_, fila) => {
         sumaTotalPorFila(fila);
       });
-    });
+    }
   };
 
   /** ***********************
@@ -506,7 +522,6 @@
         }
       }
     );
-
     form.proforma_detalles[fila].total = total == 0 ? "" : total;
     form.proforma_detalles[fila].saldo = total == 0 ? "" : total;
     form.proforma_detalles[fila].cantidad =
@@ -534,9 +549,8 @@
     });
   };
 
-  const getTotalColumna = (index_col) => {
+  const getTotalColumna = async (index_col) => {
     stockSuperado.value = false;
-
     form.proforma_productos[index_col].stock_actual =
       form.proforma_productos[index_col].stock_actual_aux;
     let total = 0;
@@ -563,6 +577,8 @@
     form.proforma_productos[index_col].stock_actual =
       parseFloat(total_sucursal) - parseFloat(total);
 
+    form.proforma_productos[index_col].agregados = total;
+    form.proforma_productos[index_col].suma = total_sucursal;
     if (total > total_sucursal) {
       toast.error(
         "Se supero el stock disponible del producto " + nombre_producto
@@ -580,6 +596,10 @@
   const verificarProforma = async () => {
     await nextTick(async () => {
       if (form.id != 0) {
+        form.proforma_productos.forEach((elem, col) => {
+          obtenerStockProducto(elem.producto_id, col);
+        });
+
         api.get("/admin/productos/listado").then((response) => {
           const data = response.data.productos;
           listProductos.value = data.map((producto) => ({
@@ -767,11 +787,11 @@
                     >
                       {{ item.precio }}
                     </th>
-                    <th rowspan="3" class="p-0">
+                    <th rowspan="5" class="p-0">
                       <button
                         class="btn bg4 btn-sm h-100"
                         @click.prevent="agregarProducto"
-                        style="writing-mode: vertical-rl; max-height: 140px"
+                        style="writing-mode: vertical-rl; max-height: 220px"
                       >
                         + Nuevo Producto
                       </button>
@@ -806,8 +826,30 @@
                       />
                     </th>
                   </tr>
-                  <tr class="bg7">
-                    <th>STOCK ACTUAL</th>
+
+                  <tr class="bg9">
+                    <th>STOCK POR SUCURSAL</th>
+                    <th></th>
+                    <th></th>
+                    <th
+                      v-for="item in form.proforma_productos"
+                      :class="{
+                        'bg-danger': item.stock_actual < 0,
+                      }"
+                    >
+                      <div
+                        v-for="item_p_s in stockPorSucursales[item.producto_id]"
+                      >
+                        <span class="text-muted">{{ item_p_s.sucursal }}:</span>
+                        {{ item_p_s.stock }}
+                      </div>
+                    </th>
+                  </tr>
+                  <tr class="bg9">
+                    <th>
+                      STOCK ACTUAL
+                      <small class="text-muted">(DISPONIBLE)</small>
+                    </th>
                     <th></th>
                     <th></th>
                     <th
@@ -817,6 +859,32 @@
                       }"
                     >
                       {{ item.stock_actual }}
+                    </th>
+                  </tr>
+                  <tr class="bg7">
+                    <th>PRODUCTOS AÑADIDOS</th>
+                    <th></th>
+                    <th></th>
+                    <th
+                      v-for="item in form.proforma_productos"
+                      :class="{
+                        'bg-danger': item.stock_actual < 0,
+                      }"
+                    >
+                      {{ item.agregados }}
+                    </th>
+                  </tr>
+                  <tr class="bg10">
+                    <th>SUMA TOTAL</th>
+                    <th></th>
+                    <th></th>
+                    <th
+                      v-for="item in form.proforma_productos"
+                      :class="{
+                        'bg-danger': item.stock_actual < 0,
+                      }"
+                    >
+                      {{ item.suma }}
                     </th>
                   </tr>
                 </thead>

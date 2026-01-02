@@ -24,8 +24,8 @@
 
   const listPermisos = ref([]);
 
-  const cargarRole = () => {
-    api.get("/admin/roles/" + props.id).then((response) => {
+  const cargarRole = (params = {}) => {
+    api.get("/admin/roles/" + props.id, { params }).then((response) => {
       role.value = response.data.role;
       modulos_group.value = response.data.modulos_group;
       array_modulos.value = response.data.array_modulos;
@@ -112,6 +112,18 @@
       });
   };
 
+  const permisosAsignados = ref(false);
+  const muestraSoloAsignados = () => {
+    permisosAsignados.value = !permisosAsignados.value;
+    let params = {};
+    if (permisosAsignados.value) {
+      params = {
+        activos: true,
+      };
+    }
+
+    cargarRole(params);
+  };
   onMounted(() => {
     cargarRole();
     appStore.stopLoading();
@@ -157,6 +169,18 @@
             <div class="row w-100 m-0">
               <div class="col-12">
                 <h3>{{ role?.nombre }}</h3>
+                <button
+                  class="btn btn-sm btn-outline-primary mb-2"
+                  @click.prevent="muestraSoloAsignados"
+                >
+                  Permisos asignados
+                  <i
+                    :class="{
+                      'far fa-square': !permisosAsignados,
+                      'fa fa-check-square': permisosAsignados,
+                    }"
+                  ></i>
+                </button>
               </div>
               <div
                 class="col-12 fila_seccion p-0"
@@ -167,10 +191,32 @@
                 </p>
                 <div class="row mb-3 px-3">
                   <div
+                    v-if="!permisosAsignados"
                     class="col-md-3"
                     v-for="item_permiso in array_modulos[item]"
                   >
                     <label class="check_permiso">
+                      {{ item_permiso.accion }}
+                      <input
+                        type="checkbox"
+                        :checked="verificaPermiso(item, item_permiso.accion)"
+                        @change="
+                          actualizaPermiso($event, item, item_permiso.accion)
+                        "
+                        :disabled="verificaDisabled(item, item_permiso.accion)"
+                        verificaPermiso
+                      />
+                    </label>
+                  </div>
+                  <div
+                    v-else
+                    class="col-md-3"
+                    v-for="item_permiso in array_modulos[item]"
+                  >
+                    <label
+                      class="check_permiso"
+                      v-if="verificaPermiso(item, item_permiso.accion)"
+                    >
                       {{ item_permiso.accion }}
                       <input
                         type="checkbox"
