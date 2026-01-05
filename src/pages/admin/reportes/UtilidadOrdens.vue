@@ -52,7 +52,8 @@
   const form = reactive({
     tipo: "pdf",
     sucursal_id: "todos",
-    anio: getAnio(),
+    fecha_ini: getFechaAtual(),
+    fecha_fin: getFechaAtual(),
     errors: null,
   });
 
@@ -293,13 +294,23 @@
                   </el-select>
                 </div>
                 <div class="col-md-12">
-                  <label>Año</label>
-                  <input
-                    type="number"
-                    step="1"
-                    v-model="form.anio"
-                    class="form-control"
-                  />
+                  <label>Fechas</label>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <input
+                        type="date"
+                        v-model="form.fecha_ini"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <input
+                        type="date"
+                        v-model="form.fecha_fin"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div class="col-md-12 text-center mt-3">
                   <button

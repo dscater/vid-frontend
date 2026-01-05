@@ -20,6 +20,15 @@
   const { toggleSidebar } = useSideBar();
 
   const logout = () => {
+    Swal.fire({
+      icon: "success",
+      title: "Correcto",
+      html: `Se cerro sesión exitosamente`,
+      confirmButtonText: `Aceptar`,
+      customClass: {
+        confirmButton: "btn-success",
+      },
+    });
     authStore.logout();
     // router.push({ name: "Login" });
   };

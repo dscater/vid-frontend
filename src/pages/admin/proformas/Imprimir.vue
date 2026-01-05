@@ -10,6 +10,7 @@
   import html2pdf from "html2pdf.js";
   import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
   import { useProformaStore } from "../../../stores/offlineStores/proformaStore.js";
+  import { isEmpty } from "element-plus/es/utils/types.mjs";
   const connectivityStore = useConnectivityStore();
   const proformaStore = useProformaStore();
   const configuracionStore = useConfiguracionStore();
@@ -28,20 +29,104 @@
 
   const { setProforma, limpiarProforma, oProforma } = useProformas();
   const loadingProforma = ref(true);
-  const literal = ref("");
+  const proformaDetallesAux = ref([]);
   const cargarProforma = async () => {
     loadingProforma.value = true;
     if (!connectivityStore.isOnline) {
       const data = await proformaStore.getProformaById(parseInt(props.id));
       setProforma(data, true);
-      literal.value = data.literal_txt;
       loadingProforma.value = false;
     } else {
       api.get("/admin/proformas/" + props.id).then((response) => {
         setProforma(response.data.proforma, true);
-        literal.value = response.data.literal;
         loadingProforma.value = false;
+        proformaDetallesAux.value = oProforma.value.proforma_detalles;
+        listClientes.value = oProforma.value.proforma_detalles.map((item) => ({
+          value: item.cliente.id,
+          // label: `${item.razon_social} - ${item.ci}`,
+          label: `${item.cliente.razon_social}`,
+        }));
       });
+    }
+  };
+
+  const sucursal_id = ref("");
+  const listSucursals = ref([]);
+  const cargarSucursals = async () => {
+    if (connectivityStore.isOnline) {
+      api.get("/admin/sucursals/listadoSP").then((response) => {
+        listSucursals.value = response.data.sucursals;
+        console.log(listSucursals.value);
+        console.log(oProforma.value.sucursal_ids);
+        listSucursals.value = listSucursals.value.filter((s) =>
+          oProforma.value.sucursal_ids.includes(s.id)
+        );
+        console.log(listSucursals.value);
+      });
+    } else {
+      listSucursals.value = await sucursalStore.getAllSinAlmacen();
+    }
+  };
+  const cliente_id = ref([]);
+  const listClientes = ref([]);
+  const listClientesAux = ref([]);
+  const loadingClientes = ref(false);
+  const intervalClientes = ref(null);
+  const onInputSelectClientes = (event) => {
+    let query = "";
+    if (typeof event === "string") {
+      query = event;
+    } else if (event?.target?.value) {
+      query = event.target.value;
+    }
+
+    if (query.length >= 1) {
+      clearInterval(intervalClientes.value);
+      intervalClientes.value = setTimeout(() => {
+        remoteMethodClientes(query);
+      }, 400);
+    }
+  };
+  const remoteMethodClientes = async (query) => {
+    if (!query || query.length < 1) {
+      return;
+    }
+    loadingClientes.value = true;
+    try {
+      let response = null;
+      if (connectivityStore.isOnline) {
+        response = await api.get(
+          "/admin/clientes/listadoSelectElementUi" +
+            `?search=${encodeURIComponent(query)}`
+        );
+      } else {
+        response = { data: { clientes: [] } };
+        response.data.clientes = await clienteStore.getAll();
+      }
+      const data = response ? response.data.clientes : [];
+      // Suponiendo que data es un array de clientes [{id, nombre}]
+      listClientes.value = data.map((cliente) => ({
+        value: cliente.id,
+        // label: `${cliente.razon_social} - ${cliente.ci}`,
+        label: `${cliente.razon_social}`,
+      }));
+      listClientesAux.value = { ...listClientes.value };
+    } catch (error) {
+      console.log(error);
+      listClientes.value = [];
+    } finally {
+      loadingClientes.value = false;
+    }
+  };
+
+  const filtraListado = () => {
+    if (!isEmpty(cliente_id.value)) {
+      proformaDetallesAux.value = oProforma.value.proforma_detalles.filter(
+        (s) => cliente_id.value.includes(s.cliente_id)
+      );
+    } else {
+      proformaDetallesAux.value = oProforma.value.proforma_detalles;
+      // console.log("todos");
     }
   };
 
@@ -53,6 +138,7 @@
     return `${dia}/${mes}/${anio}`;
   }
   onMounted(() => {
+    cargarSucursals();
     cargarProforma();
     appStore.stopLoading();
   });
@@ -79,6 +165,7 @@
         <head>
           <style>
       .contenedor_factura {
+        page-break-after: always;
         width: ${minWidth};
         overflow: auto;
         max-width: 21.59cm;
@@ -237,9 +324,52 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <label>Cliente:</label>
+                          <el-select-v2
+                            v-model="cliente_id"
+                            filterable
+                            @input="onInputSelectClientes"
+                            @change="filtraListado"
+                            :reserve-keyword="false"
+                            clearable
+                            :options="listClientes"
+                            :loading="loadingClientes"
+                            placeholder="TODOS"
+                            size="large"
+                            no-data-text="Sin resultados"
+                            loading-text="Buscando..."
+                            class="rounded-0"
+                            multiple
+                          />
+                        </div>
+                        <div class="col-md-6">
+                          <label>Seleccionar Sucursal</label>
+                          <el-select
+                            class="w-100"
+                            v-model="sucursal_id"
+                            filterable
+                            placeholder="Seleccione"
+                            no-data-text="Sin datos"
+                            no-match-text="No se encontró"
+                          >
+                            <el-option
+                              v-for="item in listSucursals"
+                              :key="item.id"
+                              :value="item.id"
+                              :label="item.nombre"
+                            ></el-option>
+                          </el-select>
+                        </div>
+                      </div>
+
                       <div class="contenedor_impresion">
                         <div id="principal">
-                          <div class="contenedor_factura">
+                          <div
+                            class="contenedor_factura"
+                            v-for="item in proformaDetallesAux"
+                          >
                             <div class="header">
                               <div class="logo">
                                 <img
@@ -249,7 +379,7 @@
                                   alt=""
                                 />
                                 <br />
-                                Fecha: {{ oProforma.fecha_ct }}
+                                Fecha: {{ item.fecha_ct }}
                               </div>
                               <div class="dir">
                                 Av. Juan Pablo II N°2780 Zona 16 de Julio<br />Telf.:
@@ -264,15 +394,14 @@
                                 </div>
                               </div>
                               <div class="total">
-                                <span class="monto"
-                                  >Bs {{ oProforma.total_f }}</span
+                                <span class="monto">Bs {{ item.total }}</span
                                 ><br />
-                                <span class="nro">{{ oProforma.codigo }}</span>
+                                <span class="nro">{{ item.codigo }}</span>
                               </div>
                             </div>
                             <div class="info">
                               <span class="tbold">Señor(a):</span>
-                              {{ oProforma.cliente.razon_social }}
+                              {{ item.cliente.razon_social }}
                             </div>
                             <div class="contenido">
                               <table border="1">
@@ -287,44 +416,56 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr
-                                    v-for="item in oProforma.proforma_detalles"
+                                  <template
+                                    v-for="item_dp in item.proforma_detalle_productos"
                                   >
-                                    <td class="centreado">
-                                      {{ item.cantidad }}
-                                    </td>
-                                    <td>
-                                      {{ item.producto.nombre }}
-                                      {{ item.unidad_medida.nombre }}
-                                    </td>
-                                    <td class="derecha">{{ item.precio }}</td>
-                                    <td class="derecha">{{ item.subtotal }}</td>
-                                    <td class="derecha">
-                                      {{ item.descuento }}
-                                    </td>
-                                    <td class="derecha">
-                                      {{ item.subtotal_f }}
-                                    </td>
-                                  </tr>
+                                    <tr
+                                      v-if="
+                                        item_dp.cantidad && item_dp.cantidad > 0
+                                      "
+                                    >
+                                      <td class="centreado">
+                                        {{ item_dp.cantidad }}
+                                      </td>
+                                      <td>
+                                        {{ item_dp.producto.nombre }}
+                                        {{
+                                          item_dp.producto.unidad_medida?.nombre
+                                        }}
+                                      </td>
+                                      <td class="derecha">
+                                        {{ item_dp.precio }}
+                                      </td>
+                                      <td class="derecha">
+                                        {{ item_dp.subtotal }}
+                                      </td>
+                                      <td class="derecha">
+                                        {{ item_dp.descuento ?? "0.00" }}
+                                      </td>
+                                      <td class="derecha">
+                                        {{ item_dp.subtotal }}
+                                      </td>
+                                    </tr>
+                                  </template>
                                   <tr>
                                     <td colspan="4"></td>
                                     <td class="tbold derecha">TOTAL</td>
                                     <td class="tbold derecha">
-                                      {{ oProforma.total_st }}
+                                      {{ item.total }}
                                     </td>
                                   </tr>
                                   <tr>
                                     <td colspan="4"></td>
                                     <td class="tbold derecha">DESCUENTO</td>
                                     <td class="tbold derecha">
-                                      {{ oProforma.descuento ?? 0 }}
+                                      {{ item.descuento ?? "0.00" }}
                                     </td>
                                   </tr>
                                   <tr>
-                                    <td colspan="4">Son: {{ literal }}</td>
+                                    <td colspan="4">Son: {{ item.literal }}</td>
                                     <td class="tbold derecha">TOTAL FINAL</td>
                                     <td class="tbold derecha">
-                                      {{ oProforma.total_f }}
+                                      {{ item.total }}
                                     </td>
                                   </tr>
                                 </tbody>

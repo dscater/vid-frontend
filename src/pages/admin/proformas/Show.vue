@@ -31,8 +31,11 @@
     if (connectivityStore.isOnline) {
       api.get("/admin/proformas/" + props.id).then((response) => {
         setProforma(response.data.proforma);
-        console.log(response.data.proforma);
         loadingProforma.value = false;
+        oProforma.value.proforma_productos.forEach((elem, col) => {
+          obtenerStockProducto(elem.producto_id, col);
+          getTotalColumna(col);
+        });
       });
     } else {
       const proforma = await proformaStore.getProformaById(parseInt(props.id));
@@ -41,6 +44,119 @@
       loadingProforma.value = false;
     }
   };
+
+  const stockPorSucursales = ref({});
+  const obtenerStockProducto = async (value, col) => {
+    if (!oProforma.value.proforma_productos[col]) return;
+
+    let total = 0;
+    stockPorSucursales.value[value] = [];
+    const requests = oProforma.value.sucursal_ids.map((sucursal_id) =>
+      api.get("/admin/sucursal_productos/getSucursalProducto", {
+        params: {
+          producto_id: value,
+          sucursal_id: sucursal_id,
+        },
+      })
+    );
+
+    const responses = await Promise.all(requests);
+
+    responses.forEach((resp, index) => {
+      const sucursal_id = oProforma.value.sucursal_ids[index];
+
+      const stock = parseFloat(resp.data.sucursal_producto?.stock_actual ?? 0);
+
+      const sucursalNombre =
+        resp.data.sucursal_producto?.sucursal?.nombre ?? "Sin sucursal";
+      stockPorSucursales.value[value].push({
+        sucursal_id,
+        sucursal: sucursalNombre,
+        stock,
+      });
+
+      total += stock;
+    });
+
+    const response = await api.get("/admin/productos/" + value);
+    if (response.data) {
+      oProforma.value.proforma_productos[col].producto_id = response.data.id;
+      oProforma.value.proforma_productos[col].producto = response.data;
+      oProforma.value.proforma_productos[col].precio = response.data.precio;
+      oProforma.value.proforma_productos[col].unidad_medida_id =
+        response.data.unidad_medida_id;
+      oProforma.value.proforma_productos[col].stock_actual = total;
+      oProforma.value.proforma_productos[col].stock_actual_aux = total;
+
+      oProforma.value.proforma_detalles.forEach((_, fila) => {
+        sumaTotalPorFila(fila);
+      });
+    }
+  };
+
+  const sumaTotalPorFila = (fila) => {
+    let total = 0;
+    let total_cantidad = 0;
+    oProforma.value.proforma_detalles[fila].proforma_detalle_productos.forEach(
+      (elem_detalle, index_col) => {
+        if (elem_detalle.cantidad) {
+          oProforma.value.proforma_detalles[fila].proforma_detalle_productos[
+            index_col
+          ].precio = parseFloat(
+            oProforma.value.proforma_productos[index_col].precio
+          );
+          total +=
+            parseFloat(elem_detalle.cantidad) *
+            parseFloat(oProforma.value.proforma_productos[index_col].precio);
+          total_cantidad += parseFloat(elem_detalle.cantidad);
+          oProforma.value.proforma_detalles[fila].proforma_detalle_productos[
+            index_col
+          ].subtotal =
+            parseFloat(elem_detalle.cantidad) *
+            parseFloat(oProforma.value.proforma_productos[index_col].precio);
+        }
+      }
+    );
+    oProforma.value.proforma_detalles[fila].total = total == 0 ? "" : total;
+    oProforma.value.proforma_detalles[fila].saldo = total == 0 ? "" : total;
+    oProforma.value.proforma_detalles[fila].cantidad =
+      total_cantidad == 0 ? "" : total_cantidad;
+  };
+
+  const getTotalColumna = async (index_col) => {
+    oProforma.value.proforma_productos[index_col].stock_actual =
+      oProforma.value.proforma_productos[index_col].stock_actual_aux;
+    let total = 0;
+
+    oProforma.value.proforma_detalles.forEach((element) => {
+      const cantidad = element.proforma_detalle_productos[index_col].cantidad;
+      const resta = element.proforma_detalle_productos[index_col].resta;
+      if (resta) {
+        // existente
+        if (cantidad) {
+          // total += parseFloat(cantidad) - parseFloat(resta);
+          total += parseFloat(cantidad);
+        } else {
+          total -= parseFloat(resta);
+        }
+      } else if (cantidad) {
+        total += parseFloat(cantidad ?? 0);
+      }
+    });
+
+    const total_sucursal =
+      oProforma.value.proforma_productos[index_col].stock_actual;
+    const nombre_producto =
+      oProforma.value.proforma_productos[index_col].producto.nombre;
+
+    oProforma.value.proforma_productos[index_col].stock_actual =
+      parseFloat(total_sucursal) - parseFloat(total);
+
+    oProforma.value.proforma_productos[index_col].agregados = total;
+    oProforma.value.proforma_productos[index_col].suma = total_sucursal;
+    return total;
+  };
+
   onMounted(() => {
     cargarProforma();
     appStore.stopLoading();
@@ -140,11 +256,12 @@
                             class="p-0 text-center"
                           >
                             {{ item.producto.nombre }} <br />
-                            {{ item.producto.unidad_medida.nombre }}
+                            {{ item.producto.unidad_medida?.nombre }}
                           </th>
                         </tr>
-                        <tr class="bg7">
-                          <th>STOCK ACTUAL</th>
+
+                        <tr class="bg9">
+                          <th>STOCK POR SUCURSAL</th>
                           <th></th>
                           <th></th>
                           <th
@@ -152,11 +269,61 @@
                             :class="{
                               'bg-danger': item.stock_actual < 0,
                             }"
-                            class="text-center"
+                          >
+                            <div
+                              v-for="item_p_s in stockPorSucursales[
+                                item.producto_id
+                              ]"
+                            >
+                              <span class="text-muted"
+                                >{{ item_p_s.sucursal }}:</span
+                              >
+                              {{ item_p_s.stock }}
+                            </div>
+                          </th>
+                        </tr>
+                        <!-- <tr class="bg9">
+                          <th>
+                            STOCK ACTUAL
+                            <small class="text-muted">(DISPONIBLE)</small>
+                          </th>
+                          <th></th>
+                          <th></th>
+                          <th
+                            v-for="item in oProforma.proforma_productos"
+                            :class="{
+                              'bg-danger': item.stock_actual < 0,
+                            }"
                           >
                             {{ item.stock_actual }}
                           </th>
+                        </tr> -->
+                        <tr class="bg7">
+                          <th>PRODUCTOS AÑADIDOS</th>
+                          <th></th>
+                          <th></th>
+                          <th
+                            v-for="item in oProforma.proforma_productos"
+                            :class="{
+                              'bg-danger': item.stock_actual < 0,
+                            }"
+                          >
+                            {{ item.agregados }}
+                          </th>
                         </tr>
+                        <!-- <tr class="bg10">
+                          <th>SUMA TOTAL</th>
+                          <th></th>
+                          <th></th>
+                          <th
+                            v-for="item in oProforma.proforma_productos"
+                            :class="{
+                              'bg-danger': item.stock_actual < 0,
+                            }"
+                          >
+                            {{ item.suma }}
+                          </th>
+                        </tr> -->
                       </thead>
                       <tbody>
                         <template v-if="oProforma.proforma_detalles.length > 0">

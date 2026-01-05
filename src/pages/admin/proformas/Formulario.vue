@@ -826,7 +826,6 @@
                       />
                     </th>
                   </tr>
-
                   <tr class="bg9">
                     <th>STOCK POR SUCURSAL</th>
                     <th></th>

@@ -236,6 +236,7 @@
                 <template
                   v-if="
                     item.almacen != 1 &&
+                    item.almacen != 2 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes('sucursals.edit'))
                   "
@@ -254,6 +255,7 @@
                 <template
                   v-if="
                     item.almacen != 1 &&
+                    item.almacen != 2 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes('sucursals.destroy'))
                   "
