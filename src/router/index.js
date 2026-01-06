@@ -252,6 +252,14 @@ const routes = [
     meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
   },
 
+  // AJUSTES
+  {
+    path: "/admin/ajustes",
+    name: "ajustes.index",
+    component: () => import("../pages/admin/ajustes/Index.vue"),
+    meta: { layout: Admin, requiresAuth: true, verificaPermiso: true },
+  },
+
   // GASTOS
   {
     path: "/admin/gastos",

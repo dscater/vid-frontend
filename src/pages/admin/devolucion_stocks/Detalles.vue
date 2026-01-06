@@ -270,7 +270,7 @@
                           Verificar
                         </el-checkbox>
                         <template v-if="item.cantidad != item.cantidad_fisica">
-                          <el-select
+                          <!-- <el-select
                             class="w-100 mb-2"
                             v-model="item.sucursal_ajuste"
                             filterable
@@ -285,7 +285,7 @@
                               :value="item.id"
                               :label="item.nombre"
                             ></el-option>
-                          </el-select>
+                          </el-select> -->
                           <el-select
                             class="w-100"
                             v-model="item.motivo"

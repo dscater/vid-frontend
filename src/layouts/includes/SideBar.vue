@@ -256,7 +256,8 @@
               :class="[
                 routeCurrent == 'solicitud_ingresos.index' ||
                 routeCurrent == 'orden_salidas.index' ||
-                routeCurrent == 'transferencias.index'
+                routeCurrent == 'transferencias.index' ||
+                routeCurrent == 'ajustes.index'
                   ? 'active menu-is-opening menu-open'
                   : '',
               ]"
@@ -294,6 +295,15 @@
                 "
                 :label="'Transferencias de Stock'"
                 :ruta="'transferencias.index'"
+                :icon="'fa fa-angle-right'"
+              ></ItemMenu>
+              <ItemMenu
+                v-if="
+                  authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes('ajustes.index')
+                "
+                :label="'Ajustes'"
+                :ruta="'ajustes.index'"
                 :icon="'fa fa-angle-right'"
               ></ItemMenu>
             </ul>
