@@ -344,7 +344,7 @@
                             multiple
                           />
                         </div>
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                           <label>Seleccionar Sucursal</label>
                           <el-select
                             class="w-100"
@@ -361,7 +361,7 @@
                               :label="item.nombre"
                             ></el-option>
                           </el-select>
-                        </div>
+                        </div> -->
                       </div>
 
                       <div class="contenedor_impresion">
