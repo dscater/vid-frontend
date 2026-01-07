@@ -9,6 +9,8 @@
   import { useRouter } from "vue-router";
   import { useOrdenVentaStore } from "../../../stores/offlineStores/ordenVentaStore.js";
   import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import { useFormater } from "../../../composables/useFormater";
+  const { getFormatoMoneda } = useFormater();
   const connectivityStore = useConnectivityStore();
   const ordenVentaStore = useOrdenVentaStore();
   const router = useRouter();
@@ -262,7 +264,7 @@
               fixed-header
             >
               <template #total="{ item }">
-                <span>{{ item.total_f }} Bs</span>
+                <span>{{ getFormatoMoneda(item.total_f) }} Bs</span>
               </template>
               <template #forma_pago="{ item }">
                 <span class="text-xs badge badge-success" v-if="item.con == 1">
@@ -381,7 +383,7 @@
               fixed-header
             >
               <template #total="{ item }">
-                <span>{{ item.total_f }} Bs</span>
+                <span>{{ getFormatoMoneda(item.total_f) }} Bs</span>
               </template>
               <template #forma_pago="{ item }">
                 <span class="text-xs badge badge-success" v-if="item.con == 1">

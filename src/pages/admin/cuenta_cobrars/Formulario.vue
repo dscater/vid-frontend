@@ -6,6 +6,8 @@
   import { useAuthStore } from "../../../stores/authStore";
   import { useCuentaCobrarStore } from "../../../stores/offlineStores/cuentaCobrarStore.js";
   import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import { useFormater } from "../../../composables/useFormater";
+  const { getFormatoMoneda } = useFormater();
   const connectivityStore = useConnectivityStore();
   const cuentaCobrarStore = useCuentaCobrarStore();
   const authStore = useAuthStore();
@@ -275,7 +277,9 @@
                       <div class="col-4 text-right">
                         <strong>Total:</strong>
                       </div>
-                      <div class="col-8">{{ form.total }} Bs</div>
+                      <div class="col-8">
+                        {{ getFormatoMoneda(form.total) }} Bs
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -283,7 +287,9 @@
                       <div class="col-4 text-right">
                         <strong>Cancelado:</strong>
                       </div>
-                      <div class="col-8">{{ form.cancelado }} Bs</div>
+                      <div class="col-8">
+                        {{ getFormatoMoneda(form.cancelado) }} Bs
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -291,7 +297,9 @@
                       <div class="col-4 text-right">
                         <strong>Saldo:</strong>
                       </div>
-                      <div class="col-8">{{ form.saldo }} Bs</div>
+                      <div class="col-8">
+                        {{ getFormatoMoneda(form.saldo) }} Bs
+                      </div>
                     </div>
                   </div>
                 </div>

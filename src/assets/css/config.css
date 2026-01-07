@@ -553,3 +553,164 @@ body.app-blank.login {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+/* MOVIMINETO DE INVENTARIO */
+.movimiento_inventario table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top: 20px;
+  page-break-before: avoid;
+}
+
+.movimiento_inventario table thead tr th,
+.movimiento_inventario tbody tr td {
+  padding: 3px;
+  word-wrap: break-word;
+}
+
+.movimiento_inventario table thead tr th {
+  font-size: 10pt;
+  text-align: center;
+}
+
+.movimiento_inventario table tbody tr td {
+  font-size: 8pt;
+  text-align: center;
+}
+
+.movimiento_inventario .encabezado {
+  width: 100%;
+}
+
+.movimiento_inventario .logo img {
+  position: absolute;
+  height: 70px;
+  top: -20px;
+  left: 0px;
+}
+
+.movimiento_inventario h2.titulo {
+  width: 450px;
+  margin: auto;
+  margin-top: 0px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14pt;
+}
+
+.movimiento_inventario .texto {
+  width: 350px;
+  text-align: center;
+  margin: auto;
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.movimiento_inventario .fecha {
+  width: 350px;
+  text-align: center;
+  margin: auto;
+  margin-top: 15px;
+  font-weight: normal;
+  font-size: 0.85em;
+}
+
+.movimiento_inventario .total {
+  text-align: right;
+  padding-right: 15px;
+  font-weight: bold;
+}
+
+.movimiento_inventario table {
+  width: 100%;
+  background: white;
+}
+
+.movimiento_inventario table thead {
+  background: rgb(236, 236, 236);
+}
+
+.movimiento_inventario tr {
+  page-break-inside: avoid !important;
+}
+
+.movimiento_inventario .centreado {
+  padding-left: 0px;
+  text-align: center;
+}
+
+.movimiento_inventario .datos {
+  margin-left: 15px;
+  border-top: solid 1px;
+  border-collapse: collapse;
+  width: 250px;
+}
+
+.movimiento_inventario .txt {
+  font-weight: bold;
+  text-align: right;
+  padding-right: 5px;
+}
+
+.movimiento_inventario .txt_center {
+  font-weight: bold;
+  text-align: center;
+}
+
+.movimiento_inventario .gray {
+  background: rgb(202, 202, 202);
+}
+
+.movimiento_inventario .bg-principal {
+  background: #153f59;
+  color: white;
+}
+
+.movimiento_inventario th.vertical {
+  vertical-align: middle;
+  text-align: center;
+  min-height: 220px;
+  height: 230px;
+  /* controla la altura de la fila */
+}
+
+.movimiento_inventario th.vertical div {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* opcional */
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding: 5px;
+}
+
+.movimiento_inventario .bgFinal {
+  background-color: rgb(255, 255, 232);
+  font-weight: bold;
+  font-size: 7.6pt;
+}
+
+.movimiento_inventario .bg0 {
+  background: #cff3f3;
+  color: black;
+}
+
+.movimiento_inventario .bg1 {
+  background: #ffe9ff;
+  color: black;
+}
+
+.movimiento_inventario .bg2 {
+  background: #f7ffe0;
+  color: black;
+}
+
+.movimiento_inventario .bg3 {
+  background: #ecfcdd;
+  color: black;
+}
+
+.movimiento_inventario .bg4 {
+  background: #faeee4;
+  color: black;
+}

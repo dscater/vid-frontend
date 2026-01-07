@@ -7,6 +7,7 @@
     computed,
     reactive,
     nextTick,
+    onUnmounted,
   } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import { useAuthStore } from "../../../stores/authStore";
@@ -140,16 +141,6 @@
       });
     });
   };
-  const listUsers = ref([]);
-  const cargarUsers = () => {
-    api.get("/admin/usuarios/listado").then((response) => {
-      listUsers.value = response.data.usuarios;
-      listUsers.value.unshift({
-        id: "todos",
-        full_name: "TODOS",
-      });
-    });
-  };
   const listMovimiento = ref([
     {
       value: "todos",
@@ -171,23 +162,25 @@
   const cargarListas = () => {
     cargarProductos();
     cargarSucursals();
-    cargarUsers();
   };
 
   onMounted(async () => {
     cargarListas();
     appStore.stopLoading();
+    intervalGrafico.value = setInterval(() => {
+      generarGrafico();
+    }, 1000);
   });
 
   const txtBtnG = computed(() => {
     if (generando.value) {
       return "Generando Reporte...";
     }
-    return "Generar Gráfico";
+    return "Previsualizar Tabla";
   });
 
   const generarGrafico = () => {
-    generando.value = true;
+    // generando.value = true;
     api
       .get("admin/reportes/movimiento_inventario_g", {
         params: form,
@@ -196,91 +189,17 @@
         nextTick(() => {
           const containerId = `container`;
           const container = document.getElementById(containerId);
-          // Verificar que el contenedor exista y tenga un tamaño válido
-          if (container) {
-            renderChart(
-              containerId,
-              response.data.categories,
-              response.data.data
-            );
-          } else {
-            console.error(`Contenedor ${containerId} no válido.`);
-          }
+          container.innerHTML = response.data;
         });
         // Create the chart
         generando.value = false;
       });
   };
 
-  const renderChart = (containerId, categories, data) => {
-    const rowHeight = 80;
-    const minHeight = 200;
-    const calculatedHeight = Math.max(minHeight, categories.length * rowHeight);
-    Highcharts.chart(containerId, {
-      chart: {
-        type: "column",
-      },
-      title: {
-        align: "center",
-        text: `MOVIMIENTO DE INVENTARIO`,
-      },
-      subtitle: {
-        align: "center",
-        text: ``,
-      },
-      accessibility: {
-        announceNewData: {
-          enabled: true,
-        },
-      },
-      xAxis: {
-        type: "category",
-      },
-      yAxis: {
-        title: {
-          text: "TOTAL",
-        },
-      },
-      legend: {
-        enabled: true,
-      },
-      plotOptions: {
-        series: {
-          depth: 100,
-          borderWidth: 0,
-          dataLabels: {
-            enabled: true,
-            // format: "{point.y}",
-            style: {
-              fontSize: "11px",
-              fontWeight: "bold",
-            },
-          },
-        },
-      },
-      tooltip: {
-        useHTML: true,
-        formatter: function () {
-          return `
-                    <div style="text-align:center;">
-                        <div style="display:inline-block; width:12px; height:12px; background:${this.point.color}; border-radius:50%; margin-right:5px;"></div>
-                        <strong style="color:${this.point.color};">${this.point.name}</strong>
-                        <br>
-                        <span class="text-md"><strong>Total:</strong> ${this.point.y}</span>
-                    </div>
-                    `;
-        },
-      },
-
-      series: [
-        {
-          name: "Reporte Inscripción",
-          data: data,
-          colorByPoint: true,
-        },
-      ],
-    });
-  };
+  const intervalGrafico = ref(null);
+  onUnmounted(() => {
+    clearInterval(intervalGrafico.value);
+  });
 </script>
 <template>
   <Content>
@@ -370,6 +289,7 @@
                 </div>
                 <div class="col-md-12 text-center mt-3">
                   <button
+                    type="button"
                     class="btn btn-primary"
                     block
                     @click="generarGrafico"
@@ -385,7 +305,10 @@
     </div>
 
     <div class="row overflow-auto pb-4" style="max-height: 600px">
-      <div class="col-12 mt-3" id="container"></div>
+      <div
+        class="col-12 mt-3 movimiento_inventario overflow-auto"
+        id="container"
+      ></div>
     </div>
   </Content>
 </template>

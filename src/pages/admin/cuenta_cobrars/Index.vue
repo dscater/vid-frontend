@@ -10,6 +10,8 @@
   import { useRouter } from "vue-router";
   import { useCuentaCobrarStore } from "../../../stores/offlineStores/cuentaCobrarStore.js";
   import { useConnectivityStore } from "../../../stores/offlineStores/useConnectivityStore";
+  import { useFormater } from "../../../composables/useFormater";
+  const { getFormatoMoneda } = useFormater();
   const connectivityStore = useConnectivityStore();
   const cuentaCobrarStore = useCuentaCobrarStore();
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -222,13 +224,13 @@
               fixed-header
             >
               <template #total="{ item }">
-                <span>{{ item.total }} Bs</span>
+                <span>{{ getFormatoMoneda(item.total) }} Bs</span>
               </template>
               <template #cancelado="{ item }">
-                <span>{{ item.cancelado }} Bs</span>
+                <span>{{ getFormatoMoneda(item.cancelado) }} Bs</span>
               </template>
               <template #saldo="{ item }">
-                <span>{{ item.saldo }} Bs</span>
+                <span>{{ getFormatoMoneda(item.saldo) }} Bs</span>
               </template>
 
               <template #accion="{ item }">
@@ -293,13 +295,13 @@
               fixed-header
             >
               <template #total="{ item }">
-                <span>{{ item.total }} Bs</span>
+                <span>{{ getFormatoMoneda(item.total) }} Bs</span>
               </template>
               <template #cancelado="{ item }">
-                <span>{{ item.cancelado }} Bs</span>
+                <span>{{ getFormatoMoneda(item.cancelado) }} Bs</span>
               </template>
               <template #saldo="{ item }">
-                <span>{{ item.saldo }} Bs</span>
+                <span>{{ getFormatoMoneda(item.saldo) }} Bs</span>
               </template>
               <template #accion="{ item }">
                 <template

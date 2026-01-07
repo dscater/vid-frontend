@@ -8,6 +8,8 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useFormater } from "../../../composables/useFormater";
+  const { getFormatoMoneda } = useFormater();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -184,7 +186,7 @@
               fixed-header
             >
               <template #monto="{ item }">
-                <span>{{ item.monto }} Bs</span>
+                <span>{{ getFormatoMoneda(item.monto) }} Bs</span>
               </template>
               <template #accion="{ item }">
                 <template

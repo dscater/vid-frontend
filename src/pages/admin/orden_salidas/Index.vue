@@ -9,6 +9,8 @@
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
+  import { useFormater } from "../../../composables/useFormater";
+  const { getFormatoMoneda } = useFormater();
   const apiUrl = import.meta.env.VITE_API_URL;
   const authStore = useAuthStore();
   const appStore = useAppStore();
@@ -229,7 +231,7 @@
               fixed-header
             >
               <template #total="{ item }">
-                <span>{{ item.total }} Bs</span>
+                <span>{{ getFormatoMoneda(item.total) }} Bs</span>
               </template>
 
               <template #user_aprobador="{ item }">

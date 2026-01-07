@@ -119,7 +119,7 @@
     <template #header>
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Reportes > Productos</h1>
+          <h1 class="m-0">Reportes > Rotación de Inventario</h1>
         </div>
         <!-- /.col -->
         <div class="col-sm-6">
@@ -127,7 +127,9 @@
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'Inicio' }">Inicio</router-link>
             </li>
-            <li class="breadcrumb-item active">Reportes > Productos</li>
+            <li class="breadcrumb-item active">
+              Reportes > Rotación de Inventario
+            </li>
           </ol>
         </div>
         <!-- /.col -->
