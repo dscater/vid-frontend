@@ -345,7 +345,13 @@
                     width="145px"
                     v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
                   >
-                    C/U
+                    PRECIO COMPRA
+                  </th>
+                  <th
+                    width="145px"
+                    v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                  >
+                    PRECIO FACTURADO
                   </th>
                   <th
                     width="100px"
@@ -404,6 +410,31 @@
                         </div>
                       </template>
                       <template v-else> {{ item.costo }} Bs </template>
+                    </td>
+                    <td
+                      v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+                    >
+                      <template
+                        v-if="form.verificado == 1 || form.verificado == 2"
+                      >
+                        <div class="input-group">
+                          <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            class="form-control"
+                            v-model="item.costo_facturado"
+                          />
+                          <div
+                            class="input-group-text rounded-0 text-xs text-muted font-weight-bold px-1"
+                          >
+                            Bs
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        {{ item.costo_facturado }} Bs
+                      </template>
                     </td>
                     <td
                       v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"

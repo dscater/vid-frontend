@@ -48,7 +48,8 @@
     sucursal_id: "todos",
     user_id: "todos",
     tipo_movimiento: "todos",
-    fecha: getFechaAtual(),
+    fecha_ini: getFechaAtual(),
+    fecha_fin: getFechaAtual(),
     errors: null,
   });
 
@@ -352,11 +353,22 @@
                 </div>
                 <div class="col-md-12">
                   <label>Fecha</label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    v-model="form.fecha"
-                  />
+                  <div class="row">
+                    <div class="col-md-6">
+                      <input
+                        type="date"
+                        v-model="form.fecha_ini"
+                        class="form-control"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <input
+                        type="date"
+                        v-model="form.fecha_fin"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div class="col-md-12">
                   <label>Tipo de movimiento</label>
