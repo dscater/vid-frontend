@@ -341,17 +341,6 @@
                   </el-select>
                 </div>
                 <div class="col-md-12">
-                  <label>Seleccionar Responsable</label>
-                  <el-select v-model="form.user_id" filterable>
-                    <el-option
-                      v-for="item in listUsers"
-                      :value="item.id"
-                      :label="item.full_name"
-                    >
-                    </el-option>
-                  </el-select>
-                </div>
-                <div class="col-md-12">
                   <label>Fecha</label>
                   <div class="row">
                     <div class="col-md-6">
@@ -369,14 +358,6 @@
                       />
                     </div>
                   </div>
-                </div>
-                <div class="col-md-12">
-                  <label>Tipo de movimiento</label>
-                  <select v-model="form.tipo_movimiento" class="form-control">
-                    <option v-for="item in listMovimiento" :value="item.value">
-                      {{ item.label }}
-                    </option>
-                  </select>
                 </div>
                 <div class="col-md-12 text-center mt-3">
                   <button

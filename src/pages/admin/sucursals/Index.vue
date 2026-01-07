@@ -5,6 +5,7 @@
   import { ref, onMounted, onBeforeMount } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
+  import Parametros from "./Parametros.vue";
   import { useAuthStore } from "../../../stores/authStore";
   import api from "../../../composables/axios.js";
   import { useRouter } from "vue-router";
@@ -79,6 +80,8 @@
 
   const accion_formulario = ref(0);
   const muestra_formulario = ref(false);
+  const accion_formulario_parametros = ref(0);
+  const muestra_formulario_parametros = ref(false);
 
   const agregarRegistro = () => {
     limpiarSucursal();
@@ -86,6 +89,10 @@
     muestra_formulario.value = true;
   };
 
+  const verParametros = () => {
+    accion_formulario_parametros.value = 0;
+    muestra_formulario_parametros.value = true;
+  };
   const updateDatatable = async () => {
     if (miTable.value) {
       await miTable.value.cargarDatos();
@@ -170,6 +177,17 @@
               @click="agregarRegistro"
             >
               <i class="fa fa-plus"></i> Nueva Sucursal
+            </button>
+            <button
+              v-if="
+                authStore?.user?.permisos == '*' ||
+                authStore?.user?.permisos.includes('sucursals.edit')
+              "
+              type="button"
+              class="btn btn-primary ml-1"
+              @click="verParametros"
+            >
+              <i class="fa fa-list"></i> Parametros Inicio y Fin Stock
             </button>
           </div>
           <div class="col-md-8 my-1">
@@ -285,5 +303,11 @@
       @envio-formulario="updateDatatable"
       @cerrar-formulario="muestra_formulario = false"
     ></Formulario>
+    <Parametros
+      :muestra_formulario="muestra_formulario_parametros"
+      :accion_formulario="accion_formulario_parametros"
+      @envio-formulario="muestra_formulario_parametros = false"
+      @cerrar-formulario="muestra_formulario_parametros = false"
+    ></Parametros>
   </Content>
 </template>

@@ -219,14 +219,14 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-12">
+                <!-- <div class="col-md-12">
                   <label>Seleccionar Estado</label>
                   <select v-model="form.forma_pago" class="form-control">
                     <option v-for="item in listTipoPagos" :value="item.value">
                       {{ item.label }}
                     </option>
                   </select>
-                </div>
+                </div> -->
                 <div class="col-md-12 text-center mt-3">
                   <button
                     class="btn btn-success"
