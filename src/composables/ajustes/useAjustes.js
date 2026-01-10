@@ -7,6 +7,8 @@ const oAjuste = ref({
   producto_id: "",
   cantidad: "",
   motivo: "",
+  tipo: "",
+  registro_id: "",
   _method: "POST",
 });
 
@@ -16,9 +18,13 @@ export const useAjustes = () => {
       oAjuste.value.id = item.id;
       oAjuste.value.sucursal_id = item.sucursal_id;
       oAjuste.value.sucursal_origen = item.sucursal_origen;
+      oAjuste.value.sucursal = item.sucursal;
+      oAjuste.value.o_sucursal_origen = item.o_sucursal_origen;
       oAjuste.value.producto_id = item.producto_id;
       oAjuste.value.cantidad = item.cantidad;
       oAjuste.value.motivo = item.motivo;
+      oAjuste.value.tipo = item.tipo;
+      oAjuste.value.registro_id = item.registro_id;
       oAjuste.value._method = "PUT";
       return oAjuste;
     }
@@ -32,6 +38,8 @@ export const useAjustes = () => {
     oAjuste.value.producto_id = "";
     oAjuste.value.cantidad = "";
     oAjuste.value.motivo = "";
+    oAjuste.value.tipo = "";
+    oAjuste.value.registro_id = "";
     oAjuste.value._method = "POST";
   };
 

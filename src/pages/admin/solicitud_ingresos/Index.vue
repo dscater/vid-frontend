@@ -40,6 +40,11 @@
       sortable: true,
     },
     {
+      label: "PRODUCTO",
+      key: "producto",
+      sortable: true,
+    },
+    {
       label: "CANTIDAD TOTAL",
       key: "cantidad_total",
       sortable: true,
@@ -52,11 +57,6 @@
     {
       label: "FECHA",
       key: "fecha_c",
-      sortable: true,
-    },
-    {
-      label: "FACTURA",
-      key: "cs_f",
       sortable: true,
     },
     {
@@ -229,6 +229,7 @@
               :api="true"
               :url="apiUrl + '/admin/solicitud_ingresos/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"
@@ -237,6 +238,11 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #producto="{ item }">
+                <div v-for="detalle in item.solicitud_ingreso_detalles">
+                  {{ detalle.producto.nombre }}
+                </div>
+              </template>
               <template #user="{ item }">
                 {{ item.user.nombre }} {{ item.user.paterno }}
                 {{ item.user.materno }}

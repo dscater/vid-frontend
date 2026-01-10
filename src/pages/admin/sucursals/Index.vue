@@ -221,6 +221,7 @@
               :api="true"
               :url="apiUrl + '/admin/sucursals/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

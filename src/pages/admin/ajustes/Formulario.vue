@@ -165,7 +165,24 @@
           <span class="text-danger">(*)</span> son obligatorios.
         </p>
         <div class="row">
-          <div class="col-md-4 mb-2">
+          <div class="col-md-4 offset-md-4">
+            <span
+              v-if="
+                form.tipo == 'DEVOLUCION DE STOCK' ||
+                form.tipo == 'SOLICITUD DE INGRESO'
+              "
+            >
+              REPONIENDO A ALMACÉN CENTRAL
+            </span>
+            <span
+              v-if="
+                form.tipo == 'TRANSFERENCIA' || form.tipo == 'ORDEN DE SALIDA'
+              "
+            >
+              REPONIENDO A {{ form.o_sucursal_origen.nombre }}
+            </span>
+          </div>
+          <!-- <div class="col-md-4 mb-2">
             <label class="required">Seleccionar Sucursal</label>
             <el-select
               class="w-100"
@@ -193,8 +210,8 @@
                 {{ form.errors?.sucursal_origen[0] }}
               </li>
             </ul>
-          </div>
-          <div class="col-md-4 mt-2">
+          </div> -->
+          <div class="col-md-4 mt-2 offset-md-4">
             <label class="required">Cantidad</label>
             <el-input
               type="text"

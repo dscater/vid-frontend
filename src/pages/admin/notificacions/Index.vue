@@ -106,6 +106,7 @@
               :api="true"
               :url="apiUrl + '/admin/notificacions/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

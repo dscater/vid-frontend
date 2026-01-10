@@ -32,11 +32,13 @@
     {
       label: "CÓDIGO PRODUCTO",
       key: "producto.codigo",
+      keySortable: "productos.codigo",
       sortable: true,
     },
     {
       label: "NOMBRE PRODUCTO",
       key: "producto.nombre",
+      keySortable: "productos.nombre",
       sortable: true,
     },
     {
@@ -45,8 +47,13 @@
       sortable: true,
     },
     {
-      label: "CANTIDAD",
+      label: "MOTIVO",
       key: "motivo",
+      sortable: true,
+    },
+    {
+      label: "TIPO DE MOVIMIENTO",
+      key: "tipo",
       sortable: true,
     },
     {
@@ -173,6 +180,7 @@
               :api="true"
               :url="apiUrl + '/admin/ajustes/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

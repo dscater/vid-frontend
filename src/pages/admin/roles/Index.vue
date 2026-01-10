@@ -170,6 +170,7 @@
               :api="true"
               :url="apiUrl + '/admin/roles/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

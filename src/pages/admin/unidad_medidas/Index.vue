@@ -165,6 +165,7 @@
               :api="true"
               :url="apiUrl + '/admin/unidad_medidas/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

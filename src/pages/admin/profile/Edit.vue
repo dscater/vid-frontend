@@ -4,6 +4,8 @@
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import api from "../../../composables/axios";
   import { useAuthStore } from "../../../stores/authStore";
+  const authStore = useAuthStore();
+
   const appStore = useAppStore();
   onBeforeMount(() => {
     appStore.startLoading();
@@ -271,7 +273,13 @@
           </div>
         </div>
       </div>
-      <div class="col-md-8">
+      <div
+        class="col-md-8"
+        v-if="
+          authStore?.user?.permisos == '*' ||
+          authStore?.user?.permisos.includes('profile.edit')
+        "
+      >
         <div class="card card-inverse pa-3">
           <div class="card-header">
             <h4 class="mb-0">Cambiar contraseña</h4>

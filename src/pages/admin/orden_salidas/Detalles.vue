@@ -275,7 +275,7 @@
                           Verificar
                         </el-checkbox>
                         <template v-if="item.cantidad != item.cantidad_fisica">
-                          <el-select
+                          <!-- <el-select
                             class="w-100 mb-2"
                             v-model="item.sucursal_ajuste"
                             filterable
@@ -290,7 +290,7 @@
                               :value="item.id"
                               :label="item.nombre"
                             ></el-option>
-                          </el-select>
+                          </el-select> -->
                           <el-select
                             class="w-100"
                             v-model="item.motivo"
@@ -312,11 +312,8 @@
                       <template v-else>
                         VERIFICADO
 
-                        <div
-                          v-if="item.o_sucursal_ajuste"
-                          class="text-muted border-top"
-                        >
-                          {{ item.o_sucursal_ajuste.nombre }}<br />
+                        <div v-if="item.motivo" class="text-muted border-top">
+                          <!-- {{ item.motivo.nombre }}<br /> -->
                           {{ item.motivo }}
                         </div></template
                       >

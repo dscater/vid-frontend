@@ -232,6 +232,7 @@
               :api="true"
               :url="apiUrl + '/admin/productos/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

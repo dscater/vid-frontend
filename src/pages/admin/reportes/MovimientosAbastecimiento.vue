@@ -99,7 +99,7 @@
 
   const listSucursals = ref([]);
   const cargarSucursals = () => {
-    api.get("/admin/sucursals/listadoSP").then((response) => {
+    api.get("/admin/sucursals/listado").then((response) => {
       listSucursals.value = response.data.sucursals;
       listSucursals.value.unshift({
         id: "todos",

@@ -280,6 +280,10 @@ body .main-sidebar .sidebar .nav .nav-link.active {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.modal .modal-header button span {
+  color: white;
+}
+
 .modal-full {
   margin: 0 auto;
   min-width: 100vw;

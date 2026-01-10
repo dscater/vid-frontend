@@ -306,11 +306,8 @@
                       </template>
                       <template v-else>
                         VERIFICADO
-                        <div
-                          v-if="item.o_sucursal_ajuste"
-                          class="text-muted border-top"
-                        >
-                          {{ item.o_sucursal_ajuste.nombre }}<br />
+                        <div v-if="item.motivo" class="text-muted border-top">
+                          <!-- {{ item.motivo.nombre }}<br /> -->
                           {{ item.motivo }}
                         </div>
                       </template>

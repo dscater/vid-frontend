@@ -195,6 +195,7 @@
               :api="true"
               :url="apiUrl + '/admin/sucursal_productos/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

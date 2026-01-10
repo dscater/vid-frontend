@@ -210,6 +210,7 @@
               :api="true"
               :url="apiUrl + '/admin/devolucion_stocks/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

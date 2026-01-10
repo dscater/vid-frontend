@@ -225,6 +225,7 @@
               :url="apiUrl + '/admin/usuarios/paginado'"
               :token="authStore.token"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :syncOrderBy="'id'"
               :syncOrderAsc="'DESC'"

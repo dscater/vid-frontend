@@ -205,6 +205,7 @@
               :api="true"
               :url="apiUrl + '/admin/transferencias/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"

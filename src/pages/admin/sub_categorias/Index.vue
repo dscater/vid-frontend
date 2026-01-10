@@ -170,6 +170,7 @@
               :api="true"
               :url="apiUrl + '/admin/sub_categorias/paginado'"
               :numPages="5"
+              :perPage="20"
               :multiSearch="multiSearch"
               :token="authStore.token"
               :syncOrderBy="'id'"
