@@ -718,3 +718,10 @@ body.app-blank.login {
   background: #faeee4;
   color: black;
 }
+
+.descripcion_corta {
+  display: -webkit-box;
+  -webkit-line-clamp: 6; /* Número de líneas a mostrar */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

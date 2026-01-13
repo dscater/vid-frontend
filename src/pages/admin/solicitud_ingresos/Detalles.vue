@@ -307,6 +307,10 @@
     form.cantidad_total = total;
   };
 
+  const getCantidadRepuesta = (a, b) => {
+    return parseInt(a) - parseInt(b);
+  };
+
   onMounted(() => {});
 </script>
 
@@ -330,6 +334,40 @@
         <div class="row">
           <div class="col-12">
             <h4>{{ form.codigo }}</h4>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-md-4">
+            <label>Proveedor: </label>
+            {{ form.proveedor?.razon_social }}
+          </div>
+          <div class="col-md-4">
+            <label>Fecha de Ingreso: </label>
+            {{ form.fecha_ingreso_t }}
+          </div>
+          <div class="col-md-4">
+            <label>Hora de Ingreso: </label>
+            {{ form.hora_ingreso }}
+          </div>
+          <div class="col-md-4">
+            <label>Con Factura/Sin Factura: </label>
+            {{ form.cs_f }}
+          </div>
+          <div class="col-md-4">
+            <label>Tipo de Cambio: </label>
+            {{ form.tipo_cambio }}
+          </div>
+          <div class="col-md-4">
+            <label>Gastos adicionales: </label>
+            {{ form.gastos }}
+          </div>
+          <div class="col-md-4">
+            <label>Obsrevaciones: </label>
+            {{ form.observaciones }}
+          </div>
+          <div class="col-md-4">
+            <label>Descripción: </label>
+            {{ form.descripcion }}
           </div>
         </div>
         <div class="row">
@@ -473,6 +511,15 @@
                               :label="item.nombre"
                             ></el-option>
                           </el-select> -->
+                          <div>
+                            Cantidad repuesta:
+                            {{
+                              getCantidadRepuesta(
+                                item.cantidad,
+                                item.cantidad_fisica
+                              )
+                            }}
+                          </div>
                           <el-select
                             class="w-100"
                             v-model="item.motivo"
@@ -494,6 +541,15 @@
                       <template v-else>
                         VERIFICADO
                         <div v-if="item.motivo" class="text-muted border-top">
+                          <div>
+                            Cantidad repuesta:
+                            {{
+                              getCantidadRepuesta(
+                                item.cantidad,
+                                item.cantidad_fisica
+                              )
+                            }}
+                          </div>
                           <!-- {{ item.motivo.nombre }}<br /> -->
                           {{ item.motivo }}
                         </div>

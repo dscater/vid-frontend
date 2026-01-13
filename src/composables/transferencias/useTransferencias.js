@@ -28,9 +28,14 @@ export const useTransferencias = () => {
       oTransferencia.value.sucursal_destino = item.sucursal_destino;
       oTransferencia.value.user_sol = item.user_sol;
       oTransferencia.value.user_ap = item.user_ap;
+      oTransferencia.value.sucursal = item.sucursal;
+      oTransferencia.value.sucursal_destino = item.sucursal_destino;
+      oTransferencia.value.user_solicitante = item.user_solicitante;
+      oTransferencia.value.user_aprobo = item.user_aprobo;
       oTransferencia.value.cantidad_total = item.cantidad_total;
       oTransferencia.value.cantidad_total_v = item.cantidad_total_v;
       oTransferencia.value.fecha = item.fecha;
+      oTransferencia.value.fecha_t = item.fecha_t;
       oTransferencia.value.hora = item.hora;
       oTransferencia.value.observaciones = item.observaciones;
       oTransferencia.value.estado = item.estado;

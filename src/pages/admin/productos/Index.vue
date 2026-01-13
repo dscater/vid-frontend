@@ -241,6 +241,11 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #descripcion="{ item }">
+                <p class="descripcion_corta">
+                  {{ item.descripcion }}
+                </p>
+              </template>
               <template #imagen="{ item }">
                 <img
                   class="cursor-pointer"

@@ -24,8 +24,11 @@ export const useOrdenSalidas = () => {
     if (item) {
       oOrdenSalida.value.id = item.id;
       oOrdenSalida.value.sucursal_id = item.sucursal_id;
+      oOrdenSalida.value.sucursal = item.sucursal;
       oOrdenSalida.value.user_sol = item.user_sol;
       oOrdenSalida.value.user_ap = item.user_ap;
+      oOrdenSalida.value.user_solicitante = item.user_solicitante;
+      oOrdenSalida.value.user_aprobador = item.user_aprobador;
       oOrdenSalida.value.fecha = item.fecha;
       oOrdenSalida.value.hora = item.hora;
       oOrdenSalida.value.observaciones = item.observaciones;

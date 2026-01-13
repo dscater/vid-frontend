@@ -31,7 +31,9 @@ export const useSolicitudIngresos = () => {
       oSolicitudIngreso.value.nro = item.nro;
       oSolicitudIngreso.value.codigo = item.codigo;
       oSolicitudIngreso.value.proveedor_id = item.proveedor_id;
+      oSolicitudIngreso.value.proveedor = item.proveedor;
       oSolicitudIngreso.value.fecha_ingreso = item.fecha_ingreso;
+      oSolicitudIngreso.value.fecha_ingreso_t = item.fecha_ingreso_t;
       oSolicitudIngreso.value.hora_ingreso = item.hora_ingreso;
       oSolicitudIngreso.value.fecha_sis = item.fecha_sis;
       oSolicitudIngreso.value.hora_sis = item.hora_sis;

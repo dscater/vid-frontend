@@ -24,7 +24,9 @@ export const useDevolucionStocks = () => {
     if (item) {
       oDevolucionStock.value.id = item.id;
       oDevolucionStock.value.sucursal_id = item.sucursal_id;
+      oDevolucionStock.value.sucursal = item.sucursal;
       oDevolucionStock.value.fecha = item.fecha;
+      oDevolucionStock.value.fecha_t = item.fecha_t;
       oDevolucionStock.value.hora = item.hora;
       oDevolucionStock.value.observaciones = item.observaciones;
       oDevolucionStock.value.cantidad_total = item.cantidad_total;

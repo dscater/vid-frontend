@@ -189,6 +189,10 @@
   const cargarListas = () => {
     cargarSucursals();
   };
+
+  const getCantidadRepuesta = (a, b) => {
+    return parseInt(a) - parseInt(b);
+  };
   onMounted(() => {});
 </script>
 
@@ -212,6 +216,24 @@
         <div class="row">
           <div class="col-12">
             <h4>{{ form.codigo }}</h4>
+          </div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-md-4">
+            <label>Sucursal: </label>
+            {{ form.sucursal?.nombre }}
+          </div>
+          <div class="col-md-4">
+            <label>Usuario que solicita: </label>
+            {{ form.user_solicitante?.full_name }}
+          </div>
+          <div class="col-md-4">
+            <label>Usuario aprobador: </label>
+            {{ form.user_aprobador?.full_name }}
+          </div>
+          <div class="col-md-4">
+            <label>Observaciones: </label>
+            {{ form.observaciones }}
           </div>
         </div>
         <div class="row">
@@ -291,6 +313,15 @@
                               :label="item.nombre"
                             ></el-option>
                           </el-select> -->
+                          <div>
+                            Cantidad repuesta:
+                            {{
+                              getCantidadRepuesta(
+                                item.cantidad,
+                                item.cantidad_fisica
+                              )
+                            }}
+                          </div>
                           <el-select
                             class="w-100"
                             v-model="item.motivo"
@@ -313,6 +344,15 @@
                         VERIFICADO
 
                         <div v-if="item.motivo" class="text-muted border-top">
+                          <div>
+                            Cantidad repuesta:
+                            {{
+                              getCantidadRepuesta(
+                                item.cantidad,
+                                item.cantidad_fisica
+                              )
+                            }}
+                          </div>
                           <!-- {{ item.motivo.nombre }}<br /> -->
                           {{ item.motivo }}
                         </div></template

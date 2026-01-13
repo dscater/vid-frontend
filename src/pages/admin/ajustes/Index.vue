@@ -47,6 +47,11 @@
       sortable: true,
     },
     {
+      label: "ESTADO",
+      key: "estado",
+      sortable: true,
+    },
+    {
       label: "MOTIVO",
       key: "motivo",
       sortable: true,
@@ -57,8 +62,13 @@
       sortable: true,
     },
     {
-      label: "ESTADO",
-      key: "estado",
+      label: "SUCURSAL",
+      key: "sucursal",
+      sortable: true,
+    },
+    {
+      label: "REPONIENDO EL AJUSTE",
+      key: "nom_sucursal",
       sortable: true,
     },
     {
@@ -189,6 +199,25 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #cantidad="{ item }">
+                <div>
+                  <span v-if="item.cantidad < 0">
+                    {{ item.cantidad }}
+                    <span class="badge badge-success">MAS</span>
+                  </span>
+                  <span v-else>
+                    {{ item.cantidad }}
+                    <span class="badge badge-danger">MENOS</span>
+                  </span>
+                </div>
+              </template>
+              <template #sucursal="{ item }">
+                <div>
+                  <span>
+                    {{ item.sucursal_nom }}
+                  </span>
+                </div>
+              </template>
               <template #accion="{ item }">
                 <template
                   v-if="
