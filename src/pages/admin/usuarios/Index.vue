@@ -66,6 +66,12 @@
       key: "fono",
     },
     {
+      label: "TIPO",
+      key: "tipo",
+      keySortable: "tipo",
+      sortable: true,
+    },
+    {
       label: "ROLE",
       key: "role.nombre",
       keySortable: "roles.nombre",
@@ -248,8 +254,9 @@
               <template #accion="{ item }">
                 <template
                   v-if="
-                    authStore?.user?.permisos == '*' ||
-                    authStore?.user?.permisos.includes('usuarios.password')
+                    item.tipo == 'USUARIO' &&
+                    (authStore?.user?.permisos == '*' ||
+                      authStore?.user?.permisos.includes('usuarios.password'))
                   "
                 >
                   <el-tooltip

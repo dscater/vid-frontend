@@ -165,14 +165,16 @@
           <span class="text-danger">(*)</span> son obligatorios.
         </p>
         <div class="row">
-          <div class="col-md-4 offset-md-4">
+          <div
+            class="col-md-4 offset-md-2 text-right pt-4 mt-2 font-weight-bold"
+          >
             <span
               v-if="
                 form.tipo == 'DEVOLUCION DE STOCK' ||
                 form.tipo == 'SOLICITUD DE INGRESO'
               "
             >
-              REPONIENDO A ALMACÉN CENTRAL
+              ALMACÉN CENTRAL
             </span>
             <span
               v-if="
@@ -211,7 +213,7 @@
               </li>
             </ul>
           </div> -->
-          <div class="col-md-4 mt-2 offset-md-4">
+          <div class="col-md-4 mt-2">
             <label class="required">Cantidad</label>
             <el-input
               type="text"

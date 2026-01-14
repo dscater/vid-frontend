@@ -55,6 +55,7 @@
             confirmButton: "btn-success",
           },
         });
+        form.password = "";
         limpiarUsuario();
         emits("envio-formulario");
       })
@@ -115,6 +116,11 @@
   const cerrarFormulario = () => {
     formulario.value = false;
   };
+
+  const showPassword = ref(false);
+  const toggleShowPassword = () => {
+    showPassword.value = !showPassword.value;
+  };
 </script>
 
 <template>
@@ -150,13 +156,29 @@
             <div class="row">
               <div class="col-md-12">
                 <label>Ingresa la nueva contraseña:</label>
-                <input
-                  placeholder="Ingresa la nueva contraseña"
-                  class="form-control"
-                  autocomplete="false"
-                  v-model="form.password"
-                  type="password"
-                />
+                <div class="input-group">
+                  <input
+                    placeholder="Ingresa la nueva contraseña"
+                    class="form-control"
+                    autocomplete="false"
+                    v-model="form.password"
+                    :type="showPassword ? 'text' : 'password'"
+                  />
+                  <div class="input-group-append">
+                    <button
+                      class="btn btn-default"
+                      @click.prevent="toggleShowPassword"
+                    >
+                      <i
+                        class="fa"
+                        :class="{
+                          'fa-eye': showPassword,
+                          'fa-eye-slash': !showPassword,
+                        }"
+                      ></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </form>

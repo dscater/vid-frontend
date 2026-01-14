@@ -62,8 +62,8 @@
       sortable: true,
     },
     {
-      label: "SUCURSAL",
-      key: "sucursal",
+      label: "CÓDIGO DE MOVIMIENTO",
+      key: "codigo",
       sortable: true,
     },
     {

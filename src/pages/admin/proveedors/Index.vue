@@ -216,6 +216,11 @@
               :header-class="'bg__primary'"
               fixed-header
             >
+              <template #observaciones="{ item }">
+                <p class="descripcion_corta">
+                  {{ item.observaciones }}
+                </p>
+              </template>
               <template #estado="{ item }">
                 <span
                   class="badge text-sm"

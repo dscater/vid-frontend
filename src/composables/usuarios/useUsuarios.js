@@ -21,7 +21,7 @@ const oUsuario = ref({
   foto: "",
   carnet: "",
   password: "",
-  tipo: "",
+  tipo: "USUARIO",
   role_id: "",
   acceso: "" + 0,
   //   certificados
@@ -55,7 +55,7 @@ export const useUsuarios = () => {
       // oUsuario.value.foto = item.foto;
       // oUsuario.value.carnet = item.carnet;
       oUsuario.value.doc_adicional = item.doc_adicional;
-      oUsuario.value.password = item.password;
+      // oUsuario.value.password = item.password;
       oUsuario.value.tipo = item.tipo;
       oUsuario.value.role_id = item.role_id;
       oUsuario.value.acceso = "" + item.acceso;
@@ -91,9 +91,13 @@ export const useUsuarios = () => {
     oUsuario.value.carnet = "";
     oUsuario.value.doc_adicional = "";
     oUsuario.value.password = "";
-    oUsuario.value.tipo = "";
+    oUsuario.value.tipo = "USUARIO";
     oUsuario.value.role_id = "";
     oUsuario.value.acceso = "" + 0;
+    oUsuario.value.documentos = [];
+    oUsuario.value.documentos_eliminados = [];
+    oUsuario.value.certificados = [];
+    oUsuario.value.certificados_eliminados = [];
     oUsuario._method = "POST";
   };
 

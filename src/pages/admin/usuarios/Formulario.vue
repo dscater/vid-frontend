@@ -642,7 +642,6 @@
               }"
               v-model="form.tipo"
             >
-              <option value="">- Seleccione -</option>
               <option value="EMPLEADO">EMPLEADO</option>
               <option value="USUARIO">USUARIO</option>
             </select>

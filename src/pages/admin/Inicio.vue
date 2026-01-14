@@ -158,6 +158,7 @@
             <tr>
               <th>N°</th>
               <th>PRODUCTO</th>
+              <th>CÓDIGO</th>
               <th>UNIDAD</th>
               <th v-for="item in listSucursals">
                 {{ item.nombre }}
@@ -173,6 +174,7 @@
               <tr v-if="totalPorProducto(item_prod.id) > -1">
                 <td>{{ index_prod + 1 }}</td>
                 <td>{{ item_prod.nombre }}</td>
+                <td>{{ item_prod.codigo }}</td>
                 <td>{{ item_prod.unidad_medida.nombre }}</td>
                 <td v-for="item in listSucursals">
                   {{ stocks[item_prod.id]?.[item.id] ?? "..." }}
