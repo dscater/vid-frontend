@@ -926,6 +926,14 @@
                     <div class="mb-1">{{ oCliente.categoria }}</div>
                     <i class="fa fa-tag"></i>
                   </span>
+                  <a
+                    class="mx-1 badge text-md bg-info"
+                    :href="oCliente.ubicacion"
+                    target="_blank"
+                  >
+                    <div class="mb-1">{{ oCliente.categoria }}</div>
+                    <i class="fa fa-map-marker-alt"></i>
+                  </a>
                 </div>
                 <div class="col-12 text-center mt-1">
                   <span class="badge bg-info text-sm">
@@ -1035,6 +1043,7 @@
                     <table class="table table-bordered mb-0">
                       <thead class="bg-secundario">
                         <tr>
+                          <th>CÓDIGO</th>
                           <th>PRODUCTO</th>
                           <th style="min-width: 140px">UNIDAD MEDIDA</th>
                           <th width="100px">P/U Bs</th>
@@ -1050,6 +1059,7 @@
                           <tr
                             v-for="(item, index) in form.orden_venta_detalles"
                           >
+                            <td>{{ item.producto.codigo }}</td>
                             <td>{{ item.producto.nombre }}</td>
                             <td>
                               <select
@@ -1123,7 +1133,7 @@
                           </tr>
                         </template>
                         <tr class="bg2">
-                          <td class="font-weight-bold text-right" colspan="2">
+                          <td class="font-weight-bold text-right" colspan="3">
                             TOTALES
                           </td>
                           <td></td>
@@ -1252,6 +1262,13 @@
                           v-model="form.cre"
                           :true-value="1"
                           :false-value="0"
+                          v-if="oCliente && oCliente.credito == 1"
+                          >CRÉDITO</el-checkbox
+                        >
+                        <!-- <el-checkbox
+                          v-model="form.cre"
+                          :true-value="1"
+                          :false-value="0"
                           v-if="
                             oCliente &&
                             oCliente.credito == 1 &&
@@ -1261,7 +1278,7 @@
                               ))
                           "
                           >CRÉDITO</el-checkbox
-                        >
+                        > -->
                       </div>
                       <div class="col-md-12" v-if="form.con">
                         <small class="text-muted font-weight-bold"

@@ -25,6 +25,7 @@
       muestra_form.value = newValue;
       if (muestra_form.value) {
         cargarUsers();
+        cargarUsersVendedores();
         document.getElementsByTagName("body")[0].classList.add("modal-open");
         form = oSucursal.value;
         form.errors = null;
@@ -135,15 +136,29 @@
     document.getElementsByTagName("body")[0].classList.remove("modal-open");
   };
   const listUsers = ref([]);
+  const listUsersVendedores = ref([]);
   const cargarUsers = () => {
     api
       .get("/admin/usuarios/listado", {
         params: {
           usuarios: true,
+          tipo: "ENCARGADO",
         },
       })
       .then((response) => {
         listUsers.value = response.data.usuarios;
+      });
+  };
+  const cargarUsersVendedores = () => {
+    api
+      .get("/admin/usuarios/listado", {
+        params: {
+          usuarios: true,
+          tipo: "VENDEDOR",
+        },
+      })
+      .then((response) => {
+        listUsersVendedores.value = response.data.usuarios;
       });
   };
 
@@ -272,6 +287,34 @@
             >
               <li class="parsley-required">
                 {{ form.errors?.user_id[0] }}
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4 mt-2">
+            <label class="required">Vendedores</label>
+            <el-select
+              :class="{
+                'parsley-error': form.errors?.vendedores,
+              }"
+              v-model="form.vendedores"
+              placeholder="Seleccionar"
+              filterable
+              multiple
+            >
+              <el-option
+                v-for="item in listUsersVendedores"
+                :key="item.id"
+                :value="item.id"
+                :label="item.full_name"
+              >
+              </el-option>
+            </el-select>
+            <ul
+              v-if="form.errors?.vendedores"
+              class="d-block text-danger list-unstyled"
+            >
+              <li class="parsley-required">
+                {{ form.errors?.vendedores[0] }}
               </li>
             </ul>
           </div>

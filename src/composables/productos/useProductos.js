@@ -14,6 +14,8 @@ const oProducto = ref({
   unidad_medida_id: "",
   estado: 1,
   imagen: "",
+  url_imagen: "",
+  txt_imagen: "",
   _method: "POST",
 });
 
@@ -32,7 +34,9 @@ export const useProductos = () => {
       oProducto.value.ppp = item.ppp;
       oProducto.value.unidad_medida_id = item.unidad_medida_id;
       oProducto.value.estado = item.estado;
-      oProducto.value.imagen = item.imagen;
+      oProducto.value.imagen = null;
+      oProducto.value.url_imagen = item.url_imagen;
+      oProducto.value.txt_imagen = item.txt_imagen;
       oProducto.value._method = "PUT";
       return oProducto;
     }
@@ -53,6 +57,8 @@ export const useProductos = () => {
     oProducto.value.unidad_medida_id = "";
     oProducto.value.estado = 1;
     oProducto.value.imagen = "";
+    oProducto.value.url_imagen = "";
+    oProducto.value.txt_imagen = "";
     oProducto.value._method = "POST";
   };
 

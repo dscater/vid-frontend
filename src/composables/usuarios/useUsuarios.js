@@ -53,7 +53,11 @@ export const useUsuarios = () => {
       oUsuario.value.ubicacion = item.ubicacion;
       oUsuario.value.correo = item.correo;
       // oUsuario.value.foto = item.foto;
+      oUsuario.value.url_foto = item.url_foto;
+      oUsuario.value.txt_foto = item.txt_foto;
       // oUsuario.value.carnet = item.carnet;
+      oUsuario.value.url_carnet = item.url_carnet;
+      oUsuario.value.txt_carnet = item.txt_carnet;
       oUsuario.value.doc_adicional = item.doc_adicional;
       // oUsuario.value.password = item.password;
       oUsuario.value.tipo = item.tipo;
@@ -88,7 +92,11 @@ export const useUsuarios = () => {
     oUsuario.value.ubicacion = "";
     oUsuario.value.correo = "";
     oUsuario.value.foto = "";
+    oUsuario.value.url_foto = "";
+    oUsuario.value.txt_foto = "";
     oUsuario.value.carnet = "";
+    oUsuario.value.url_carnet = "";
+    oUsuario.value.txt_carnet = "";
     oUsuario.value.doc_adicional = "";
     oUsuario.value.password = "";
     oUsuario.value.tipo = "USUARIO";

@@ -16,6 +16,9 @@
   import api, { setAuthToken } from "../../../composables/axios";
   import { useAuthStore } from "../../../stores/authStore";
   import { isArray } from "highcharts";
+  // TOAST
+  import { toast } from "vue3-toastify";
+  import "vue3-toastify/dist/index.css";
   const apiUrl = import.meta.env.VITE_API_URL;
   const urlServer = import.meta.env.VITE_URL_SERVER + "/";
   const authStore = useAuthStore();
@@ -85,8 +88,18 @@
   const foto = ref(null);
 
   function cargaArchivo(e, key) {
+    console.log("AAA");
     form[key] = null;
-    form[key] = e.target.files[0];
+    form["url_" + key] = "";
+    form["txt_" + key] = "";
+    const file = e.target.files[0];
+    if (file) {
+      console.log("BBB");
+      console.log(file);
+      form[key] = file;
+      form["url_" + key] = URL.createObjectURL(file);
+      form["txt_" + key] = file.name;
+    }
   }
 
   const tituloDialog = computed(() => {
@@ -220,6 +233,20 @@
       })
       .catch((error) => {
         console.log(error);
+      });
+  };
+
+  const eliminarFoto = (col) => {
+    api
+      .post("/admin/usuarios/eliminarFotoCarnet/" + form.id, {
+        col: col,
+        _method: "put",
+      })
+      .then((response) => {
+        form["url_" + col] = "";
+        form["txt_" + col] = "";
+        form[col] = "";
+        toast.success("Imagen eliminada");
       });
   };
 
@@ -567,12 +594,27 @@
               ref="foto"
               @change="cargaArchivo($event, 'foto')"
             />
-
             <ul v-if="form.errors?.foto" class="list-unstyled text-danger">
               <li class="parsley-required">
                 {{ form.errors?.foto[0] }}
               </li>
             </ul>
+            <div
+              v-if="form.url_foto && form.txt_foto"
+              class="text-center contenedor_img"
+            >
+              <button
+                class="btn btn-danger btn-xs"
+                @click.prevent="eliminarFoto('foto')"
+              >
+                X
+              </button>
+              <img :src="form.url_foto" width="120px" />
+              <p>{{ form.txt_foto ?? "" }}</p>
+            </div>
+            <div v-else class="pt-3 text-center">
+              <span class="text-muted font-weight-bold">SIN FOTO</span>
+            </div>
           </div>
           <div class="col-md-6 mb-2">
             <label>Carnet</label>
@@ -585,12 +627,27 @@
               ref="carnet"
               @change="cargaArchivo($event, 'carnet')"
             />
-
             <ul v-if="form.errors?.carnet" class="list-unstyled text-danger">
               <li class="parsley-required">
                 {{ form.errors?.carnet[0] }}
               </li>
             </ul>
+            <div
+              v-if="form.url_carnet && form.txt_carnet"
+              class="text-center contenedor_img"
+            >
+              <button
+                class="btn btn-danger btn-xs"
+                @click.prevent="eliminarFoto('carnet')"
+              >
+                X
+              </button>
+              <img :src="form.url_carnet" width="120px" />
+              <p>{{ form.txt_carnet ?? "" }}</p>
+            </div>
+            <div v-else class="pt-3 text-center">
+              <span class="text-muted font-weight-bold">SIN CARNET</span>
+            </div>
           </div>
           <div class="col-md-6 mb-2">
             <label class=""
@@ -717,3 +774,15 @@
     </template>
   </MiModal>
 </template>
+<style scoped>
+  .contenedor_img {
+    width: 120px;
+    margin: auto;
+    position: relative;
+  }
+  .contenedor_img button {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>

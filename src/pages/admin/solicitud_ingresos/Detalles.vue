@@ -376,6 +376,7 @@
               <thead class="bg-secundario">
                 <tr>
                   <th width="1%">NRO.</th>
+                  <th width="90px">CÓDIGO</th>
                   <th>PRODUCTO</th>
                   <th width="60px">CANTIDAD</th>
                   <th width="60px">CANTIDAD FÍSICA</th>
@@ -404,6 +405,7 @@
                 <template v-if="form.solicitud_ingreso_detalles.length > 0">
                   <tr v-for="(item, index) in form.solicitud_ingreso_detalles">
                     <td>{{ index + 1 }}</td>
+                    <td>{{ item.producto.codigo }}</td>
                     <td>{{ item.producto.nombre }}</td>
                     <td>
                       {{ item.cantidad }}

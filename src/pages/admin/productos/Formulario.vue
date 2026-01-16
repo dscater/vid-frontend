@@ -3,6 +3,9 @@
   import { useProductos } from "../../../composables/productos/useProductos";
   import { watch, ref, computed, onMounted, nextTick, reactive } from "vue";
   import api from "../../../composables/axios.js";
+  // TOAST
+  import { toast } from "vue3-toastify";
+  import "vue3-toastify/dist/index.css";
   const props = defineProps({
     muestra_formulario: {
       type: Boolean,
@@ -61,7 +64,14 @@
   const imagen = ref(null);
   function cargaArchivo(e, key) {
     form[key] = null;
-    form[key] = e.target.files[0];
+    form["url_" + key] = null;
+    form["text_" + key] = null;
+    const file = e.target.files[0];
+    if (file) {
+      form[key] = file;
+      form["url_" + key] = URL.createObjectURL(file);
+      form["txt_" + key] = file.name;
+    }
   }
 
   const enviarFormulario = () => {
@@ -101,6 +111,8 @@
             confirmButton: "btn-success",
           },
         });
+
+        imagen.value.value = null;
         limpiarProducto();
         emits("envio-formulario");
       })
@@ -177,6 +189,20 @@
     cargarCategorias();
     cargarMarcas();
     cargarUnidadMedidas();
+  };
+
+  const eliminarFoto = (col) => {
+    api
+      .post("/admin/productos/eliminarImagen/" + form.id, {
+        col: col,
+        _method: "put",
+      })
+      .then((response) => {
+        form["url_" + col] = "";
+        form["txt_" + col] = "";
+        form[col] = "";
+        toast.success("Imagen eliminada");
+      });
   };
 
   onMounted(() => {});
@@ -417,12 +443,27 @@
               ref="imagen"
               @change="cargaArchivo($event, 'imagen')"
             />
-
             <ul v-if="form.errors?.imagen" class="list-unstyled text-danger">
               <li class="parsley-required">
                 {{ form.errors?.imagen[0] }}
               </li>
             </ul>
+            <div
+              v-if="form.url_imagen && form.txt_imagen"
+              class="text-center contenedor_img"
+            >
+              <button
+                class="btn btn-danger btn-xs"
+                @click.prevent="eliminarFoto('imagen')"
+              >
+                X
+              </button>
+              <img :src="form.url_imagen" width="120px" />
+              <p>{{ form.txt_imagen ?? "" }}</p>
+            </div>
+            <div v-else class="pt-3 text-center">
+              <span class="text-muted font-weight-bold">SIN IMAGEN</span>
+            </div>
           </div>
         </div>
       </form>
@@ -445,3 +486,15 @@
     </template>
   </MiModal>
 </template>
+<style scoped>
+  .contenedor_img {
+    width: 120px;
+    margin: auto;
+    position: relative;
+  }
+  .contenedor_img button {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>
