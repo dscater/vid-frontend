@@ -49,7 +49,16 @@
     (newValue) => {
       form = newValue;
       verificarOrdenVenta();
-    }
+    },
+  );
+
+  watch(
+    () => form.sucursal_id,
+    (newValue) => {
+      if (newValue) {
+        verificarMontoMaximo();
+      }
+    },
   );
 
   const textBtnDescuento = computed(() => {
@@ -374,7 +383,7 @@
       if (connectivityStore.isOnline) {
         response = await api.get(
           "/admin/clientes/listadoSelectElementUi" +
-            `?search=${encodeURIComponent(query)}`
+            `?search=${encodeURIComponent(query)}`,
         );
       } else {
         response = { data: { clientes: [] } };
@@ -397,8 +406,6 @@
 
   const oCliente = ref(null);
   const detectarCliente = async (value) => {
-    console.log("CLIENTE");
-    console.log(value);
     oCliente.value = null;
     if (connectivityStore.isOnline) {
       api.get("/admin/clientes/" + value).then((response) => {
@@ -440,7 +447,7 @@
       if (connectivityStore.isOnline) {
         response = await api.get(
           "/admin/productos/byCodigoListSelectElementUi" +
-            `?search=${encodeURIComponent(query)}`
+            `?search=${encodeURIComponent(query)}`,
         );
       } else {
         response = { data: { productos: [] } };
@@ -499,7 +506,7 @@
           }
           const prod = response.data;
           const existe = form.orden_venta_detalles.filter(
-            (elem) => elem.producto_id === prod.id
+            (elem) => elem.producto_id === prod.id,
           );
           if (existe.length > 0) {
             toast.info("Ese producto ya fue agregado");
@@ -508,7 +515,7 @@
 
           let descuento = getDescuentoProducto(
             parseFloat(nuevoProducto.value.cantidad),
-            prod
+            prod,
           );
           const subtotal =
             parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
@@ -546,7 +553,7 @@
     } else {
       // OFFLINE
       const prod = await productoStore.getProductoByCodigo(
-        nuevoProducto.value.codigoProducto
+        nuevoProducto.value.codigoProducto,
       );
       if (!prod) {
         Swal.fire({
@@ -560,7 +567,7 @@
         });
       }
       const existe = form.orden_venta_detalles.filter(
-        (elem) => elem.producto_id === prod.id
+        (elem) => elem.producto_id === prod.id,
       );
       if (existe.length > 0) {
         toast.info("Ese producto ya fue agregado");
@@ -569,14 +576,14 @@
 
       let descuento = getDescuentoProducto(
         parseFloat(nuevoProducto.value.cantidad),
-        prod
+        prod,
       );
       const subtotal =
         parseFloat(nuevoProducto.value.cantidad) * parseFloat(prod.precio) -
         descuento;
 
       const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
-        prod.unidad_medida_id
+        prod.unidad_medida_id,
       );
       form.orden_venta_detalles.push({
         id: 0,
@@ -618,7 +625,7 @@
     form.orden_venta_detalles[index].unidad_medida_id = e.target.value;
     if (!connectivityStore.isOnline) {
       const unidad_medida = await unidadMedidaStore.getUnidadMedidaById(
-        parseInt(e.target.value)
+        parseInt(e.target.value),
       );
       form.orden_venta_detalles[index].unidad_medida = unidad_medida;
     }
@@ -640,7 +647,7 @@
 
     let descuento = getDescuentoProducto(
       parseFloat(value),
-      form.orden_venta_detalles[index].producto
+      form.orden_venta_detalles[index].producto,
     );
 
     form.orden_venta_detalles[index].subtotal_f =
@@ -815,7 +822,7 @@
         //
         const total = await ordenVentaStore.totalPorFechaSucursal(
           fecha,
-          form.sucursal_id
+          form.sucursal_id,
         );
 
         const sucursal = await sucursalStore.getSucursalById(form.sucursal_id);
@@ -854,7 +861,6 @@
                 placeholder="Seleccione"
                 no-data-text="Sin datos"
                 no-match-text="No se encontró"
-                @change="verificarMontoMaximo"
               >
                 <el-option
                   v-for="item in listSucursals"
@@ -912,7 +918,7 @@
               <div class="row mt-2" v-if="oCliente">
                 <div class="col-12 text-center">
                   <span class="mx-1 badge bg-secundario text-md">
-                    <div class="mb-1">{{ oCliente.rank }}</div>
+                    <div class="mb-1">{{ oCliente.ranking }}</div>
                     <i class="fa fa-flag-checkered"></i>
                   </span>
                   <span
@@ -1205,7 +1211,7 @@
                             form.verificado == 0 &&
                             (authStore?.user?.permisos == '*' ||
                               authStore?.user?.permisos.includes(
-                                'orden_ventas.aprobar_descuentos'
+                                'orden_ventas.aprobar_descuentos',
                               ))
                           "
                           class="btn btn-success btn-sm w-100 mt-1 text-xs"
@@ -1263,7 +1269,10 @@
                           :true-value="1"
                           :false-value="0"
                           v-if="oCliente && oCliente.credito == 1"
-                          >CRÉDITO</el-checkbox
+                          >CRÉDITO ({{
+                            oCliente.total_credito
+                          }}
+                          Bs)</el-checkbox
                         >
                         <!-- <el-checkbox
                           v-model="form.cre"
