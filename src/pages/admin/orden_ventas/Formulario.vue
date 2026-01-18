@@ -936,8 +936,9 @@
                     class="mx-1 badge text-md bg-info"
                     :href="oCliente.ubicacion"
                     target="_blank"
+                    title="Ubicación"
                   >
-                    <div class="mb-1">{{ oCliente.categoria }}</div>
+                    <div class="mb-1">U</div>
                     <i class="fa fa-map-marker-alt"></i>
                   </a>
                 </div>

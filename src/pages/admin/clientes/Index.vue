@@ -2,7 +2,7 @@
   import Content from "../../../Components/Content.vue";
   import MiTable from "../../../Components/MiTable.vue";
   import { useClientes } from "../../../composables/clientes/useClientes";
-  import { ref, onMounted, onBeforeMount } from "vue";
+  import { ref, onMounted, onBeforeMount, computed } from "vue";
   import { useAppStore } from "../../../stores/aplicacion/appStore";
   import Formulario from "./Formulario.vue";
   import Parametros from "./Parametros.vue";
@@ -40,7 +40,7 @@
     },
     {
       label: "RANK",
-      key: "rank",
+      key: "ranking",
       sortable: true,
       width: "1%",
       fixed: true,
@@ -172,6 +172,36 @@
       }
     });
   };
+
+  const recalculando = ref(false);
+  const txtBtnRecalcular = computed(() => {
+    if (recalculando.value) {
+      return `<i class="fa fa-spin fa-spinner"></i> Recalculando...`;
+    }
+
+    return `<i class="fa fa-list"></i> Recalcular Ranking`;
+  });
+
+  const recalcularRanking = () => {
+    recalculando.value = true;
+    api
+      .post("/admin/parametro_clientes/recalcularRanking")
+      .then((response) => {
+        Swal.fire({
+          icon: "success",
+          title: "Correcto",
+          html: `<strong>Se recálculo el ranking de clientes</strong>`,
+          confirmButtonText: `Aceptar`,
+          customClass: {
+            confirmButton: "btn-success",
+          },
+        });
+        updateDatatable();
+      })
+      .finally(() => {
+        recalculando.value = false;
+      });
+  };
 </script>
 <template>
   <Content>
@@ -213,7 +243,7 @@
                 connectivityStore.isOnline &&
                 (authStore?.user?.permisos == '*' ||
                   authStore?.user?.permisos.includes(
-                    'clientes.parametro_clientes'
+                    'clientes.parametro_clientes',
                   ))
               "
               type="button"
@@ -222,6 +252,20 @@
             >
               <i class="fa fa-list"></i> Parametros Ranking
             </button>
+            <button
+              v-if="
+                connectivityStore.isOnline &&
+                (authStore?.user?.permisos == '*' ||
+                  authStore?.user?.permisos.includes(
+                    'clientes.parametro_clientes',
+                  ))
+              "
+              type="button"
+              class="btn btn-info ml-1"
+              @click="recalcularRanking"
+              :disabled="recalculando"
+              v-html="txtBtnRecalcular"
+            ></button>
           </div>
           <div class="col-md-6 my-1">
             <div class="row justify-content-end">
