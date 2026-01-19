@@ -395,7 +395,7 @@
       <button
         v-if="
           authStore?.user?.permisos == '*' ||
-          authStore?.user?.permisos.includes('cuenta_cobrars.pago')
+          authStore?.user?.permisos.includes('orden_ventas.pago')
         "
         type="button"
         class="btn btn-success"
