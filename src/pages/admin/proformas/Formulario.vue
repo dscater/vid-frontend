@@ -49,7 +49,7 @@
     (newValue) => {
       form = newValue;
       verificarProforma();
-    }
+    },
   );
 
   const textBtn = computed(() => {
@@ -228,7 +228,7 @@
         if (connectivityStore.isOnline) {
           response = await api.get(
             "/admin/clientes/listadoSelectElementUi" +
-              `?search=${encodeURIComponent(query)}`
+              `?search=${encodeURIComponent(query)}`,
           );
         } else {
           response = { data: { clientes: [] } };
@@ -296,7 +296,7 @@
       if (connectivityStore.isOnline) {
         response = await api.get(
           "/admin/productos/byCodigoListSelectElementUi" +
-            `?search=${encodeURIComponent(query)}`
+            `?search=${encodeURIComponent(query)}`,
         );
       } else {
         response = { data: { productos: [] } };
@@ -394,7 +394,7 @@
           producto_id: value,
           sucursal_id: element,
         },
-      })
+      }),
     );
 
     const responses = await Promise.all(requests);
@@ -420,7 +420,7 @@
           producto_id: value,
           sucursal_id: sucursal_id,
         },
-      })
+      }),
     );
 
     const responses = await Promise.all(requests);
@@ -520,7 +520,7 @@
             parseFloat(elem_detalle.cantidad) *
             parseFloat(form.proforma_productos[index_col].precio);
         }
-      }
+      },
     );
     form.proforma_detalles[fila].total = total == 0 ? "" : total;
     form.proforma_detalles[fila].saldo = total == 0 ? "" : total;
@@ -581,7 +581,7 @@
     form.proforma_productos[index_col].suma = total_sucursal;
     if (total > total_sucursal) {
       toast.error(
-        "Se supero el stock disponible del producto " + nombre_producto
+        "Se supero el stock disponible del producto " + nombre_producto,
       );
       stockSuperado.value = true;
     }
@@ -633,7 +633,7 @@
       }
       if (!item.total) {
         toast.error(
-          `No se detectó ningún producto agregado en la Fila ${index + 1}`
+          `No se detectó ningún producto agregado en la Fila ${index + 1}`,
         );
         error = false;
       }
@@ -670,6 +670,85 @@
       colVerifica.value
     ].verificado = verificado;
     detectaCierre();
+  };
+
+  const generarOrdenVenta = (id, index) => {
+    const sucursales = form.sucursal_ids;
+    if (sucursales.length == 0) {
+      toast.error(
+        "Debe seleccionar al menos una sucursal para generar la Orden de Venta",
+      );
+      return;
+    }
+
+    // mostrar mensaje informando que se marcara como atendido y no se podra modificar
+    Swal.fire({
+      title: "Generar Orden de Venta",
+      html: `<strong>Al generar la Orden de Venta, la Proforma se marcará como atendida y no podrá ser modificada. ¿Desea continuar?</strong>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, Generar Orden",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: "btn-success",
+        cancelButton: "btn-danger",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (sucursales.length > 1) {
+          // armar un select para seleccionar la sucursal para generar una orden de venta
+          let options = "";
+          sucursales.forEach((sucursal_id) => {
+            const sucursal = listSucursals.value.find(
+              (elem) => elem.id == sucursal_id,
+            );
+            if (sucursal) {
+              options += `<option value="${sucursal.id}">${sucursal.nombre}</option>`;
+            }
+          });
+          Swal.fire({
+            title: "Seleccionar Sucursal",
+            html: `
+          <select id="sucursal_select" class="form-control" style="width: 100%;">
+            ${options}
+          </select>
+        `,
+            showCancelButton: true,
+            confirmButtonText: "Generar Orden Venta",
+            cancelButtonText: "Cancelar",
+            preConfirm: () => {
+              const sucursal_id =
+                Swal.getPopup().querySelector("#sucursal_select").value;
+              return sucursal_id;
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const sucursal_id = result.value;
+              // usar funcion crearOrdenVenta con sucursal_id
+              crearOrdenVenta(id, index, sucursal_id);
+            }
+          });
+        } else {
+          // usar funcion crearOrdenVenta
+          crearOrdenVenta(id, index, sucursales[0]);
+        }
+      }
+    });
+  };
+
+  const crearOrdenVenta = (id, index, sucursal_id) => {
+    api
+      .post("/admin/proformas/crearOrdenVenta", {
+        proforma_detalle_id: id,
+        sucursal_id: sucursal_id,
+      })
+      .then((response) => {
+        // redireccionar a la orden de venta editar
+        router.push({
+          name: "orden_ventas.edit",
+          params: { id: response.data.orden_venta.id },
+        });
+      });
   };
 
   onUnmounted(() => {
@@ -961,6 +1040,14 @@
                         </div>
                       </td>
                       <td>
+                        <button
+                          v-if="form.id != 0"
+                          class="btn btn-primary btn-sm"
+                          title="Generar Orden Venta"
+                          @click.prevent="generarOrdenVenta(item.id, index)"
+                        >
+                          <i class="fa fa-clipboard-list"></i>
+                        </button>
                         <button
                           class="btn btn-danger btn-sm"
                           @click.prevent="quitarDetalle(item.id, index)"

@@ -79,7 +79,7 @@
     if (enviando.value) {
       return `<i class="fa fa-spin fa-spinner"></i> Enviando...`;
     }
-    if (form.id == 0) {
+    if (form.id == 0 || form.verificado == 5) {
       return `<i class="fa fa-save"></i> Finalizar Orden de Venta`;
     }
     return `<i class="fa fa-edit"></i> Actualizar Orden de Venta`;
@@ -89,7 +89,7 @@
     let tituloConfirmar = "¿Completar Orden de Venta?";
     let mensajeConfirmar = `<strong>Una vez confirmada no se podrá modificar</strong>`;
 
-    if (form.id != 0) {
+    if (form.id != 0 && form.verificado != 5) {
       tituloConfirmar = "¿Modificar Orden de Venta?";
       mensajeConfirmar = `<strong>Se guardarán las modificaciones de la Orden de Venta</strong>`;
       if (form.solicitud_sw == 1) {
@@ -1408,7 +1408,7 @@
                     <button
                       v-if="
                         form.solicitud_descuento == 0 &&
-                        monto_maximo >= total_vendido
+                        parseFloat(monto_maximo) >= parseFloat(total_vendido)
                       "
                       class="btn btn-primary w-100"
                       v-html="textBtn"

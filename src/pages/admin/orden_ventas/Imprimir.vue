@@ -67,6 +67,20 @@
   async function imprimirContenedor() {
     const elemento = document.getElementById("principal");
 
+    const contenedores = document.querySelectorAll(".contenedor_factura");
+
+    if (contenedores.length < 2) return;
+
+    const altoHojaPx = 1122; // aprox carta a scale 2
+    const mitadHoja = altoHojaPx / 2;
+    const primerContenedor = contenedores[0];
+
+    console.log("alto primer contenedor:", primerContenedor.offsetHeight);
+    console.log("mitad hoja:", mitadHoja);
+    if (primerContenedor.offsetHeight > mitadHoja) {
+      contenedores[1].classList.add("page-break");
+    }
+
     const opt = {
       margin: 0,
       image: { type: "jpeg", quality: 0.98 },
@@ -102,6 +116,10 @@
         padding: 10px;
         width: ${minWidth};
         font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .contenedor_factura.page-break{
+         page-break-before: always;
       }
 
       .contenedor_factura .centreado {
@@ -153,6 +171,13 @@
         text-align: right;
         flex: 1;
         font-weight: bold;
+      }
+
+      .contenedor_factura .header .total .txtNombreImp {
+        font-weight: bold;
+        display: block;
+        color: rgb(238, 74, 74);
+        margin-bottom: 10px;
       }
 
       .contenedor_factura .header .total .monto {
@@ -273,6 +298,127 @@
                                 </div>
                               </div>
                               <div class="total">
+                                <span class="txtNombreImp">COPIA VENDEDOR</span>
+                                <span class="monto"
+                                  >Bs {{ oOrdenVenta.total_f }}</span
+                                ><br />
+                                <span class="nro">{{
+                                  oOrdenVenta.codigo
+                                }}</span>
+                              </div>
+                            </div>
+                            <div class="info">
+                              <span class="tbold">Señor(a):</span>
+                              {{ oOrdenVenta.cliente.razon_social }}
+                            </div>
+                            <div class="contenido">
+                              <table border="1">
+                                <thead>
+                                  <tr>
+                                    <th width="20px">CANTIDAD</th>
+                                    <th>DESCRIPCIÓN</th>
+                                    <th>P. UNIT Bs</th>
+                                    <th>SUBTOTAL Bs</th>
+                                    <th>DESCUENTO Bs</th>
+                                    <th>TOTAL Bs</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr
+                                    v-for="item in oOrdenVenta.orden_venta_detalles"
+                                  >
+                                    <td class="centreado">
+                                      {{ item.cantidad }}
+                                    </td>
+                                    <td>
+                                      {{ item.producto.nombre }}
+                                      {{ item.unidad_medida.nombre }}
+                                    </td>
+                                    <td class="derecha">{{ item.precio }}</td>
+                                    <td class="derecha">{{ item.subtotal }}</td>
+                                    <td class="derecha">
+                                      {{ item.descuento }}
+                                    </td>
+                                    <td class="derecha">
+                                      {{ item.subtotal_f }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4"></td>
+                                    <td class="tbold derecha">TOTAL</td>
+                                    <td class="tbold derecha">
+                                      Bs {{ oOrdenVenta.total_st }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4"></td>
+                                    <td class="tbold derecha">DESCUENTO</td>
+                                    <td class="tbold derecha">
+                                      Bs {{ oOrdenVenta.descuento ?? "0.00" }}
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4">Son: {{ literal }}</td>
+                                    <td class="tbold derecha">TOTAL FINAL</td>
+                                    <td class="tbold derecha">
+                                      Bs {{ oOrdenVenta.total_f }}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <div class="info_pagos">
+                                <table>
+                                  <tbody>
+                                    <tr>
+                                      <td>A cuenta:</td>
+                                      <td>Bs {{ oOrdenVenta.cancelado }}</td>
+                                      <td>Saldo:</td>
+                                      <td>Bs {{ saldoRestante }}</td>
+                                      <td>Fecha:</td>
+                                      <td>{{ oOrdenVenta.fecha_t }}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div class="final">
+                                <table>
+                                  <tbody>
+                                    <tr>
+                                      <td>ENTREGUE PRODUCTO CONFORME</td>
+                                      <td>RECIBÍ PRODUCTO CONFORME</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="contenedor_factura">
+                            <div class="header">
+                              <div class="logo">
+                                <img
+                                  :src="
+                                    configuracionStore.oConfiguracion.logo_b64
+                                  "
+                                  alt=""
+                                />
+                                <br />
+                                Fecha: {{ oOrdenVenta.fecha_ct }}
+                              </div>
+                              <div class="dir">
+                                Av. Juan Pablo II N°2780 Zona 16 de Julio<br />Telf.:
+                                2840248 Cel.: 73636537 - 76571953 - 767666777
+                                <div class="tipo">
+                                  <div>
+                                    NOTA DE ENTREGA
+                                    <span class="check active">X</span>
+                                  </div>
+                                  <div>
+                                    PROFORMA <span class="check"></span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="total">
+                                <span class="txtNombreImp">COPIA CLIENTE</span>
                                 <span class="monto"
                                   >Bs {{ oOrdenVenta.total_f }}</span
                                 ><br />
@@ -416,6 +562,10 @@
     font-family: Arial, Helvetica, sans-serif;
   }
 
+  .contenedor_factura.page-break {
+    page-break-before: always;
+  }
+
   .contenedor_factura .centreado {
     text-align: center;
   }
@@ -465,6 +615,13 @@
     text-align: right;
     flex: 1;
     font-weight: bold;
+  }
+
+  .contenedor_factura .header .total .txtNombreImp {
+    font-weight: bold;
+    display: block;
+    color: rgb(238, 74, 74);
+    margin-bottom: 10px;
   }
 
   .contenedor_factura .header .total .monto {

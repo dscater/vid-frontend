@@ -39,7 +39,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -48,7 +48,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const tituloDialog = computed(() => {
@@ -203,7 +203,7 @@
         }
         const prod = response.data;
         const existe = form.solicitud_ingreso_detalles.filter(
-          (elem) => elem.producto_id === prod.id
+          (elem) => elem.producto_id === prod.id,
         );
         if (existe.length > 0) {
           toast.info("Ese producto ya fue agregado");
@@ -314,7 +314,7 @@
       let response = null;
       response = await api.get(
         "/admin/productos/byCodigoListSelectElementUi" +
-          `?search=${encodeURIComponent(query)}`
+          `?search=${encodeURIComponent(query)}`,
       );
       const data = response ? response.data.productos : [];
       // Suponiendo que data es un array de productos [{id, nombre}]
@@ -565,6 +565,7 @@
             <table class="table table-bordered mb-0">
               <thead class="bg-secundario">
                 <tr>
+                  <th>CÓDIGO</th>
                   <th>PRODUCTO</th>
                   <!-- <th width="140px">C/U</th> -->
                   <th width="140px">CANTIDAD</th>
@@ -575,6 +576,7 @@
               <tbody>
                 <template v-if="form.solicitud_ingreso_detalles.length > 0">
                   <tr v-for="(item, index) in form.solicitud_ingreso_detalles">
+                    <td>{{ item.producto.codigo }}</td>
                     <td>{{ item.producto.nombre }}</td>
                     <!-- <td>
                       <input
@@ -617,7 +619,7 @@
                   </tr>
                 </template>
                 <tr>
-                  <td class="font-weight-bold text-right" colspan="">
+                  <td class="font-weight-bold text-right" colspan="2">
                     TOTALES
                   </td>
                   <td>{{ form.cantidad_total }}</td>

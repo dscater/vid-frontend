@@ -40,7 +40,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -49,7 +49,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const tituloDialog = computed(() => {
@@ -214,7 +214,7 @@
         }
         const prod = response.data;
         const existe = form.orden_salida_detalles.filter(
-          (elem) => elem.producto_id === prod.id
+          (elem) => elem.producto_id === prod.id,
         );
         if (existe.length > 0) {
           toast.info("Ese producto ya fue agregado");
@@ -252,7 +252,7 @@
     oUser.value = null;
     if (form.sucursal_id) {
       const user_id = listSucursals.value.filter(
-        (elem) => elem.id === form.sucursal_id
+        (elem) => elem.id === form.sucursal_id,
       )[0].user_id;
 
       api.get("/admin/usuarios/show/" + user_id).then((response) => {
@@ -348,7 +348,7 @@
       let response = null;
       response = await api.get(
         "/admin/productos/byCodigoListSelectElementUi" +
-          `?search=${encodeURIComponent(query)}`
+          `?search=${encodeURIComponent(query)}`,
       );
       const data = response ? response.data.productos : [];
       // Suponiendo que data es un array de productos [{id, nombre}]
@@ -525,6 +525,7 @@
               <table class="table table-bordered mb-0">
                 <thead class="bg-secundario">
                   <tr>
+                    <th>CÓDIGO</th>
                     <th>PRODUCTO</th>
                     <th width="100px">C/U</th>
                     <th width="180px">CANTIDAD</th>
@@ -535,6 +536,7 @@
                 <tbody>
                   <template v-if="form.orden_salida_detalles.length > 0">
                     <tr v-for="(item, index) in form.orden_salida_detalles">
+                      <td>{{ item.producto.codigo }}</td>
                       <td>{{ item.producto.nombre }}</td>
                       <td>{{ item.costo }}</td>
                       <td>
@@ -577,7 +579,7 @@
                     </tr>
                   </template>
                   <tr>
-                    <td class="font-weight-bold text-right" colspan="2">
+                    <td class="font-weight-bold text-right" colspan="3">
                       TOTALES
                     </td>
                     <td>{{ form.cantidad_total }}</td>

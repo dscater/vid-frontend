@@ -168,7 +168,7 @@
           "/admin/orden_ventas/anular/" + item.id,
           {
             _method: "PUT",
-          }
+          },
         );
         if (respuesta.data && respuesta.data.sw) {
           const success =
@@ -300,7 +300,7 @@
                 <template
                   v-if="
                     connectivityStore.isOnline &&
-                    item.verificado == 0 &&
+                    (item.verificado == 0 || item.verificado == 5) &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes('orden_ventas.edit'))
                   "
@@ -324,7 +324,7 @@
                     connectivityStore.isOnline &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(
-                        'orden_ventas.destroy'
+                        'orden_ventas.destroy',
                       ))
                   "
                 >
@@ -349,7 +349,7 @@
                     item.verificado == 0 &&
                     (authStore?.user?.permisos == '*' ||
                       authStore?.user?.permisos.includes(
-                        'orden_ventas.destroy'
+                        'orden_ventas.destroy',
                       ))
                   "
                 >

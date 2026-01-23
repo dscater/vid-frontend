@@ -54,7 +54,7 @@ export const useOrdenSalidas = () => {
     oOrdenSalida.value.hora = "";
     oOrdenSalida.value.observaciones = "";
     oOrdenSalida.value.cantidad_total = "";
-    oOrdenSalida.value.total = "CON FATURA";
+    oOrdenSalida.value.total = "";
     oOrdenSalida.value.estado = "";
     oOrdenSalida.value.verificado = "";
     oOrdenSalida.value.user_id = "";

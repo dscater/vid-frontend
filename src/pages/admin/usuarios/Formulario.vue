@@ -59,7 +59,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -68,7 +68,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const listExpedido = [
@@ -401,7 +401,7 @@
             </ul>
           </div>
           <div class="col-md-4 mt-2">
-            <label class="required">Grupo Sanguíneo</label>
+            <label>Grupo Sanguíneo</label>
             <input
               type="text"
               class="form-control"
