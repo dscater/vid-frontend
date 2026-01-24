@@ -55,7 +55,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
     } catch (error) {
       console.error(
         `Error al buscar registros por cliente ${clienteId}:`,
-        error
+        error,
       );
       return [];
     }
@@ -110,7 +110,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
 
             if (!detalle.cantidad) {
               throw new Error(
-                `No se indico la cantidad vendida en una de las filas`
+                `No se indico la cantidad vendida en una de las filas`,
               );
             }
 
@@ -119,7 +119,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
             const registroStock =
               await sucursalProductoStore.getSucursalProductoByIdPS(
                 sucursalId,
-                productoId
+                productoId,
               );
 
             console.log("Registro Stock:");
@@ -127,7 +127,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
 
             if (!registroStock) {
               throw new Error(
-                `Stock no encontrado para Producto ID: ${productoId} en Sucursal ID: ${sucursalId}.`
+                `Stock no encontrado para Producto ID: ${productoId} en Sucursal ID: ${sucursalId}.`,
               );
             }
 
@@ -138,7 +138,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
             if (stockActual < cantidadVendida) {
               // Si el stock es insuficiente, lanzamos un error y el ROLLBACK es automático
               throw new Error(
-                `Stock insuficiente para Producto: ${detalle.producto.nombre}. Disponible: ${stockActual}, Vendido: ${cantidadVendida}.`
+                `Stock insuficiente para Producto: ${detalle.producto.nombre}. Disponible: ${stockActual}, Vendido: ${cantidadVendida}.`,
               );
             }
 
@@ -149,7 +149,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
               stock_actual: nuevoStock,
             });
             console.log(
-              `Stock actualizado para Producto ${productoId}. Nuevo Stock: ${nuevoStock}`
+              `Stock actualizado para Producto ${productoId}. Nuevo Stock: ${nuevoStock}`,
             );
           }
 
@@ -176,16 +176,16 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           }));
 
           const cliente = await clienteStore.getClienteById(
-            parseInt(data.cliente_id)
+            parseInt(data.cliente_id),
           );
           const sucursal = await sucursalStore.getSucursalById(
-            parseInt(data.sucursal_id)
+            parseInt(data.sucursal_id),
           );
           const fechaHoraCompleta = `${data.fecha}T${data.hora}`;
           const fechaObj = new Date(fechaHoraCompleta);
           if (isNaN(fechaObj)) {
             console.warn(
-              "Fecha y/o hora de la data inválidas. Usando fecha/hora actual."
+              "Fecha y/o hora de la data inválidas. Usando fecha/hora actual.",
             );
             const now = new Date();
             data.fecha = data.fecha || now.toISOString().split("T")[0];
@@ -208,7 +208,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           };
           const fecha_ct = fechaObj.toLocaleDateString(
             "es-ES",
-            opcionesFormato
+            opcionesFormato,
           );
 
           const nuevoRegistro = {
@@ -239,6 +239,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
             solicitud_descuento: data.solicitud_descuento,
             solicitud_sw: data.solicitud_sw,
             monto_solicitud: data.monto_solicitud,
+            descuento_sugerido: data.descuento_sugerido,
             descuento: data.descuento,
             total_f: data.total_f,
             estado: "FINALIZADO",
@@ -250,6 +251,10 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
               paterno: authStore?.user.paterno,
               materno: authStore?.user.materno,
             },
+
+            foto: data.foto,
+            foto64: data.foto64,
+
             orden_venta_detalles: detallesParaDB,
             sync: false,
           };
@@ -285,9 +290,9 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
           // ------------------------------------------------------------------
 
           console.log(
-            "Todas las operaciones completadas. Commit automático exitoso."
+            "Todas las operaciones completadas. Commit automático exitoso.",
           );
-        }
+        },
       ); // Fin de la transacción
 
       return ordenVentaId; // Devuelve el ID de la orden creada
@@ -295,7 +300,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
       // ROLLBACK (Automático al capturar cualquier error dentro de la transacción)
       console.error(
         "Transacción de Orden de Venta fallida (rollback):",
-        error.message
+        error.message,
       );
       throw error; // Propagar el error
     }
@@ -326,7 +331,7 @@ export const useOrdenVentaStore = defineStore("ordenVentaStore", () => {
     pendientes.forEach(async (elem) => {
       // cuenta_cobrar
       const cuenta_cobrar = await cuentaCobrarStore.getCuentaCobrarByOrdenId(
-        parseInt(elem.id)
+        parseInt(elem.id),
       );
       console.log(cuenta_cobrar);
       try {

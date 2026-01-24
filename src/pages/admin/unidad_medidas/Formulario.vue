@@ -30,7 +30,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -39,7 +39,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const tituloDialog = computed(() => {
@@ -160,7 +160,7 @@
         </p>
         <div class="row">
           <div class="col-md-12 mt-2">
-            <label class="required">Nombre de UnidadMedida</label>
+            <label class="required">Nombre de Unidad de Medida</label>
             <el-input
               type="text"
               :class="{

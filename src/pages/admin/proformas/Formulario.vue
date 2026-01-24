@@ -560,13 +560,13 @@
       const resta = element.proforma_detalle_productos[index_col].resta;
       if (resta) {
         // existente
-        if (cantidad) {
+        if (cantidad && element.verificado == 0) {
           // total += parseFloat(cantidad) - parseFloat(resta);
           total += parseFloat(cantidad);
         } else {
-          total -= parseFloat(resta);
+          if (element.verificado == 0) total -= parseFloat(resta);
         }
-      } else if (cantidad) {
+      } else if (cantidad && element.verificado == 0) {
         total += parseFloat(cantidad ?? 0);
       }
     });
@@ -899,7 +899,7 @@
                         clearable
                         :options="listProductos"
                         :loading="loadingProductos"
-                        placeholder="Código..."
+                        placeholder="Producto..."
                         no-data-text="Sin resultados"
                         loading-text="Buscando..."
                       />
@@ -1041,7 +1041,7 @@
                       </td>
                       <td>
                         <button
-                          v-if="form.id != 0"
+                          v-if="form.id != 0 && item.verificado == 0"
                           class="btn btn-primary btn-sm"
                           title="Generar Orden Venta"
                           @click.prevent="generarOrdenVenta(item.id, index)"

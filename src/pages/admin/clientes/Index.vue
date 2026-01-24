@@ -97,6 +97,12 @@
       label: "ESTADO",
       key: "estado",
       sortable: true,
+      classRow: function (item) {
+        if (item.ventas_65 > 0) {
+          return "bg11";
+        }
+        return "";
+      },
     },
     {
       label: "ACCIÓN",

@@ -13,6 +13,7 @@ const oOrdenVenta = ref({
   solicitud_sw: 0,
   user_ap: "",
   monto_solicitud: 0,
+  descuento_sugerido: 0,
   descuento: 0,
   total_f: "",
   con: "",
@@ -28,6 +29,8 @@ const oOrdenVenta = ref({
   observaciones: "",
   estado: "",
   verificado: 0,
+  foto: "",
+  foto64: "",
   orden_venta_detalles: [],
   eliminados_detalles: [],
   verificado: 0,
@@ -54,6 +57,7 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.solicitud_sw = item.solicitud_sw;
       oOrdenVenta.value.user_ap = item.user_ap;
       oOrdenVenta.value.monto_solicitud = item.monto_solicitud;
+      oOrdenVenta.value.descuento_sugerido = item.descuento_sugerido;
       oOrdenVenta.value.descuento = item.descuento;
       oOrdenVenta.value.total_f = item.total_f;
       oOrdenVenta.value.con = item.con;
@@ -69,6 +73,8 @@ export const useOrdenVentas = () => {
       oOrdenVenta.value.observaciones = item.observaciones;
       oOrdenVenta.value.estado = item.estado;
       oOrdenVenta.value.verificado = item.verificado;
+      oOrdenVenta.value.foto = item.foto;
+      oOrdenVenta.value.foto64 = item.foto64;
       oOrdenVenta.value.cliente = item.cliente;
       if (withUser) {
         oOrdenVenta.value.user = item.user;
@@ -111,6 +117,7 @@ export const useOrdenVentas = () => {
     oOrdenVenta.value.solicitud_sw = 0;
     oOrdenVenta.value.user_ap = "";
     oOrdenVenta.value.monto_solicitud = 0;
+    oOrdenVenta.value.descuento_sugerido = 0;
     oOrdenVenta.value.descuento = 0;
     oOrdenVenta.value.total_f = "";
     oOrdenVenta.value.con = 1;
@@ -127,6 +134,8 @@ export const useOrdenVentas = () => {
     oOrdenVenta.value.observaciones = "";
     oOrdenVenta.value.estado = "";
     oOrdenVenta.value.verificado = "";
+    oOrdenVenta.value.foto = "";
+    oOrdenVenta.value.foto64 = "";
     oOrdenVenta.value.orden_venta_detalles = [];
     oOrdenVenta.value.eliminados_detalles = [];
     oOrdenVenta.value._method = "POST";

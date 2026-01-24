@@ -321,7 +321,7 @@
       listProductos.value = data.map((producto) => ({
         value: producto.codigo,
         // label: `${producto.codigo} - ${producto.ci}`,
-        label: `${producto.codigo}`,
+        label: `${producto.codigo} - ${producto.nombre}`,
       }));
     } catch (error) {
       console.log(error);
@@ -426,69 +426,6 @@
             </ul>
           </div>
           <div class="col-md-4 mb-2">
-            <label class="required">Con factura/Sin factura*</label>
-            <select
-              class="form-control"
-              :class="{
-                'parsley-error': form.errors?.cs_f,
-              }"
-              v-model="form.cs_f"
-            >
-              <option value="CON FATURA">CON FACTURA</option>
-              <option value="SIN FATURA">SIN FACTURA</option>
-            </select>
-            <ul
-              v-if="form.errors?.cs_f"
-              class="d-block text-danger list-unstyled"
-            >
-              <li class="parsley-required">
-                {{ form.errors?.cs_f[0] }}
-              </li>
-            </ul>
-          </div>
-          <div class="col-md-4 mb-2">
-            <label class="required">Tipo de Cambio</label>
-            <input
-              type="number"
-              class="form-control"
-              step="0.01"
-              :class="{
-                'parsley-error': form.errors?.tipo_cambio,
-              }"
-              v-model="form.tipo_cambio"
-              autosize
-            />
-            <ul
-              v-if="form.errors?.tipo_cambio"
-              class="d-block text-danger list-unstyled"
-            >
-              <li class="parsley-required">
-                {{ form.errors?.tipo_cambio[0] }}
-              </li>
-            </ul>
-          </div>
-          <div class="col-md-4 mb-2">
-            <label class="required">Gastos adicionales</label>
-            <input
-              type="number"
-              class="form-control"
-              step="0.01"
-              :class="{
-                'parsley-error': form.errors?.gastos,
-              }"
-              v-model="form.gastos"
-              autosize
-            />
-            <ul
-              v-if="form.errors?.gastos"
-              class="d-block text-danger list-unstyled"
-            >
-              <li class="parsley-required">
-                {{ form.errors?.gastos[0] }}
-              </li>
-            </ul>
-          </div>
-          <div class="col-md-4 mb-2">
             <label>Observaciones</label>
             <el-input
               type="textarea"
@@ -532,9 +469,7 @@
             <h4>Seleccionar Productos</h4>
           </div>
           <div class="col-md-6 mb-2">
-            <small class="text-muted font-weight-bold"
-              >Código de Producto</small
-            >
+            <small class="text-muted font-weight-bold">Producto</small>
             <div class="input-group">
               <el-select-v2
                 v-model="codigoProducto"
@@ -544,7 +479,7 @@
                 clearable
                 :options="listProductos"
                 :loading="loadingProductos"
-                placeholder="Código..."
+                placeholder="Producto..."
                 size="large"
                 no-data-text="Sin resultados"
                 loading-text="Buscando..."

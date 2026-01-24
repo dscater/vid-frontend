@@ -105,6 +105,14 @@ body .mi-table tr.bg-oficial td .label-responsive {
 .bg10 {
   background-color: var(--bg10);
 }
+.bg11 {
+  background-color: var(--bg11);
+}
+tr.bg11 td,
+body .mi-table .mitabla tr.bg11 .fixed-column div {
+  background-color: var(--bg11);
+}
+
 body .sidebar .bg3,
 .bg3 {
   background-color: var(--bg3);
@@ -543,7 +551,9 @@ body.app-blank.login {
 }
 
 .el-collapse-item {
-  box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 1px rgba(0, 0, 0, 0.125),
+    0 1px 3px rgba(0, 0, 0, 0.2);
 
   padding: 0px 10px;
 }

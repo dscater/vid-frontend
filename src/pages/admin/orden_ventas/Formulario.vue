@@ -420,6 +420,7 @@
   };
 
   const listProductos = ref([]);
+  const listDataproductos = ref([]);
   const loadingProductos = ref(false);
   const intervalProductos = ref(null);
   const onInputSelectProductos = (event) => {
@@ -454,11 +455,12 @@
         response.data.productos = await productoStore.getAll();
       }
       const data = response ? response.data.productos : [];
+      listDataproductos.value = data;
       // Suponiendo que data es un array de productos [{id, nombre}]
       listProductos.value = data.map((producto) => ({
         value: producto.codigo,
         // label: `${producto.codigo} - ${producto.ci}`,
-        label: `${producto.codigo}`,
+        label: `${producto.codigo} - ${producto.nombre}`,
       }));
     } catch (error) {
       console.log(error);
@@ -607,17 +609,17 @@
 
   const getDescuentoProducto = (cantidad, producto) => {
     let descuento = 0;
-    if (oCliente.value) {
-      if (oCliente.value.categoria == "A") {
-        // POR PRODUCTO
-        descuento = parseFloat(cantidad) * 5;
-      }
-      if (oCliente.value.categoria == "B") {
-        // POR CAJA
-        const u_caja = parseInt(parseFloat(cantidad) / producto.unidades_caja);
-        descuento = u_caja * 5;
-      }
-    }
+    // if (oCliente.value) {
+    //   if (oCliente.value.categoria == "A") {
+    //     // POR PRODUCTO
+    //     descuento = parseFloat(cantidad) * 5;
+    //   }
+    //   if (oCliente.value.categoria == "B") {
+    //     // POR CAJA
+    //     const u_caja = parseInt(parseFloat(cantidad) / producto.unidades_caja);
+    //     descuento = u_caja * 5;
+    //   }
+    // }
     return descuento;
   };
 
@@ -689,10 +691,32 @@
       return;
     }
     let total = 0;
+    let total_descuento_sugerido = 0;
     total = form.orden_venta_detalles.reduce((acum, item) => {
       return acum + parseFloat(item.subtotal);
     }, 0);
+
+    // calcular DESCUENTO SUGERIDO
+    total_descuento_sugerido = form.orden_venta_detalles.reduce(
+      (acum, item) => {
+        console.log(item);
+        const cantidad_caja = parseFloat(item.producto.unidades_caja);
+        console.log("cantidad caja: ", cantidad_caja);
+        const precio = parseFloat(item.producto.precio);
+        console.log("precio: ", precio);
+        const cantidad_vendida = parseFloat(item.cantidad);
+        console.log("cantidaD_vendida: ", cantidad_vendida);
+        const res =
+          ((cantidad_caja * precio - 5) * cantidad_vendida) / cantidad_caja;
+        console.log(res);
+        return acum + res;
+      },
+      0,
+    );
+
     form.total = total;
+    form.descuento_sugerido = total_descuento_sugerido;
+    console.log(form.descuento_sugerido);
     total = form.orden_venta_detalles.reduce((acum, item) => {
       return acum + parseFloat(item.subtotal_f);
     }, 0);
@@ -832,6 +856,47 @@
       }
     }
   };
+
+  const foto = ref(null);
+  const cargarFoto = async (e) => {
+    const file = e.target.files[0];
+    form.foto = "";
+    form.foto64 = "";
+    if (file) {
+      if (connectivityStore.isOnline) {
+        form.foto = file;
+        form.foto64 = await fileToBase64(file);
+      } else {
+        form.foto64 = await fileToBase64(file);
+        console.log("OFFLINE");
+        console.log(form.foto64);
+      }
+    }
+  };
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const productoImagen64 = ref("");
+  const mostrarImagen = (value) => {
+    console.log(value);
+    const item = listDataproductos.value.filter(
+      (elem) => elem.codigo == value,
+    )[0];
+    productoImagen64.value = "";
+    if (item) {
+      productoImagen64.value = item.imagen64;
+    }
+  };
+
+  const mostrarDescuentoSugerido = ref(false);
+  const mostrarCredito = ref(false);
 
   onMounted(() => {
     cargarListas();
@@ -1006,19 +1071,18 @@
               />
             </div>
             <div class="col-md-8 mb-2">
-              <small class="text-muted font-weight-bold"
-                >Código de Producto</small
-              >
+              <small class="text-muted font-weight-bold">Producto</small>
               <div class="input-group">
                 <el-select-v2
                   v-model="nuevoProducto.codigoProducto"
                   filterable
                   @input="onInputSelectProductos"
+                  @change="mostrarImagen"
                   :reserve-keyword="false"
                   clearable
                   :options="listProductos"
                   :loading="loadingProductos"
-                  placeholder="Código..."
+                  placeholder="Producto..."
                   size="large"
                   no-data-text="Sin resultados"
                   loading-text="Buscando..."
@@ -1033,6 +1097,9 @@
                     +
                   </button>
                 </div>
+              </div>
+              <div class="text-center mt-2" v-if="productoImagen64">
+                <img :src="productoImagen64" alt="" width="200px" />
               </div>
             </div>
           </div>
@@ -1237,6 +1304,22 @@
                             >CON DESCUENTO</el-radio
                           >
                         </el-radio-group>
+                        <span
+                          v-show="mostrarDescuentoSugerido"
+                          class="ml-2 mr-2 text-muted font-weight-bold"
+                          >(Bs {{ form.descuento_sugerido }})</span
+                        >
+                        <i
+                          class="fa cursor-pointer ml-2"
+                          :class="{
+                            'fa-eye-slash': mostrarDescuentoSugerido,
+                            'fa-eye': !mostrarDescuentoSugerido,
+                          }"
+                          title="Mostrar Descuento Sugerido"
+                          @click="
+                            mostrarDescuentoSugerido = !mostrarDescuentoSugerido
+                          "
+                        ></i>
                       </div>
                     </div>
                   </div>
@@ -1252,7 +1335,7 @@
                   <div class="col-12">
                     <small class="font-weight-bold">Métodos de Pago</small>
                     <div class="row">
-                      <div class="col-md-12">
+                      <div class="col-md-12 align-center">
                         <el-checkbox
                           v-model="form.con"
                           :true-value="1"
@@ -1270,11 +1353,26 @@
                           :true-value="1"
                           :false-value="0"
                           v-if="oCliente && oCliente.credito == 1"
-                          >CRÉDITO ({{
-                            oCliente.total_credito
-                          }}
-                          Bs)</el-checkbox
+                          >CRÉDITO
+                        </el-checkbox>
+
+                        <span
+                          v-if="
+                            mostrarCredito && oCliente && oCliente.credito == 1
+                          "
+                          class="ml-2 mr-2 text-muted font-weight-bold"
+                          >(Bs {{ oCliente.total_credito }})</span
                         >
+                        <i
+                          v-if="oCliente && oCliente.credito == 1"
+                          class="fa cursor-pointer ml-2"
+                          :class="{
+                            'fa-eye-slash': mostrarCredito,
+                            'fa-eye': !mostrarCredito,
+                          }"
+                          title="Mostrar Descuento Sugerido"
+                          @click="mostrarCredito = !mostrarCredito"
+                        ></i>
                         <!-- <el-checkbox
                           v-model="form.cre"
                           :true-value="1"
@@ -1397,9 +1495,32 @@
                       {{ form.errors?.total_f[0] }}
                     </li>
                   </ul>
-                  <div class="col-12 my-1">
+                  <div class="col-12">
+                    <small class="font-weight-bold required">Cargar Foto</small>
+                    <input
+                      type="file"
+                      ref="foto"
+                      @change="cargarFoto"
+                      class="form-control"
+                    />
+                  </div>
+                  <img :src="form.foto64" alt="" width="200px" />
+                  <ul
+                    v-if="form.errors?.foto64"
+                    class="d-block text-danger mb-0 list-unstyled w-100"
+                  >
+                    <li class="parsley-required">
+                      {{ form.errors?.foto64[0] }}
+                    </li>
+                  </ul>
+                  <div class="col-12 my-1 mt-2">
                     <button
-                      v-if="form.solicitud_descuento == 1"
+                      v-if="
+                        form.foto64 &&
+                        form.solicitud_descuento == 1 &&
+                        parseFloat(form.descuento) >
+                          parseFloat(form.descuento_sugerido)
+                      "
                       class="btn btn-primary w-100"
                       v-html="textBtnDescuento"
                       :disabled="enviando"
@@ -1407,7 +1528,9 @@
                     ></button>
                     <button
                       v-if="
-                        form.solicitud_descuento == 0 &&
+                        form.foto64 &&
+                        parseFloat(form.descuento) <=
+                          parseFloat(form.descuento_sugerido) &&
                         parseFloat(monto_maximo) >= parseFloat(total_vendido)
                       "
                       class="btn btn-primary w-100"

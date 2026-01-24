@@ -37,7 +37,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -46,7 +46,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const tituloDialog = computed(() => {
@@ -247,6 +247,7 @@
               <thead class="bg-secundario">
                 <tr>
                   <th width="1%">NRO.</th>
+                  <th width="1%">CÓDIGO</th>
                   <th>PRODUCTO</th>
                   <th width="60px">CANTIDAD</th>
                   <th width="60px">CANTIDAD FÍSICA</th>
@@ -257,6 +258,7 @@
                 <template v-if="form.devolucion_stock_detalles.length > 0">
                   <tr v-for="(item, index) in form.devolucion_stock_detalles">
                     <td>{{ index + 1 }}</td>
+                    <td>{{ item.producto.codigo }}</td>
                     <td>{{ item.producto.nombre }}</td>
                     <td>
                       {{ item.cantidad }}
@@ -318,7 +320,7 @@
                             {{
                               getCantidadRepuesta(
                                 item.cantidad,
-                                item.cantidad_fisica
+                                item.cantidad_fisica,
                               )
                             }}
                           </div>
@@ -348,7 +350,7 @@
                             {{
                               getCantidadRepuesta(
                                 item.cantidad,
-                                item.cantidad_fisica
+                                item.cantidad_fisica,
                               )
                             }}
                           </div>

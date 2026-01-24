@@ -37,7 +37,7 @@
       } else {
         document.getElementsByTagName("body")[0].classList.remove("modal-open");
       }
-    }
+    },
   );
   watch(
     () => props.accion_formulario,
@@ -46,7 +46,7 @@
       if (accion_form.value == 0) {
         form["_method"] = "POST";
       }
-    }
+    },
   );
 
   const tituloDialog = computed(() => {
@@ -349,7 +349,7 @@
             <label>Hora de Ingreso: </label>
             {{ form.hora_ingreso }}
           </div>
-          <div class="col-md-4">
+          <!-- <div class="col-md-4">
             <label>Con Factura/Sin Factura: </label>
             {{ form.cs_f }}
           </div>
@@ -360,7 +360,7 @@
           <div class="col-md-4">
             <label>Gastos adicionales: </label>
             {{ form.gastos }}
-          </div>
+          </div> -->
           <div class="col-md-4">
             <label>Obsrevaciones: </label>
             {{ form.observaciones }}
@@ -368,6 +368,76 @@
           <div class="col-md-4">
             <label>Descripción: </label>
             {{ form.descripcion }}
+          </div>
+          <div
+            class="col-12"
+            v-if="form.verificado > 0 && form.estado != 'PENDIENTE'"
+          >
+            <div class="row mt-2">
+              <div class="col-md-4 mb-2">
+                <label class="required">Con factura/Sin factura*</label>
+                <select
+                  class="form-control"
+                  :class="{
+                    'parsley-error': form.errors?.cs_f,
+                  }"
+                  v-model="form.cs_f"
+                >
+                  <option value="CON FATURA">CON FACTURA</option>
+                  <option value="SIN FATURA">SIN FACTURA</option>
+                </select>
+                <ul
+                  v-if="form.errors?.cs_f"
+                  class="d-block text-danger list-unstyled"
+                >
+                  <li class="parsley-required">
+                    {{ form.errors?.cs_f[0] }}
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-4 mb-2">
+                <label class="required">Tipo de Cambio</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  step="0.01"
+                  :class="{
+                    'parsley-error': form.errors?.tipo_cambio,
+                  }"
+                  v-model="form.tipo_cambio"
+                  autosize
+                />
+                <ul
+                  v-if="form.errors?.tipo_cambio"
+                  class="d-block text-danger list-unstyled"
+                >
+                  <li class="parsley-required">
+                    {{ form.errors?.tipo_cambio[0] }}
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-4 mb-2">
+                <label class="required">Gastos adicionales</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  step="0.01"
+                  :class="{
+                    'parsley-error': form.errors?.gastos,
+                  }"
+                  v-model="form.gastos"
+                  autosize
+                />
+                <ul
+                  v-if="form.errors?.gastos"
+                  class="d-block text-danger list-unstyled"
+                >
+                  <li class="parsley-required">
+                    {{ form.errors?.gastos[0] }}
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
         <div class="row">
@@ -518,7 +588,7 @@
                             {{
                               getCantidadRepuesta(
                                 item.cantidad,
-                                item.cantidad_fisica
+                                item.cantidad_fisica,
                               )
                             }}
                           </div>
@@ -548,7 +618,7 @@
                             {{
                               getCantidadRepuesta(
                                 item.cantidad,
-                                item.cantidad_fisica
+                                item.cantidad_fisica,
                               )
                             }}
                           </div>
@@ -606,7 +676,7 @@
           (form.verificado == 1 || form.verificado == 2) &&
           (authStore?.user?.permisos == '*' ||
             authStore?.user?.permisos.includes(
-              'solicitud_ingresos.aprobar_costos'
+              'solicitud_ingresos.aprobar_costos',
             ))
         "
         type="button"

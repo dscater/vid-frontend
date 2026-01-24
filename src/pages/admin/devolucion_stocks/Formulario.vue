@@ -279,8 +279,13 @@
     form.devolucion_stock_detalles[index].subtotal =
       parseFloat(value) *
       parseFloat(form.devolucion_stock_detalles[index].costo);
+
+    form.devolucion_stock_detalles[index].cantidad_restante =
+      form.devolucion_stock_detalles[index].cantidad_existente -
+      parseFloat(value);
     calcularTotal();
   };
+
   const calcularSubtotalIndex = (index) => {
     const value = form.devolucion_stock_detalles[index].cantidad;
     if (!value) {
@@ -366,8 +371,64 @@
       loadingProductos.value = false;
     }
   };
+  const listSucursalProductos = ref([]);
+  const cargarProductos = () => {
+    api
+      .get("/admin/sucursal_productos/listaProductosExistentesConStock", {
+        params: {
+          sucursal_id: form.sucursal_id,
+        },
+      })
+      .then((response) => {
+        listSucursalProductos.value = response.data.sucursal_productos;
 
-  onMounted(() => {});
+        const listDetallesDevolucion = listSucursalProductos.value.map(
+          (item) => {
+            const subtotal =
+              parseFloat(item.stock_actual) * parseFloat(item.producto.precio);
+            return {
+              id: 0,
+              devolucion_stock_id: 0,
+              producto_id: item.producto_id,
+              producto: item.producto,
+              cantidad_existente: item.stock_actual,
+              cantidad: 0,
+              cantidad_restante: item.stock_actual,
+              costo: item.producto.precio,
+              subtotal: subtotal,
+            };
+          },
+        );
+        form.devolucion_stock_detalles = listDetallesDevolucion;
+
+        form.cantidad_total = form.devolucion_stock_detalles.reduce(
+          (acum, item) => {
+            return acum + parseFloat(item.cantidad);
+          },
+          0,
+        );
+      });
+  };
+
+  const totalExistente = computed(() => {
+    return form.devolucion_stock_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.cantidad_existente);
+    }, 0);
+  });
+
+  const totalRestante = computed(() => {
+    return form.devolucion_stock_detalles.reduce((acum, item) => {
+      return acum + parseFloat(item.cantidad_restante);
+    }, 0);
+  });
+
+  onMounted(() => {
+    if (authStore?.user.sucursal_asignada) {
+      form.sucursal_id = authStore.user.sucursal_asignada.id;
+      getUsuarioSolicitante();
+      cargarProductos();
+    }
+  });
 </script>
 
 <template>
@@ -408,7 +469,10 @@
                 placeholder="Seleccione"
                 no-data-text="Sin datos"
                 no-match-text="No se encontró"
-                @change="getUsuarioSolicitante"
+                @change="
+                  getUsuarioSolicitante();
+                  cargarProductos();
+                "
               >
                 <el-option
                   v-for="item in listSucursals"
@@ -501,37 +565,7 @@
           </div>
           <div class="row">
             <div class="col-12">
-              <h4>Seleccionar Productos</h4>
-            </div>
-            <div class="col-md-6 mb-2">
-              <small class="text-muted font-weight-bold"
-                >Código de Producto</small
-              >
-              <div class="input-group">
-                <el-select-v2
-                  v-model="codigoProducto"
-                  filterable
-                  @input="onInputSelectProductos"
-                  :reserve-keyword="false"
-                  clearable
-                  :options="listProductos"
-                  :loading="loadingProductos"
-                  placeholder="Código..."
-                  size="large"
-                  no-data-text="Sin resultados"
-                  loading-text="Buscando..."
-                  class="rounded-0"
-                  style="width: calc(100% - 38px)"
-                />
-                <div class="input-group-append">
-                  <button
-                    class="btn btn-primary d-flex align-items-center justify-content-center"
-                    @click.prevent="agregarProducto"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+              <h4>Lista de Productos</h4>
             </div>
             <div class="col-12 overflow-auto">
               <table class="table table-bordered mb-0">
@@ -539,9 +573,9 @@
                   <tr>
                     <th>CÓDIGO</th>
                     <th>PRODUCTO</th>
-                    <!-- <th width="100px">C/U</th> -->
+                    <th width="100px">C. EXISTENTE</th>
                     <th width="180px">CANTIDAD</th>
-                    <!-- <th width="100px">SUBTOTAL</th> -->
+                    <th width="180px">CANTIDAD RESTANTE</th>
                     <th width="1%"></th>
                   </tr>
                 </thead>
@@ -550,7 +584,7 @@
                     <tr v-for="(item, index) in form.devolucion_stock_detalles">
                       <td>{{ item.producto.codigo }}</td>
                       <td>{{ item.producto.nombre }}</td>
-                      <!-- <td>{{ item.costo }}</td> -->
+                      <td>{{ item.cantidad_existente }}</td>
                       <td>
                         <input
                           type="number"
@@ -562,7 +596,7 @@
                           @keyup="calcularSubtotal($event, index)"
                         />
                       </td>
-                      <!-- <td>{{ item.subtotal }}</td> -->
+                      <td>{{ item.cantidad_restante }}</td>
                       <td>
                         <button
                           class="btn btn-danger btn-sm"
@@ -584,8 +618,9 @@
                     <td class="font-weight-bold text-right" colspan="2">
                       TOTALES
                     </td>
+                    <td>{{ totalExistente }}</td>
                     <td>{{ form.cantidad_total }}</td>
-                    <!-- <td>{{ form.total }}</td> -->
+                    <td>{{ totalRestante }}</td>
                   </tr>
                 </tbody>
               </table>

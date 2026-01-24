@@ -481,7 +481,7 @@
       listProductos.value = data.map((producto) => ({
         value: producto.codigo,
         // label: `${producto.codigo} - ${producto.ci}`,
-        label: `${producto.codigo}`,
+        label: `${producto.codigo} - ${producto.nombre}`,
       }));
     } catch (error) {
       console.log(error);
@@ -657,9 +657,7 @@
               <h4>Seleccionar Productos</h4>
             </div>
             <div class="col-md-6 mb-2">
-              <small class="text-muted font-weight-bold"
-                >Código de Producto</small
-              >
+              <small class="text-muted font-weight-bold">Producto</small>
               <div class="input-group">
                 <el-select-v2
                   v-model="codigoProducto"
@@ -669,7 +667,7 @@
                   clearable
                   :options="listProductos"
                   :loading="loadingProductos"
-                  placeholder="Código..."
+                  placeholder="Producto..."
                   size="large"
                   no-data-text="Sin resultados"
                   loading-text="Buscando..."
